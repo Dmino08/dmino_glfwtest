@@ -130,7 +130,6 @@ float vertices[] = {
 
 // COLORS
 
-    glm::vec3 toy_color = glm::vec3(1.0f, 1.0f, 1.0f);
     glm::vec3 light_color = glm::vec3(1.0f, 1.0f, 1.0f);
 
 
@@ -171,18 +170,19 @@ float vertices[] = {
     toy_shader->uniform1i("texture1", 0);   
     toy_shader->uniform1i("texture2", 1);
 
-
+// Light setup
     toy_shader->uniform3f("view_pos", camera.getPos());
-    toy_shader->uniform3f("light_pos", light_pos);
-    toy_shader->uniform3f("light_color", light_color);
-    toy_shader->uniform3f("toy_color", toy_color);
+    toy_shader->uniform3f("light.position", light_pos);
+    toy_shader->uniform3f("light.ambient", 0.4f, 0.4f, 0.4f);
+    toy_shader->uniform3f("light.diffuse", 0.8f, 0.8f, 0.8f);
+    toy_shader->uniform3f("light.specular", 0.4f, 0.4f, 0.4f);
 
 
 // Material setup
-    toy_shader->uniform3f("material.ambient", glm::vec3(0.2f, 0.3f, 0.2f));
-    toy_shader->uniform3f("material.diffuse", glm::vec3(0.5f, 0.6f, 0.3f));
-    toy_shader->uniform3f("material.specular", glm::vec3(0.6f, 0.2f, 0.4f));
-    toy_shader->uniform1f("material.shininess", 16);
+    toy_shader->uniform3f("material.ambient", glm::vec3(0.6f, 0.6f, 0.6f));
+    toy_shader->uniform3f("material.diffuse", glm::vec3(0.6f, 0.6f, 0.6f));
+    toy_shader->uniform3f("material.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+    toy_shader->uniform1f("material.shininess", 32);
 
     
 
@@ -226,10 +226,10 @@ float vertices[] = {
             camera.process3DMouseRotation(input.getDeltaX(), input.getDeltaY());
 
             if (input.pressed(GLFW_KEY_W)) {
-                camera.translate(camera_speed * delta_time * camera.getFront());
+                camera.translate(camera_speed * camera.getFront() * delta_time);
             }
             if (input.pressed(GLFW_KEY_S)) {
-                camera.translate(-camera_speed * delta_time * camera.getFront() );
+                camera.translate(-camera_speed * camera.getFront() * delta_time);
             }
             if (input.pressed(GLFW_KEY_A)) {
                 camera.translate(-camera_speed * camera.getRight() * delta_time);
@@ -249,7 +249,16 @@ float vertices[] = {
         
         toy_shader->use();
 
-        toy_shader->uniform3f("light_pos", light_pos);
+        light_color.x = sin(glfwGetTime() * 4.0f);
+        light_color.y = sin(glfwGetTime() * 2.0f);
+        light_color.z = sin(glfwGetTime() * 3.0f);
+
+        toy_shader->uniform3f("light.ambient", light_color * 0.8f);
+        toy_shader->uniform3f("light.diffuse", light_color * 0.6f * 0.8f);
+
+
+
+        toy_shader->uniform3f("light.position", light_pos);
         toy_shader->uniform3f("view_pos", camera.getPos());
         toy_shader->uniformMatrix("model", model_toy);
         toy_shader->uniformMatrix("view", camera.getViewMatrix());
@@ -266,6 +275,9 @@ float vertices[] = {
         texture2->unbind();
 
         light_shader->use();
+
+        light_shader->uniform3f("color", light_color);
+
         light_shader->uniformMatrix("model", model_light);
         light_shader->uniformMatrix("view", camera.getViewMatrix());
         light_shader->uniformMatrix("projection", camera.getProjectionMatrix()); 
