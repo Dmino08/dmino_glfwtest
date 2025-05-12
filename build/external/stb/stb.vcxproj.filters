@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="D:\D\C++\CMakeLessons\Gits\GLFWTest\external\stb\src\stb_image.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="D:\D\C++\CMakeLessons\Gits\GLFWTest\external\stb\include\stb_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\D\C++\CMakeLessons\Gits\GLFWTest\external\stb\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{68A9E636-F389-3538-BA03-286244BD0279}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{3CC07320-E5FB-356A-83E1-D77BF6AB0F77}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
