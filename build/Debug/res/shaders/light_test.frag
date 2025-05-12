@@ -35,7 +35,7 @@ void main() {
     vec3 specular = specular_strength * spec * light_color;
 
 
-    vec3 light_result = (ambient * diffuse * specular) * toy_color;
+    vec3 light_result = (ambient + diffuse + specular) * toy_color;
     vec4 texture_color = mix(texture(texture1, coord), 
                              texture(texture2, coord),
                              0.5f);

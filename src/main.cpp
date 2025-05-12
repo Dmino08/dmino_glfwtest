@@ -150,7 +150,7 @@ float vertices[] = {
 
     glm::mat4 model_light = glm::mat4(1.0f);
     glm::vec3 light_pos = glm::vec3(2.0f, 2.0f, 1.0f);
-    model_light = glm::translate(model_light, light_pos);
+    model_light = glm::translate(glm::mat4(1.0f), light_pos);
     model_light = glm::scale(model_light, glm::vec3(0.3f, 0.3f, 0.3f));
 
 
@@ -172,7 +172,7 @@ float vertices[] = {
     toy_shader->uniform1i("texture2", 1);
 
 
-    toy_shader->uniform3f("light_pos", camera.getPos());
+    toy_shader->uniform3f("view_pos", camera.getPos());
     toy_shader->uniform3f("light_pos", light_pos);
     toy_shader->uniform3f("light_color", light_color);
     toy_shader->uniform3f("toy_color", toy_color);
@@ -181,7 +181,6 @@ float vertices[] = {
 
 // TOY MODEL
     glm::mat4 model_toy = glm::mat4(1.0f);
-    model_toy = glm::rotate(model_toy, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
 
     toy_shader->uniformMatrix("model", model_toy);
@@ -206,16 +205,10 @@ float vertices[] = {
     {
         window.pollEvents();
 
-
         auto start = std::chrono::high_resolution_clock::now();
-
-
         
         glClearColor(0.42, 0.42, 0.6, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        
-
         
 
         if (input.justPressed(GLFW_KEY_TAB)) {
@@ -238,17 +231,19 @@ float vertices[] = {
                 camera.translate(camera_speed * camera.getRight() * delta_time);
             }   
 
-
-
             camera.toZoom(input.getScrollDeltaY() * 0.05f * delta_time);
 
         }     
 
-        
-
+        light_pos.x = sin(glfwGetTime()) * 3.5f;
+        light_pos.y = cos(glfwGetTime()) * 3.5f;
+        model_light = glm::translate(glm::mat4(1.0f), light_pos);
+        model_light = glm::scale(model_light, glm::vec3(0.3f, 0.3f, 0.3f));
         
         toy_shader->use();
-        toy_shader->uniform3f("light_pos", camera.getPos());
+
+        toy_shader->uniform3f("light_pos", light_pos);
+        toy_shader->uniform3f("view_pos", camera.getPos());
         toy_shader->uniformMatrix("model", model_toy);
         toy_shader->uniformMatrix("view", camera.getViewMatrix());
         toy_shader->uniformMatrix("projection", camera.getProjectionMatrix());
