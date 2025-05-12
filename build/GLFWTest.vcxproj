@@ -413,6 +413,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="D:\D\C++\CMakeLessons\Gits\GLFWTest\src\core\Logger.cpp" />
+    <ClCompile Include="D:\D\C++\CMakeLessons\Gits\GLFWTest\src\graphics\Mesh.cpp" />
     <ClCompile Include="D:\D\C++\CMakeLessons\Gits\GLFWTest\src\graphics\Shader.cpp" />
     <ClCompile Include="D:\D\C++\CMakeLessons\Gits\GLFWTest\src\graphics\Texture.cpp" />
     <ClCompile Include="D:\D\C++\CMakeLessons\Gits\GLFWTest\src\main.cpp" />

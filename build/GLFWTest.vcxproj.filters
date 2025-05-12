@@ -4,6 +4,9 @@
     <ClCompile Include="D:\D\C++\CMakeLessons\Gits\GLFWTest\src\core\Logger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="D:\D\C++\CMakeLessons\Gits\GLFWTest\src\graphics\Mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="D:\D\C++\CMakeLessons\Gits\GLFWTest\src\graphics\Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
