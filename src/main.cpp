@@ -177,6 +177,13 @@ float vertices[] = {
     toy_shader->uniform3f("light_color", light_color);
     toy_shader->uniform3f("toy_color", toy_color);
 
+
+// Material setup
+    toy_shader->uniform3f("material.ambient", glm::vec3(0.2f, 0.3f, 0.2f));
+    toy_shader->uniform3f("material.diffuse", glm::vec3(0.5f, 0.6f, 0.3f));
+    toy_shader->uniform3f("material.specular", glm::vec3(0.6f, 0.2f, 0.4f));
+    toy_shader->uniform1f("material.shininess", 16);
+
     
 
 // TOY MODEL
