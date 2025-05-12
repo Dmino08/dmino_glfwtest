@@ -96,5 +96,6 @@ class Camera {
         const glm::vec3& getRight() const;
         const glm::vec3& getUp() const;
         const glm::vec3& getDir() const;
+        const glm::vec3& getPos() const;
 
 };

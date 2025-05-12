@@ -91,3 +91,7 @@ const glm::vec3& Camera::getUp() const {
 const glm::vec3& Camera::getDir() const {
     return _dir;
 }
+
+const glm::vec3& Camera::getPos() const {
+    return _position;
+}

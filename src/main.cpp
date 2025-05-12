@@ -172,6 +172,7 @@ float vertices[] = {
     toy_shader->uniform1i("texture2", 1);
 
 
+    toy_shader->uniform3f("light_pos", camera.getPos());
     toy_shader->uniform3f("light_pos", light_pos);
     toy_shader->uniform3f("light_color", light_color);
     toy_shader->uniform3f("toy_color", toy_color);
@@ -247,6 +248,7 @@ float vertices[] = {
 
         
         toy_shader->use();
+        toy_shader->uniform3f("light_pos", camera.getPos());
         toy_shader->uniformMatrix("model", model_toy);
         toy_shader->uniformMatrix("view", camera.getViewMatrix());
         toy_shader->uniformMatrix("projection", camera.getProjectionMatrix());

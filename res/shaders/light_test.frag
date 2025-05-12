@@ -12,24 +12,32 @@ in vec2 coord;
 
 uniform sampler2D texture1;
 uniform sampler2D texture2;
-
 uniform vec3 light_pos;
+uniform vec3 view_pos;
 
-float ambientStrength = 0.2f;
+float ambient_strength = 0.2f;
+float specular_strength = 0.5f;
 
 void main() {
 
-    vec3 ambient = ambientStrength * light_color;
+    vec3 ambient = ambient_strength * light_color;
+
 
     vec3 norm = normalize(normal);
     vec3 light_dir = normalize(light_pos - frag_pos);
-
     float diff = max(dot(norm, light_dir), 0.0f);
     vec3 diffuse = diff * light_color;
 
-    vec3 light_result = (ambient + diffuse) * toy_color;
 
-    frag_color = mix(texture(texture1, coord), 
-                     texture(texture2, coord),
-                     0.5f) * vec4(light_result, 1.0f);
+    vec3 view_dir = normalize(view_pos - frag_pos);
+    vec3 reflect_dir = reflect(-light_dir, norm);
+    float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 32);
+    vec3 specular = specular_strength * spec * light_color;
+
+
+    vec3 light_result = (ambient + diffuse + specular) * toy_color;
+    vec4 texture_color = mix(texture(texture1, coord), 
+                             texture(texture2, coord),
+                             0.5f);
+    frag_color = texture_color * vec4(light_result, 1.0f);
 }
