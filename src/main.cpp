@@ -147,7 +147,7 @@ float vertices[] = {
     InputManager& input = window.getInput();
 
 
-    auto shader = Shader::create("res/shaders/standart.vert", "res/shaders/standart.frag");
+    auto shader = Shader::create("res/shaders/light_test.vert", "res/shaders/light_test.frag");
     if (shader == nullptr)
     {
         logger.log(Logger::ERROR, "Shader is not created");
@@ -156,6 +156,9 @@ float vertices[] = {
     shader->use();
     shader->uniform1i("texture1", 0);   
     shader->uniform1i("texture2", 1);
+
+    shader->uniform3f("light_color", 0.0f, 1.0f, 0.0f);
+    shader->uniform3f("toy_color", 1.0f, 1.0f, 1.0f);
 
 // GLM HARD STUFF
     glm::mat4 model = glm::mat4(1.0f);
