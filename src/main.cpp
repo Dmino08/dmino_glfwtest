@@ -74,80 +74,119 @@ int main(void) {
     window.setFramebufferSizeCallback(frameBufferCallback);
 //    window.setScrollCallback(scrollCallback);
 
+
 // Creating a Cube
 float vertices[] = {
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-     0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+//   position            normals              coord    
+    -0.5f, -0.5f, -0.5f, 0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
+     0.5f, -0.5f, -0.5f, 0.0f,  0.0f, -1.0f, 1.0f, 0.0f,
+     0.5f,  0.5f, -0.5f, 0.0f,  0.0f, -1.0f, 1.0f, 1.0f,
+     0.5f,  0.5f, -0.5f, 0.0f,  0.0f, -1.0f, 1.0f, 1.0f,
+    -0.5f,  0.5f, -0.5f, 0.0f,  0.0f, -1.0f, 0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f, 0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
 
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+    -0.5f, -0.5f,  0.5f, 0.0f,  0.0f,  1.0f, 0.0f, 0.0f,
+     0.5f, -0.5f,  0.5f, 0.0f,  0.0f,  1.0f, 1.0f, 0.0f,
+     0.5f,  0.5f,  0.5f, 0.0f,  0.0f,  1.0f, 1.0f, 1.0f,
+     0.5f,  0.5f,  0.5f, 0.0f,  0.0f,  1.0f, 1.0f, 1.0f,
+    -0.5f,  0.5f,  0.5f, 0.0f,  0.0f,  1.0f, 0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f, 0.0f,  0.0f,  1.0f, 0.0f, 0.0f,
 
-    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
+    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
 
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f,  0.5f, 1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
+     0.5f,  0.5f, -0.5f, 1.0f,  0.0f,  0.0f, 1.0f, 1.0f,
+     0.5f, -0.5f, -0.5f, 1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
+     0.5f, -0.5f, -0.5f, 1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
+     0.5f, -0.5f,  0.5f, 1.0f,  0.0f,  0.0f, 0.0f, 0.0f,
+     0.5f,  0.5f,  0.5f, 1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
 
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f, 0.0f, -1.0f,  0.0f, 0.0f, 1.0f,
+     0.5f, -0.5f, -0.5f, 0.0f, -1.0f,  0.0f, 1.0f, 1.0f,
+     0.5f, -0.5f,  0.5f, 0.0f, -1.0f,  0.0f, 1.0f, 0.0f,
+     0.5f, -0.5f,  0.5f, 0.0f, -1.0f,  0.0f, 1.0f, 0.0f,
+    -0.5f, -0.5f,  0.5f, 0.0f, -1.0f,  0.0f, 0.0f, 0.0f,
+    -0.5f, -0.5f, -0.5f, 0.0f, -1.0f,  0.0f, 0.0f, 1.0f,
 
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+    -0.5f,  0.5f, -0.5f, 0.0f,  1.0f,  0.0f, 0.0f, 1.0f,
+     0.5f,  0.5f, -0.5f, 0.0f,  1.0f,  0.0f, 1.0f, 1.0f,
+     0.5f,  0.5f,  0.5f, 0.0f,  1.0f,  0.0f, 1.0f, 0.0f,
+     0.5f,  0.5f,  0.5f, 0.0f,  1.0f,  0.0f, 1.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f, 0.0f,  1.0f,  0.0f, 0.0f, 0.0f,
+    -0.5f,  0.5f, -0.5f, 0.0f,  1.0f,  0.0f, 0.0f, 1.0f
 };
 
     Mesh* cube = new Mesh(vertices, sizeof(vertices));
-
+    Mesh* light = new Mesh(vertices, sizeof(vertices));
     
 
 
     InputManager& input = window.getInput();
 
+// COLORS
 
-    auto shader = Shader::create("res/shaders/light_test.vert", "res/shaders/light_test.frag");
-    if (shader == nullptr)
+    glm::vec3 toy_color = glm::vec3(1.0f, 1.0f, 1.0f);
+    glm::vec3 light_color = glm::vec3(1.0f, 1.0f, 1.0f);
+
+
+
+
+
+
+    auto light_shader = Shader::create("res/shaders/light.vert", "res/shaders/light.frag");
+    if (light_shader == nullptr)
     {
-        logger.log(Logger::ERROR, "Shader is not created");
+        logger.log(Logger::ERROR, "Light shader is not created");
+        return -1;
+    }    
+
+    light_shader->use();
+    light_shader->uniform3f("color", light_color);
+
+    glm::mat4 model_light = glm::mat4(1.0f);
+    glm::vec3 light_pos = glm::vec3(2.0f, 2.0f, 1.0f);
+    model_light = glm::translate(model_light, light_pos);
+    model_light = glm::scale(model_light, glm::vec3(0.3f, 0.3f, 0.3f));
+
+
+    light_shader->uniformMatrix("model", model_light);
+    light_shader->uniformMatrix("view", camera.getViewMatrix());
+    light_shader->uniformMatrix("projection", camera.getProjectionMatrix());    
+
+
+
+// TOY SHADER
+    auto toy_shader = Shader::create("res/shaders/light_test.vert", "res/shaders/light_test.frag");
+    if (toy_shader == nullptr)
+    {
+        logger.log(Logger::ERROR, "Toy shader is not created");
         return -1;
     }
-    shader->use();
-    shader->uniform1i("texture1", 0);   
-    shader->uniform1i("texture2", 1);
-
-    shader->uniform3f("light_color", 0.0f, 1.0f, 0.0f);
-    shader->uniform3f("toy_color", 1.0f, 1.0f, 1.0f);
-
-// GLM HARD STUFF
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    toy_shader->use();
+    toy_shader->uniform1i("texture1", 0);   
+    toy_shader->uniform1i("texture2", 1);
 
 
-    shader->uniformMatrix("model", model);
-    shader->uniformMatrix("view", camera.getViewMatrix());
-    shader->uniformMatrix("projection", camera.getProjectionMatrix());
+    toy_shader->uniform3f("light_pos", light_pos);
+    toy_shader->uniform3f("light_color", light_color);
+    toy_shader->uniform3f("toy_color", toy_color);
+
+    
+
+// TOY MODEL
+    glm::mat4 model_toy = glm::mat4(1.0f);
+    model_toy = glm::rotate(model_toy, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+
+    toy_shader->uniformMatrix("model", model_toy);
+    toy_shader->uniformMatrix("view", camera.getViewMatrix());
+    toy_shader->uniformMatrix("projection", camera.getProjectionMatrix());
+
 
 
 // GENERATING TEXTURE
@@ -176,7 +215,7 @@ float vertices[] = {
 
         
 
-        shader->use();
+        
 
         if (input.justPressed(GLFW_KEY_TAB)) {
             input.toggleCursor();
@@ -207,9 +246,10 @@ float vertices[] = {
         
 
         
-
-        shader->uniformMatrix("view", camera.getViewMatrix());
-        shader->uniformMatrix("projection", camera.getProjectionMatrix());
+        toy_shader->use();
+        toy_shader->uniformMatrix("model", model_toy);
+        toy_shader->uniformMatrix("view", camera.getViewMatrix());
+        toy_shader->uniformMatrix("projection", camera.getProjectionMatrix());
 
         glActiveTexture(GL_TEXTURE0);
         texture1->bind();
@@ -220,6 +260,13 @@ float vertices[] = {
 
         texture1->unbind();
         texture2->unbind();
+
+        light_shader->use();
+        light_shader->uniformMatrix("model", model_light);
+        light_shader->uniformMatrix("view", camera.getViewMatrix());
+        light_shader->uniformMatrix("projection", camera.getProjectionMatrix()); 
+
+        light->draw();
 
         window.swapBuffers();
 
