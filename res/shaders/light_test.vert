@@ -4,15 +4,13 @@ layout (location = 1) in vec3 a_normal;
 layout (location = 2) in vec2 a_coord;
 
 
-
-uniform mat4 projection;
-uniform mat4 view;
-uniform mat4 model;
-
 out vec3 frag_pos;
 out vec3 normal;
 out vec2 coord;
 
+uniform mat4 projection;
+uniform mat4 view;
+uniform mat4 model;
 
 void main() {
     

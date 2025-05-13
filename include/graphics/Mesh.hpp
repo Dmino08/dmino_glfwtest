@@ -7,6 +7,7 @@
 
 class Mesh {
     unsigned int VAO, VBO;
+    size_t vertice_count;
 
     public:
         Mesh(float* vertices, 

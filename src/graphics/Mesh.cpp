@@ -1,7 +1,7 @@
 #include "graphics/Mesh.hpp"
 #include "graphics/Shader.hpp"
 
-Mesh::Mesh(float* vertices, size_t size, int* attribute_params, size_t attribute_amount) : VAO(0), VBO(0) {
+Mesh::Mesh(float* vertices, size_t size, int* attribute_params, size_t attribute_amount) : VAO(0), VBO(0), vertice_count(0) {
      
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -28,12 +28,14 @@ Mesh::Mesh(float* vertices, size_t size, int* attribute_params, size_t attribute
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+
+    vertice_count = size / (sizeof(float) * stride);
 }
 
 void Mesh::draw() {
     glBindVertexArray(VAO);
 
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glDrawArrays(GL_TRIANGLES, 0, vertice_count);
 
     glBindVertexArray(0);
 }

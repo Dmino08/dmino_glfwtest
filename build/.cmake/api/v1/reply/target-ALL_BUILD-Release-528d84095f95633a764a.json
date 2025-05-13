@@ -17,19 +17,19 @@
 	"dependencies" : 
 	[
 		{
-			"id" : "GLFWTest::@6890427a1f51a3e7e1df"
+			"id" : "glad::@55512df44c152ef9a2ca"
 		},
 		{
-			"id" : "glad::@55512df44c152ef9a2ca"
+			"id" : "GLFWTest::@6890427a1f51a3e7e1df"
 		},
 		{
 			"id" : "glfw::@ca12bac854c2ac6b2230"
 		},
 		{
-			"id" : "glm_shared::@d090a432591bc19a3a56"
+			"id" : "stb::@75eb285bbb843d317cb7"
 		},
 		{
-			"id" : "stb::@75eb285bbb843d317cb7"
+			"id" : "glm_shared::@d090a432591bc19a3a56"
 		},
 		{
 			"id" : "ZERO_CHECK::@6890427a1f51a3e7e1df"
