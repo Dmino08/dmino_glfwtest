@@ -2,10 +2,10 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "Debug/GLFWTest.exe"
+			"path" : "RelWithDebInfo/GLFWTest.exe"
 		},
 		{
-			"path" : "Debug/GLFWTest.pdb"
+			"path" : "RelWithDebInfo/GLFWTest.pdb"
 		}
 	],
 	"backtrace" : 1,
@@ -59,7 +59,7 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "/DWIN32 /D_WINDOWS /GR /EHsc /Zi /Ob0 /Od /RTC1 -std:c++17 -MDd"
+					"fragment" : "/DWIN32 /D_WINDOWS /GR /EHsc /Zi /O2 /Ob1 /DNDEBUG -std:c++17 -MD"
 				}
 			],
 			"defines" : 
@@ -125,12 +125,12 @@
 			"id" : "glad::@55512df44c152ef9a2ca"
 		},
 		{
-			"backtrace" : 2,
-			"id" : "stb::@75eb285bbb843d317cb7"
-		},
-		{
 			"backtrace" : 3,
 			"id" : "glfw::@ca12bac854c2ac6b2230"
+		},
+		{
+			"backtrace" : 2,
+			"id" : "stb::@75eb285bbb843d317cb7"
 		},
 		{
 			"id" : "ZERO_CHECK::@6890427a1f51a3e7e1df"
@@ -142,7 +142,7 @@
 		"commandFragments" : 
 		[
 			{
-				"fragment" : "/DWIN32 /D_WINDOWS /GR /EHsc /Zi /Ob0 /Od /RTC1 -MDd",
+				"fragment" : "/DWIN32 /D_WINDOWS /GR /EHsc /Zi /O2 /Ob1 /DNDEBUG -MD",
 				"role" : "flags"
 			},
 			{
@@ -156,17 +156,17 @@
 			},
 			{
 				"backtrace" : 2,
-				"fragment" : "external\\glfw\\src\\Debug\\glfw3dll.lib",
+				"fragment" : "external\\glfw\\src\\RelWithDebInfo\\glfw3dll.lib",
 				"role" : "libraries"
 			},
 			{
 				"backtrace" : 2,
-				"fragment" : "external\\glad\\Debug\\glad.lib",
+				"fragment" : "external\\glad\\RelWithDebInfo\\glad.lib",
 				"role" : "libraries"
 			},
 			{
 				"backtrace" : 2,
-				"fragment" : "external\\stb\\Debug\\stb.lib",
+				"fragment" : "external\\stb\\RelWithDebInfo\\stb.lib",
 				"role" : "libraries"
 			},
 			{

@@ -4,13 +4,16 @@
 
 #include "glad/glad.h"
 
-class Shader;
 
 class Mesh {
     unsigned int VAO, VBO;
 
     public:
-        Mesh(float* vertices, size_t count);
+        Mesh(float* vertices, 
+             size_t size, 
+             int* attribute_params,
+             size_t attribute_amount
+             );
 
         void draw();
 };

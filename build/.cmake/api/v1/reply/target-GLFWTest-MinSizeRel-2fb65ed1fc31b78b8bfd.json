@@ -125,12 +125,12 @@
 			"id" : "glad::@55512df44c152ef9a2ca"
 		},
 		{
-			"backtrace" : 2,
-			"id" : "stb::@75eb285bbb843d317cb7"
-		},
-		{
 			"backtrace" : 3,
 			"id" : "glfw::@ca12bac854c2ac6b2230"
+		},
+		{
+			"backtrace" : 2,
+			"id" : "stb::@75eb285bbb843d317cb7"
 		},
 		{
 			"id" : "ZERO_CHECK::@6890427a1f51a3e7e1df"

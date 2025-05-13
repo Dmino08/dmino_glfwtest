@@ -121,8 +121,10 @@ float vertices[] = {
     -0.5f,  0.5f, -0.5f, 0.0f,  1.0f,  0.0f, 0.0f, 1.0f
 };
 
-    Mesh* cube = new Mesh(vertices, sizeof(vertices));
-    Mesh* light = new Mesh(vertices, sizeof(vertices));
+    int attributes[] = {3,3,2};
+    int size = sizeof(vertices);
+    Mesh* cube = new Mesh(vertices, size, attributes, 3);
+    Mesh* light = new Mesh(vertices, size, attributes, 3);
     
 
 
@@ -249,14 +251,6 @@ float vertices[] = {
         
         toy_shader->use();
 
-        light_color.x = sin(glfwGetTime() * 4.0f);
-        light_color.y = sin(glfwGetTime() * 2.0f);
-        light_color.z = sin(glfwGetTime() * 3.0f);
-
-        toy_shader->uniform3f("light.ambient", light_color * 0.8f);
-        toy_shader->uniform3f("light.diffuse", light_color * 0.6f * 0.8f);
-
-
 
         toy_shader->uniform3f("light.position", light_pos);
         toy_shader->uniform3f("view_pos", camera.getPos());
@@ -275,8 +269,6 @@ float vertices[] = {
         texture2->unbind();
 
         light_shader->use();
-
-        light_shader->uniform3f("color", light_color);
 
         light_shader->uniformMatrix("model", model_light);
         light_shader->uniformMatrix("view", camera.getViewMatrix());

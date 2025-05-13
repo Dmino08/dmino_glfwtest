@@ -1,7 +1,7 @@
 #include "graphics/Mesh.hpp"
 #include "graphics/Shader.hpp"
 
-Mesh::Mesh(float* vertices, size_t count) : VAO(0), VBO(0) {
+Mesh::Mesh(float* vertices, size_t size, int* attribute_params, size_t attribute_amount) : VAO(0), VBO(0) {
      
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -9,16 +9,22 @@ Mesh::Mesh(float* vertices, size_t count) : VAO(0), VBO(0) {
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, count, vertices, GL_STATIC_DRAW);
-// Position
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(0 * sizeof(float)));
-    glEnableVertexAttribArray(0);
-// Normal
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-// Coord
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
+    glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);
+
+    int stride = 0;
+    for (size_t i = 0; i < attribute_amount; i++)
+    {
+        stride += attribute_params[i];
+    }
+
+    int pointer = 0;
+    for (size_t i = 0; i < attribute_amount; i++)
+    {
+        glVertexAttribPointer(i, attribute_params[i], GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)(pointer * sizeof(float)));
+        glEnableVertexAttribArray(i);
+        pointer += attribute_params[i];
+
+    }
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
