@@ -162,46 +162,44 @@ float vertices[] = {
 
 
 // TOY SHADER
-    auto toy_shader = Shader::create("res/shaders/light_test.vert", "res/shaders/light_test.frag");
-    if (toy_shader == nullptr)
+    auto main_shader = Shader::create("res/shaders/light_test.vert", "res/shaders/diffuse_map.frag");
+    if (main_shader == nullptr)
     {
         logger.log(Logger::ERROR, "Toy shader is not created");
         return -1;
     }
-    toy_shader->use();
-    toy_shader->uniform1i("texture1", 0);   
-    toy_shader->uniform1i("texture2", 1);
+    main_shader->use();
+       
+
 
 // Light setup
-    toy_shader->uniform3f("view_pos", camera.getPos());
-    toy_shader->uniform3f("light.position", light_pos);
-    toy_shader->uniform3f("light.ambient", 0.4f, 0.4f, 0.4f);
-    toy_shader->uniform3f("light.diffuse", 0.8f, 0.8f, 0.8f);
-    toy_shader->uniform3f("light.specular", 0.4f, 0.4f, 0.4f);
+    main_shader->uniform3f("view_pos", camera.getPos());
+    main_shader->uniform3f("light.position", light_pos);
+    main_shader->uniform3f("light.ambient", 0.3f, 0.3f, 0.3f);
+    main_shader->uniform3f("light.diffuse", 0.5f, 0.5f, 0.5f);
+    main_shader->uniform3f("light.specular", 0.8f, 0.8f, 0.8f);
 
 
 // Material setup
-    toy_shader->uniform3f("material.ambient", glm::vec3(0.6f, 0.6f, 0.6f));
-    toy_shader->uniform3f("material.diffuse", glm::vec3(0.6f, 0.6f, 0.6f));
-    toy_shader->uniform3f("material.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-    toy_shader->uniform1f("material.shininess", 32);
+    main_shader->uniform1i("material.diffuse", 0);
+    main_shader->uniform1i("material.specular", 1);
+    main_shader->uniform1f("material.shininess", 32);
 
     
 
 // TOY MODEL
-    glm::mat4 model_toy = glm::mat4(1.0f);
+    glm::mat4 main_model = glm::mat4(1.0f);
 
 
-    toy_shader->uniformMatrix("model", model_toy);
-    toy_shader->uniformMatrix("view", camera.getViewMatrix());
-    toy_shader->uniformMatrix("projection", camera.getProjectionMatrix());
+    main_shader->uniformMatrix("model", main_model);
+    main_shader->uniformMatrix("view", camera.getViewMatrix());
+    main_shader->uniformMatrix("projection", camera.getProjectionMatrix());
 
 
 
 // GENERATING TEXTURE
-    auto texture1 = Texture::create("res/images/Shreak.jpg");
-    auto texture2 = Texture::create("res/images/Donkey.jpg");    
-    
+    auto texture0 = Texture::create("res/images/container2.png");    
+    auto texture1 = Texture::create("res/images/container2_specular.png");
 
 // Input setting up
     float delta_time = 0.16f;
@@ -248,28 +246,30 @@ float vertices[] = {
         light_pos.y = cos(glfwGetTime()) * 3.5f;
         model_light = glm::translate(glm::mat4(1.0f), light_pos);
         model_light = glm::scale(model_light, glm::vec3(0.3f, 0.3f, 0.3f));
+       
         
-        toy_shader->use();
 
 
-        toy_shader->uniform3f("light.position", light_pos);
-        toy_shader->uniform3f("view_pos", camera.getPos());
-        toy_shader->uniformMatrix("model", model_toy);
-        toy_shader->uniformMatrix("view", camera.getViewMatrix());
-        toy_shader->uniformMatrix("projection", camera.getProjectionMatrix());
+        main_shader->use();
+        main_shader->uniform3f("view_pos", camera.getPos());
+        main_shader->uniform3f("light.position", light_pos);
+        main_shader->uniformMatrix("model", main_model);
+        main_shader->uniformMatrix("view", camera.getViewMatrix());
+        main_shader->uniformMatrix("projection", camera.getProjectionMatrix());
+
 
         glActiveTexture(GL_TEXTURE0);
-        texture1->bind();
+        texture0->bind();
         glActiveTexture(GL_TEXTURE1);
-        texture2->bind();
+        texture1->bind();
         
         cube->draw();
 
+        texture0->unbind();
         texture1->unbind();
-        texture2->unbind();
+
 
         light_shader->use();
-
         light_shader->uniformMatrix("model", model_light);
         light_shader->uniformMatrix("view", camera.getViewMatrix());
         light_shader->uniformMatrix("projection", camera.getProjectionMatrix()); 

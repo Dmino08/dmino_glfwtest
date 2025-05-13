@@ -15,10 +15,10 @@ out vec2 coord;
 
 
 void main() {
-
-    gl_Position = projection * view * model * vec4(a_pos, 1.0f);
     
     frag_pos = vec3(model * vec4(a_pos, 1.0f));
     normal = a_normal;
     coord = a_coord;
+
+    gl_Position = projection * view * vec4(frag_pos, 1.0f);
 }

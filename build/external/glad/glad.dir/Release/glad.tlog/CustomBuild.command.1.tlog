@@ -1,0 +1,10 @@
+^D:\D\C++\CMAKELESSONS\GITS\GLFWTEST\EXTERNAL\GLAD\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SD:/D/C++/CMakeLessons/Gits/GLFWTest -BD:/D/C++/CMakeLessons/Gits/GLFWTest/build --check-stamp-file D:/D/C++/CMakeLessons/Gits/GLFWTest/build/external/glad/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
