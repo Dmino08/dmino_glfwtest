@@ -21,11 +21,9 @@ in vec3 frag_pos;
 in vec3 normal;
 in vec2 coord;
 
-
 uniform vec3 view_pos;
 uniform Material material;
 uniform Light light;
-
 
 void main() {
 
@@ -38,7 +36,7 @@ void main() {
     vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, coord));
 
 
-    vec3 view_dir = normalize(view_pos - frag_pos);
+    vec3 view_dir = normalize(frag_pos - view_pos);
     vec3 reflect_dir = reflect(-light_dir, norm);
     float spec = pow(max(dot(view_dir, reflect_dir), 0.0f), material.shininess);
     vec3 specular = light.specular * spec * vec3(texture(material.specular, coord));

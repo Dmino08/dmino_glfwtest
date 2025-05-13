@@ -127,17 +127,10 @@ float vertices[] = {
     Mesh* light = new Mesh(vertices, size, attributes, 3);
     
 
-
     InputManager& input = window.getInput();
 
 // COLORS
-
     glm::vec3 light_color = glm::vec3(1.0f, 1.0f, 1.0f);
-
-
-
-
-
 
     auto light_shader = Shader::create("res/shaders/light.vert", "res/shaders/light.frag");
     if (light_shader == nullptr)
@@ -162,7 +155,7 @@ float vertices[] = {
 
 
 // TOY SHADER
-    auto main_shader = Shader::create("res/shaders/light_test.vert", "res/shaders/diffuse_map.frag");
+    auto main_shader = Shader::create("res/shaders/light_test.vert", "res/shaders/point_light.frag");
     if (main_shader == nullptr)
     {
         logger.log(Logger::ERROR, "Toy shader is not created");
@@ -174,11 +167,13 @@ float vertices[] = {
 
 // Light setup
     main_shader->uniform3f("view_pos", camera.getPos());
-    main_shader->uniform3f("light.position", light_pos);
+    main_shader->uniform3f("light.position", camera.getPos() + camera.getFront());
     main_shader->uniform3f("light.ambient", 0.3f, 0.3f, 0.3f);
     main_shader->uniform3f("light.diffuse", 0.5f, 0.5f, 0.5f);
-    main_shader->uniform3f("light.specular", 0.8f, 0.8f, 0.8f);
-
+    main_shader->uniform3f("light.specular", 1.0f, 1.0f, 1.0f);
+    main_shader->uniform1f("light.constant", 1.0f);
+    main_shader->uniform1f("light.linear", 0.09f);
+    main_shader->uniform1f("light.quadratic", 0.032f);
 
 // Material setup
     main_shader->uniform1i("material.diffuse", 0);
@@ -206,6 +201,18 @@ float vertices[] = {
     float camera_speed = 5.f;
 
     glfwSwapInterval(1);
+
+    glm::vec3 cube_positions[10];
+    cube_positions[0] = glm::vec3(0.0f, 0.0f, 0.0f);
+    cube_positions[1] = glm::vec3(2.0f, 2.0f, 0.0f);
+    cube_positions[2] = glm::vec3(0.0f, 5.0f, 5.0f);
+    cube_positions[3] = glm::vec3(6.0f, 0.0f, 6.0f);
+    cube_positions[4] = glm::vec3(5.0f, 5.0f, 0.0f);
+    cube_positions[5] = glm::vec3(7.0f, 7.0f, 0.0f);
+    cube_positions[6] = glm::vec3(0.0f, 2.0f, 0.0f);
+    cube_positions[7] = glm::vec3(5.0f, 5.0f, 5.0f);
+    cube_positions[8] = glm::vec3(4.0f, 4.0f, 0.0f);
+    cube_positions[9] = glm::vec3(0.0f, 10.0f, 0.0f);
 
 // Loop
     while (!window.shouldClose())
@@ -252,8 +259,8 @@ float vertices[] = {
 
         main_shader->use();
         main_shader->uniform3f("view_pos", camera.getPos());
-        main_shader->uniform3f("light.position", light_pos);
-        main_shader->uniformMatrix("model", main_model);
+        main_shader->uniform3f("light.position", camera.getPos() + camera.getFront());
+    //    main_shader->uniformMatrix("model", main_model);
         main_shader->uniformMatrix("view", camera.getViewMatrix());
         main_shader->uniformMatrix("projection", camera.getProjectionMatrix());
 
@@ -263,18 +270,33 @@ float vertices[] = {
         glActiveTexture(GL_TEXTURE1);
         texture1->bind();
         
-        cube->draw();
+        for (size_t i = 0; i < 10; i++)
+        {
+            main_model = glm::mat4(1.0f);
+            main_model = glm::translate(main_model, cube_positions[i]);
+
+            float angle = 20 * i;
+
+            main_model = glm::rotate(main_model, glm::radians(angle),
+                                     glm::vec3(1.0f, 0.3f, 0.5f));
+            main_shader->uniformMatrix("model", main_model);
+
+            cube->draw();
+        }
+        
+
+        
 
         texture0->unbind();
         texture1->unbind();
 
 
-        light_shader->use();
-        light_shader->uniformMatrix("model", model_light);
-        light_shader->uniformMatrix("view", camera.getViewMatrix());
-        light_shader->uniformMatrix("projection", camera.getProjectionMatrix()); 
+        // light_shader->use();
+        // light_shader->uniformMatrix("model", model_light);
+        // light_shader->uniformMatrix("view", camera.getViewMatrix());
+        // light_shader->uniformMatrix("projection", camera.getProjectionMatrix()); 
 
-        light->draw();
+        // light->draw();
 
         window.swapBuffers();
 
