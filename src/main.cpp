@@ -30,19 +30,34 @@ int height = 720;
 Camera camera = Camera(CameraParams());
 
 
-void drawXYCubes(Shader& shader, glm::mat4& model, int x, int y, int z) {
-    const float offset = 2.0f;
-    shader.use();
-    for (size_t i = 1; i <= x; i++) { 
-        for (size_t j = 1; j <= y; j++) {
-            for (size_t q = 1; q <= z; q++) {
-                model = glm::mat4(1.0f);
-                model = glm::translate(model, glm::vec3(i * offset, j * offset, q * offset));
-                shader.uniformMatrix("model", model);
-                glDrawArrays(GL_TRIANGLES, 0, 36);
-            }
-        }
-    }
+void setUpMatrices(Shader& shd, const glm::mat4& projection, const glm::mat4& view, const glm::mat4& model) {
+    shd.uniformMatrix("model", model);
+    shd.uniformMatrix("view", view);
+    shd.uniformMatrix("projection", projection);    
+}
+
+void setUpSpotLight(Shader& shd, 
+                    glm::vec3 position, 
+                    glm::vec3 direction, 
+                    float cut_off, 
+                    glm::vec3 ambient, 
+                    glm::vec3 diffuse, 
+                    glm::vec3 specular,
+                    float constant,
+                    float linear,
+                    float quadratic
+                   ) 
+{
+    shd.uniform3f("light.position", position);
+    shd.uniform3f("light.direction", direction);
+    shd.uniform1f("light.cut_off", cut_off);
+    shd.uniform3f("light.ambient", ambient);
+    shd.uniform3f("light.diffuse", diffuse);
+    shd.uniform3f("light.specular", specular);
+
+    shd.uniform1f("light.constant", constant); 
+    shd.uniform1f("light.linear", linear);
+    shd.uniform1f("light.quadratic", quadratic);   
 }
 
 void frameBufferCallback(GLFWwindow* window, int width, int height) {
@@ -129,33 +144,10 @@ float vertices[] = {
 
     InputManager& input = window.getInput();
 
-// COLORS
-    glm::vec3 light_color = glm::vec3(1.0f, 1.0f, 1.0f);
-
-    auto light_shader = Shader::create("res/shaders/light.vert", "res/shaders/light.frag");
-    if (light_shader == nullptr)
-    {
-        logger.log(Logger::ERROR, "Light shader is not created");
-        return -1;
-    }    
-
-    light_shader->use();
-    light_shader->uniform3f("color", light_color);
-
-    glm::mat4 model_light = glm::mat4(1.0f);
-    glm::vec3 light_pos = glm::vec3(2.0f, 2.0f, 1.0f);
-    model_light = glm::translate(glm::mat4(1.0f), light_pos);
-    model_light = glm::scale(model_light, glm::vec3(0.3f, 0.3f, 0.3f));
 
 
-    light_shader->uniformMatrix("model", model_light);
-    light_shader->uniformMatrix("view", camera.getViewMatrix());
-    light_shader->uniformMatrix("projection", camera.getProjectionMatrix());    
-
-
-
-// TOY SHADER
-    auto main_shader = Shader::create("res/shaders/light_test.vert", "res/shaders/point_light.frag");
+// MAIN SHADER
+    auto main_shader = Shader::create("res/shaders/light_test.vert", "res/shaders/spot_light.frag");
     if (main_shader == nullptr)
     {
         logger.log(Logger::ERROR, "Toy shader is not created");
@@ -163,34 +155,30 @@ float vertices[] = {
     }
     main_shader->use();
        
-
+    main_shader->uniform1i("material.diffuse", 0);
+    main_shader->uniform1i("material.specular", 1);
 
 // Light setup
     main_shader->uniform3f("view_pos", camera.getPos());
-    main_shader->uniform3f("light.position", camera.getPos() + camera.getFront());
-    main_shader->uniform3f("light.ambient", 0.3f, 0.3f, 0.3f);
-    main_shader->uniform3f("light.diffuse", 0.5f, 0.5f, 0.5f);
-    main_shader->uniform3f("light.specular", 1.0f, 1.0f, 1.0f);
-    main_shader->uniform1f("light.constant", 1.0f);
-    main_shader->uniform1f("light.linear", 0.09f);
-    main_shader->uniform1f("light.quadratic", 0.032f);
-
-// Material setup
-    main_shader->uniform1i("material.diffuse", 0);
-    main_shader->uniform1i("material.specular", 1);
-    main_shader->uniform1f("material.shininess", 32);
+    setUpSpotLight(*main_shader, 
+                    camera.getPos(), 
+                    camera.getFront(), 
+                    glm::cos(glm::radians(12.5f)), 
+                    glm::vec3(0.28f),
+                    glm::vec3(0.8f),
+                    glm::vec3(1.0f),
+                    1.0f,
+                    0.09f,
+                    0.032f
+                  );
 
     
 
 // TOY MODEL
     glm::mat4 main_model = glm::mat4(1.0f);
+    setUpMatrices(*main_shader, camera.getProjectionMatrix(), camera.getViewMatrix(), main_model);
 
-
-    main_shader->uniformMatrix("model", main_model);
-    main_shader->uniformMatrix("view", camera.getViewMatrix());
-    main_shader->uniformMatrix("projection", camera.getProjectionMatrix());
-
-
+    
 
 // GENERATING TEXTURE
     auto texture0 = Texture::create("res/images/container2.png");    
@@ -223,7 +211,7 @@ float vertices[] = {
         
         glClearColor(0.42, 0.42, 0.6, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        
+
 
         if (input.justPressed(GLFW_KEY_TAB)) {
             input.toggleCursor();
@@ -249,20 +237,14 @@ float vertices[] = {
 
         }     
 
-        light_pos.x = sin(glfwGetTime()) * 3.5f;
-        light_pos.y = cos(glfwGetTime()) * 3.5f;
-        model_light = glm::translate(glm::mat4(1.0f), light_pos);
-        model_light = glm::scale(model_light, glm::vec3(0.3f, 0.3f, 0.3f));
-       
         
-
+        
 
         main_shader->use();
         main_shader->uniform3f("view_pos", camera.getPos());
-        main_shader->uniform3f("light.position", camera.getPos() + camera.getFront());
-    //    main_shader->uniformMatrix("model", main_model);
-        main_shader->uniformMatrix("view", camera.getViewMatrix());
-        main_shader->uniformMatrix("projection", camera.getProjectionMatrix());
+        main_shader->uniform3f("light.position", camera.getPos());
+        main_shader->uniform3f("light.direction", camera.getFront());
+        setUpMatrices(*main_shader, camera.getProjectionMatrix(), camera.getViewMatrix(), main_model);
 
 
         glActiveTexture(GL_TEXTURE0);
@@ -283,20 +265,10 @@ float vertices[] = {
 
             cube->draw();
         }
-        
-
-        
-
+    
         texture0->unbind();
         texture1->unbind();
 
-
-        // light_shader->use();
-        // light_shader->uniformMatrix("model", model_light);
-        // light_shader->uniformMatrix("view", camera.getViewMatrix());
-        // light_shader->uniformMatrix("projection", camera.getProjectionMatrix()); 
-
-        // light->draw();
 
         window.swapBuffers();
 

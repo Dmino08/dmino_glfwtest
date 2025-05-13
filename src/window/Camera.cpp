@@ -51,7 +51,7 @@ void Camera::translate(glm::vec3 offset) {
     _position += offset;
 }
 void Camera::setTransform(glm::vec3 new_position) {
-    _position = new_position;
+    _position = glm::vec3(new_position);
 }
 
 void Camera::rotate(float x, float y, float z) {
