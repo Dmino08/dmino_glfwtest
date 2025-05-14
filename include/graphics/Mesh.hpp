@@ -10,6 +10,7 @@ class Mesh {
     size_t vertice_count;
 
     public:
+        Mesh() = default;
         Mesh(float* vertices, 
              size_t size, 
              int* attribute_params,

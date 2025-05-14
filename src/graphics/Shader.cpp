@@ -4,6 +4,7 @@
 #include <sstream>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "core/Logger.hpp"
 
 
 unsigned int Shader::getUniformLocation(const std::string& name) {
@@ -12,7 +13,12 @@ unsigned int Shader::getUniformLocation(const std::string& name) {
     if (found == uniformLocations.end())
     {
         unsigned int location = glGetUniformLocation(_id, name.c_str());
-        uniformLocations.try_emplace(name, location);
+        if (location == -1) {
+            logger.log(Logger::WARNING, "Shader doesn't have the uniform variable " + name);
+        }
+        else {
+            uniformLocations.try_emplace(name, location);
+        }
         return location;
     }
 
@@ -32,52 +38,87 @@ Shader::~Shader() {
 
 
 void Shader::use() const {
-    glUseProgram(_id);
+    if (_id != 0) {
+        glUseProgram(_id);
+    }
 }
 
 
 void Shader::uniform1i(const std::string& name, int x) {
-    glUniform1i(getUniformLocation(name), x);
+    unsigned int location = getUniformLocation(name);
+    if (location != -1) {
+        glUniform1i(location, x);
+    }
 }   
 
 void Shader::uniform2i(const std::string& name, int x, int y) {
-    glUniform2i(getUniformLocation(name), x, y);
+    unsigned int location = getUniformLocation(name);
+    if (location != -1) {    
+        glUniform2i(location, x, y);
+    }
 }  
 
 void Shader::uniform2i(const std::string& name, glm::ivec2 xy) {
-    glUniform2i(getUniformLocation(name), xy.x, xy.y);
+    unsigned int location = getUniformLocation(name);
+    if (location != -1) {      
+        glUniform2i(location, xy.x, xy.y);
+    }
 }  
 
 void Shader::uniform3i(const std::string& name, int x, int y, int z) {
-    glUniform3i(getUniformLocation(name), x, y, z);
+    unsigned int location = getUniformLocation(name);
+    if (location != -1) {      
+        glUniform3i(location, x, y, z);
+    }
 }  
 
 void Shader::uniform3i(const std::string& name, glm::ivec3 xyz) {
-    glUniform3i(getUniformLocation(name), xyz.x, xyz.y, xyz.z);
+    unsigned int location = getUniformLocation(name);
+    if (location != -1) {     
+        glUniform3i(location, xyz.x, xyz.y, xyz.z);
+    }
 }  
 
 void Shader::uniform1f(const std::string& name, float x) {
-    glUniform1f(getUniformLocation(name), x);
+    unsigned int location = getUniformLocation(name);
+    if (location != -1) {     
+        glUniform1f(location, x);
+    }
 }  
 
 void Shader::uniform2f(const std::string& name, float x, float y) {
-    glUniform2f(getUniformLocation(name), x, y);
+    unsigned int location = getUniformLocation(name);
+    if (location != -1) {     
+        glUniform2f(location, x, y);
+    }
 }  
 
 void Shader::uniform2f(const std::string& name, glm::vec2 xy) {
-    glUniform2f(getUniformLocation(name), xy.x, xy.y);
+    unsigned int location = getUniformLocation(name);
+    if (location != -1) {     
+        glUniform2f(location, xy.x, xy.y);
+    }
 }  
 
 void Shader::uniform3f(const std::string& name, float x, float y, float z) {
-    glUniform3f(getUniformLocation(name), x, y, z);
+    unsigned int location = getUniformLocation(name);
+    if (location != -1) {     
+        glUniform3f(location, x, y, z);
+    }
 }  
 
 void Shader::uniform3f(const std::string& name, glm::vec3 xyz) {
-    glUniform3f(getUniformLocation(name), xyz.x, xyz.y, xyz.z);
+    unsigned int location = getUniformLocation(name);
+    if (location != -1) {     
+        glUniform3f(location, xyz.x, xyz.y, xyz.z);
+    }
 }  
 
 void Shader::uniformMatrix(const std::string& name, glm::mat4 matrix) {
-    glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, glm::value_ptr(matrix));
+    unsigned int location = getUniformLocation(name);
+    if (location != -1) {     
+        glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
+    }
 }  
 
 

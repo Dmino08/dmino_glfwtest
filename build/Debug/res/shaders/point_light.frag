@@ -34,12 +34,12 @@ void main() {
 
     vec3 norm = normalize(normal);
     vec3 light_dir = normalize(light.position - frag_pos);
-    float diff = max(dot(norm, light_dir), 0.0f);
+    float diff = max(dot(norm, light_dir), 0.0);
     vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, coord));
 
     vec3 view_dir = normalize(view_pos - frag_pos);
     vec3 reflect_dir = reflect(-light_dir, norm);
-    float spec = pow(max(dot(view_dir, reflect_dir), 0.0f), material.shininess);
+    float spec = pow(max(dot(view_dir, reflect_dir), 0.0), material.shininess);
     vec3 specular = light.specular * spec * vec3(texture(material.specular, coord));
 
     float distance = length(light.position - frag_pos); 
