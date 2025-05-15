@@ -110,7 +110,6 @@ void setUpMatrices(Shader& shd, const glm::mat4& projection, const glm::mat4& vi
 }
 
 
-
 void frameBufferCallback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }
@@ -126,7 +125,7 @@ void coutDelta(float& delta) {
 int main(void) {
 
     // // Assimp test
-    // Assimp::Importer importer;
+     Assimp::Importer importer;
 
 
 
