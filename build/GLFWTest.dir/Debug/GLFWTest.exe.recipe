@@ -5,9 +5,6 @@
       <FullPath>D:\D\C++\CMakeLessons\Gits\GLFWTest\build\x64\Debug\ZERO_CHECK</FullPath>
     </ProjectOutput>
     <ProjectOutput>
-      <FullPath>D:\D\C++\CMakeLessons\Gits\GLFWTest\build\external\glfw\src\Debug\glfw3.dll</FullPath>
-    </ProjectOutput>
-    <ProjectOutput>
       <FullPath>D:\D\C++\CMakeLessons\Gits\GLFWTest\build\Debug\GLFWTest.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>

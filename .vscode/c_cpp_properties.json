@@ -6,7 +6,8 @@
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/include",
                 "${workspaceFolder}/external/glad/include",
-                "${workspaceFolder}/external/glfw/include"
+                "${workspaceFolder}/external/glfw/include",
+                "D:/vcpkg/installed/x64-windows/include"
             ],
             "defines": [
                 "_DEBUG",

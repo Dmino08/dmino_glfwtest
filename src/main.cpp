@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <chrono>
+#include <thread>
 
 #include "config.h"
 
@@ -24,6 +25,8 @@
 
 #include "stb_image.h"
 
+#include <assimp/Importer.hpp>
+
 
 int width = 1280;
 int height = 720;
@@ -33,10 +36,12 @@ Camera camera = Camera(CameraParams());
 
 
 void updateTitle(Window& window, float timer, float& timer_elapsed, float delta_time) {
+    timer_elapsed += delta_time;
     if (timer <= timer_elapsed) {
         window.setTitle("FPS:" + std::to_string(int(1.0f/delta_time)));
         timer_elapsed = 0.0f;
     }
+
 }
 
 void setUpMultipleShader(Shader& shd, 
@@ -110,8 +115,20 @@ void frameBufferCallback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }
 
+void coutDelta(float& delta) {
+    while (true)
+    {
+        std::cout << delta << std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+}
 
 int main(void) {
+
+    // // Assimp test
+    // Assimp::Importer importer;
+
+
 
     std::cout << PROJECT_VERSION_MAJOR << "." << PROJECT_VERSION_MINOR << std::endl;
 
@@ -251,25 +268,24 @@ int main(void) {
 
 
 // Some loop variables
-    float delta_time = 0.0f;
+   glfwSwapInterval(1);
+
     float timer = 1.0f;
     float timer_elapsed = 0.0f;
 
-    auto last_frame_time = std::chrono::high_resolution_clock::now();
     float camera_speed = 5.f;
 
-    glfwSwapInterval(0);
+    float delta_time = 0.016f;
+    int FPS = 60;
 
-// Loop
+    auto target_delta = std::chrono::microseconds(1000000 / FPS);
+
+    std::thread delta_thread(coutDelta, std::ref(delta_time));
+    delta_thread.detach();
+// Loop 
     while (!window.shouldClose())
-    {
-
-        auto current_frame_time = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<float> elapsed = current_frame_time - last_frame_time;
-        last_frame_time = current_frame_time;
-
-        float delta_time = elapsed.count();
-        timer_elapsed += delta_time;
+    { 
+        auto frame_start = std::chrono::high_resolution_clock::now();
         updateTitle(window, timer, timer_elapsed, delta_time);
 
         window.pollEvents();
@@ -277,6 +293,7 @@ int main(void) {
         glClearColor(0.42, 0.42, 0.6, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        
 
         if (input.justPressed(GLFW_KEY_TAB)) {
             input.toggleCursor();
@@ -361,12 +378,22 @@ int main(void) {
             light->draw();
         }
 
+        window.swapBuffers();  
+        
 
 
+        auto frame_end = std::chrono::high_resolution_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(frame_end - frame_start);
 
-        window.swapBuffers();
-      
-
+        // It doesn't work as it should
+        // if (elapsed < target_delta)
+        // {
+        //     std::this_thread::sleep_for(target_delta - elapsed);
+            
+        //     frame_end = std::chrono::high_resolution_clock::now();
+        //     elapsed = std::chrono::duration_cast<std::chrono::microseconds>(frame_end - frame_start);
+        // }
+        delta_time = elapsed.count() / 1'000'000.0;
         
     }
 
