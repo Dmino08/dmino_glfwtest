@@ -1,0 +1,11 @@
+{
+    "name" : "glfw-test",
+    "version-string" : "0.1.0",
+    "dependencies" : [
+        "opengl",
+        "glfw3",
+        "glm",
+        "glew",
+        "assimp"
+    ]
+}

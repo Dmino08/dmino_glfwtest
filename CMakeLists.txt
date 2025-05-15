@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.30)
 
 project(GLFWTest VERSION 1.0)
 
@@ -10,6 +10,7 @@ set(GLFW_BUILD_EXAMPLES OFF)
 set(GLFW_BUILD_TESTS OFF)
 set(GLFW_BUILD_DOCS OFF)
 set(CMAKE_FIND_DEBUG_MODE ON)
+#set(CMAKE_TOOLCHAIN_FILE "D:/vcpkg/scripts/buildsystems/vcpkg.cmake")
 
 add_subdirectory(external/glad)
 add_subdirectory(external/stb)
