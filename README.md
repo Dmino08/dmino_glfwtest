@@ -36,4 +36,7 @@ If you don’t have `vcpkg` yet, clone and bootstrap it (see vcpkg docs). Then, 
 
 ```powershell
 $env:VCPKG_ROOT = "path/to/vcpkg"
-cmake --preset debug # inside happening vcpkg install
+```
+```powershell # Inside happehing vcpkg install
+cmake --preset debug 
+```
