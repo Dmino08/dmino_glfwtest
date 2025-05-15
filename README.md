@@ -22,9 +22,9 @@ This is still a work in progress and will grow over time as I explore more syste
 
 This project uses the following libraries:
 
+- stb
 - OpenGL
-- GLFW
-- GLEW
+- glad
 - GLM
 - Assimp
 

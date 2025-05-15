@@ -10,18 +10,20 @@ set(GLFW_BUILD_EXAMPLES OFF)
 set(GLFW_BUILD_TESTS OFF)
 set(GLFW_BUILD_DOCS OFF)
 set(CMAKE_FIND_DEBUG_MODE ON)
-#set(CMAKE_TOOLCHAIN_FILE "D:/vcpkg/scripts/buildsystems/vcpkg.cmake")
 
-add_subdirectory(external/glad)
-add_subdirectory(external/stb)
 
 find_package(OpenGL REQUIRED)
+
 
 find_package(assimp CONFIG REQUIRED)
 
 find_package(glm CONFIG REQUIRED)
 
+find_package(glad CONFIG REQUIRED)
+
 find_package(glfw3 CONFIG REQUIRED)
+
+
 
 file(GLOB_RECURSE source "${PROJECT_SOURCE_DIR}/src/*.cpp")
 
@@ -44,11 +46,10 @@ target_link_libraries(
     PRIVATE
         OpenGL::GL
         assimp::assimp
+        glad::glad
         glfw
-        glad
     PUBLIC
         glm::glm
-        stb
     )
 
 
@@ -58,7 +59,8 @@ target_include_directories(
     GLFWTest
     PUBLIC
         "${PROJECT_BINARY_DIR}"
-        "${PROJECT_SOURCE_DIR}/include")
+        "${PROJECT_SOURCE_DIR}/include"
+        "${VCPKG_INCLUDE_DIRS}")
 
 configure_file(config.h.in config.h)
 

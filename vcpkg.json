@@ -2,10 +2,11 @@
     "name" : "glfw-test",
     "version-string" : "0.1.0",
     "dependencies" : [
+        "stb",
         "opengl",
         "glfw3",
         "glm",
-        "glew",
+        "glad",
         "assimp"
     ]
 }
