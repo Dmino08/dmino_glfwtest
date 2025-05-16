@@ -1,21 +1,30 @@
 #pragma once
 
 
-
 #include <glad/glad.h>
+#include "utils/Buffer.hpp"
+
+struct Vertex {
+    float position[3];
+    float normal[3];
+    float tex_coord[2];
+};
+
+struct MeshData {
+    util::Buffer<Vertex> vertices;
+    util::Buffer<uint> indices;
+};
 
 
 class Mesh {
-    unsigned int VAO, VBO;
-    size_t vertice_count;
+    uint vao_, vbo_, ebo_;
+
+    MeshData data_;
+    uint verticeCount_;
+    uint indiceCount_;
 
     public:
-        Mesh() = default;
-        Mesh(float* vertices, 
-             size_t size, 
-             int* attribute_params,
-             size_t attribute_amount
-             );
-
+        Mesh(MeshData data);
         void draw();
+
 };

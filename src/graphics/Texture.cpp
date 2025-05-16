@@ -4,12 +4,14 @@
 #include "Core/Logger.hpp"
 
 
-Texture::Texture(GLuint id, int width, int height, int nrChannels, GLenum target) : 
+Texture::Texture(GLuint id, int width, int height, int nrChannels, GLenum target, std::string path, std::string file_name) : 
     _id(id), 
     _width(width), 
     _height(height), 
     _nrChannels(nrChannels), 
-    _target(target) {}
+    _target(target),
+    _path(path),
+    _file_name(file_name) {}
 
 
 Texture::~Texture() {
@@ -26,9 +28,20 @@ void Texture::unbind() const {
     glBindTexture(_target, 0);
 }
 
+std::string Texture::getPath() const {
+    return _path;
+}
 
-std::unique_ptr<Texture> Texture::create(
+std::string Texture::getFileName() const {
+    return _file_name;
+}
+
+
+
+
+Texture Texture::create(
     std::string path, 
+    std::string file_name, 
     TextureParams params
 ) {
     GLuint id;
@@ -54,7 +67,7 @@ std::unique_ptr<Texture> Texture::create(
     
 
     int width, height, nrChannels;
-    unsigned char* data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
+    unsigned char* data = stbi_load((path + "/" + file_name).c_str(), &width, &height, &nrChannels, 0);
     
 
     if (!data) {
@@ -65,7 +78,7 @@ std::unique_ptr<Texture> Texture::create(
             glDeleteTextures(1, &id);
         }
         
-        return nullptr;        
+        return Texture(0, 0, 0, 0, 0, "", "");        
     }
     else {
         GLenum format = GL_RGB;
@@ -76,7 +89,7 @@ std::unique_ptr<Texture> Texture::create(
             logger.log(Logger::WARNING, "Unknown channel count: " + std::to_string(nrChannels));
             stbi_image_free(data);
             glDeleteTextures(1, &id);
-            return nullptr;
+            return Texture(0, 0, 0, 0, 0, "", "");
         }
 
 
@@ -88,6 +101,7 @@ std::unique_ptr<Texture> Texture::create(
         glGenerateMipmap(params.target);
     }
     stbi_image_free(data);
+
     
-    return std::make_unique<Texture>(id, width, height, nrChannels, params.target);
+    return Texture(id, width, height, nrChannels, params.target, path, file_name);
 }

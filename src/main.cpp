@@ -124,11 +124,6 @@ void coutDelta(float& delta) {
 
 int main(void) {
 
-    // // Assimp test
-     Assimp::Importer importer;
-
-
-
     std::cout << PROJECT_VERSION_MAJOR << "." << PROJECT_VERSION_MINOR << std::endl;
 
     if(!glfwInit()) {
@@ -151,60 +146,64 @@ int main(void) {
     window.setFramebufferSizeCallback(frameBufferCallback);
 //    window.setScrollCallback(scrollCallback);
 
+// GENERATING TEXTURE
+    Texture texture0 = Texture::create("res/images", "container2.png");    
+    Texture texture1 = Texture::create("res/images", "container2_specular.png");
 
-// Creating a Cube
-    float vertices[] = {
-    //   camera_position            normals              coord    
-        -0.5f, -0.5f, -0.5f, 0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
-        0.5f, -0.5f, -0.5f, 0.0f,  0.0f, -1.0f, 1.0f, 0.0f,
-        0.5f,  0.5f, -0.5f, 0.0f,  0.0f, -1.0f, 1.0f, 1.0f,
-        0.5f,  0.5f, -0.5f, 0.0f,  0.0f, -1.0f, 1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f, 0.0f,  0.0f, -1.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
 
-        -0.5f, -0.5f,  0.5f, 0.0f,  0.0f,  1.0f, 0.0f, 0.0f,
-        0.5f, -0.5f,  0.5f, 0.0f,  0.0f,  1.0f, 1.0f, 0.0f,
-        0.5f,  0.5f,  0.5f, 0.0f,  0.0f,  1.0f, 1.0f, 1.0f,
-        0.5f,  0.5f,  0.5f, 0.0f,  0.0f,  1.0f, 1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f, 0.0f,  0.0f,  1.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f, 0.0f,  0.0f,  1.0f, 0.0f, 0.0f,
 
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
+// Vertex data
+    util::Buffer<Vertex> cubeVertices = {
+        // ЗАДНЯЯ грань (нормаль: -Z)
+        {{-0.5f, -0.5f, -0.5f},  { 0.0f,  0.0f, -1.0f},  {0.0f, 0.0f}},
+        {{ 0.5f, -0.5f, -0.5f},  { 0.0f,  0.0f, -1.0f},  {1.0f, 0.0f}},
+        {{ 0.5f,  0.5f, -0.5f},  { 0.0f,  0.0f, -1.0f},  {1.0f, 1.0f}},
+        {{-0.5f,  0.5f, -0.5f},  { 0.0f,  0.0f, -1.0f},  {0.0f, 1.0f}},
 
-        0.5f,  0.5f,  0.5f, 1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
-        0.5f,  0.5f, -0.5f, 1.0f,  0.0f,  0.0f, 1.0f, 1.0f,
-        0.5f, -0.5f, -0.5f, 1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
-        0.5f, -0.5f, -0.5f, 1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
-        0.5f, -0.5f,  0.5f, 1.0f,  0.0f,  0.0f, 0.0f, 0.0f,
-        0.5f,  0.5f,  0.5f, 1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
+        // ПЕРЕДНЯЯ грань (нормаль: +Z)
+        {{-0.5f, -0.5f,  0.5f},  { 0.0f,  0.0f,  1.0f},  {0.0f, 0.0f}},
+        {{ 0.5f, -0.5f,  0.5f},  { 0.0f,  0.0f,  1.0f},  {1.0f, 0.0f}},
+        {{ 0.5f,  0.5f,  0.5f},  { 0.0f,  0.0f,  1.0f},  {1.0f, 1.0f}},
+        {{-0.5f,  0.5f,  0.5f},  { 0.0f,  0.0f,  1.0f},  {0.0f, 1.0f}},
 
-        -0.5f, -0.5f, -0.5f, 0.0f, -1.0f,  0.0f, 0.0f, 1.0f,
-        0.5f, -0.5f, -0.5f, 0.0f, -1.0f,  0.0f, 1.0f, 1.0f,
-        0.5f, -0.5f,  0.5f, 0.0f, -1.0f,  0.0f, 1.0f, 0.0f,
-        0.5f, -0.5f,  0.5f, 0.0f, -1.0f,  0.0f, 1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f, 0.0f, -1.0f,  0.0f, 0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, -1.0f,  0.0f, 0.0f, 1.0f,
+        // ЛЕВАЯ грань (нормаль: -X)
+        {{-0.5f, -0.5f,  0.5f},  {-1.0f,  0.0f,  0.0f},  {0.0f, 0.0f}},
+        {{-0.5f, -0.5f, -0.5f},  {-1.0f,  0.0f,  0.0f},  {1.0f, 0.0f}},
+        {{-0.5f,  0.5f, -0.5f},  {-1.0f,  0.0f,  0.0f},  {1.0f, 1.0f}},
+        {{-0.5f,  0.5f,  0.5f},  {-1.0f,  0.0f,  0.0f},  {0.0f, 1.0f}},
 
-        -0.5f,  0.5f, -0.5f, 0.0f,  1.0f,  0.0f, 0.0f, 1.0f,
-        0.5f,  0.5f, -0.5f, 0.0f,  1.0f,  0.0f, 1.0f, 1.0f,
-        0.5f,  0.5f,  0.5f, 0.0f,  1.0f,  0.0f, 1.0f, 0.0f,
-        0.5f,  0.5f,  0.5f, 0.0f,  1.0f,  0.0f, 1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f, 0.0f,  1.0f,  0.0f, 0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f, 0.0f,  1.0f,  0.0f, 0.0f, 1.0f
+        // ПРАВАЯ грань (нормаль: +X)
+        {{ 0.5f, -0.5f, -0.5f},  { 1.0f,  0.0f,  0.0f},  {0.0f, 0.0f}},
+        {{ 0.5f, -0.5f,  0.5f},  { 1.0f,  0.0f,  0.0f},  {1.0f, 0.0f}},
+        {{ 0.5f,  0.5f,  0.5f},  { 1.0f,  0.0f,  0.0f},  {1.0f, 1.0f}},
+        {{ 0.5f,  0.5f, -0.5f},  { 1.0f,  0.0f,  0.0f},  {0.0f, 1.0f}},
+
+        // НИЖНЯЯ грань (нормаль: -Y)
+        {{-0.5f, -0.5f, -0.5f},  { 0.0f, -1.0f,  0.0f},  {0.0f, 0.0f}},
+        {{ 0.5f, -0.5f, -0.5f},  { 0.0f, -1.0f,  0.0f},  {1.0f, 0.0f}},
+        {{ 0.5f, -0.5f,  0.5f},  { 0.0f, -1.0f,  0.0f},  {1.0f, 1.0f}},
+        {{-0.5f, -0.5f,  0.5f},  { 0.0f, -1.0f,  0.0f},  {0.0f, 1.0f}},
+
+        // ВЕРХНЯЯ грань (нормаль: +Y)
+        {{-0.5f,  0.5f,  0.5f},  { 0.0f,  1.0f,  0.0f},  {0.0f, 0.0f}},
+        {{ 0.5f,  0.5f,  0.5f},  { 0.0f,  1.0f,  0.0f},  {1.0f, 0.0f}},
+        {{ 0.5f,  0.5f, -0.5f},  { 0.0f,  1.0f,  0.0f},  {1.0f, 1.0f}},
+        {{-0.5f,  0.5f, -0.5f},  { 0.0f,  1.0f,  0.0f},  {0.0f, 1.0f}},
+    };
+// Indices data
+    util::Buffer<uint> cubeIndices = {
+        0,  1,  2,  2,  3,  0,      // задняя
+        4,  5,  6,  6,  7,  4,      // передняя
+        8,  9, 10, 10, 11,  8,      // левая
+        12, 13, 14, 14, 15, 12,     // правая
+        16, 17, 18, 18, 19, 16,     // нижняя
+        20, 21, 22, 22, 23, 20      // верхняя
     };
 
-// Mesh variables
-    const int a_count = 3;
-    int attributes[a_count] = {3,3,2};
-    int size = sizeof(vertices);
+    MeshData meshData{cubeVertices, cubeIndices};
 
 //  Our crate
-    Mesh* crate = new Mesh(vertices, size, attributes, a_count);
+    Mesh* crate = new Mesh(meshData);
 
     // Crate positions
     glm::vec3 crate_positions[10] = {
@@ -224,7 +223,7 @@ int main(void) {
 
 
 // Our light
-    Mesh* light = new Mesh(vertices, size, attributes, a_count);
+    Mesh* light = new Mesh(meshData);
 
     // Point light positions
     glm::vec3 point_light_positions[] = {
@@ -257,9 +256,7 @@ int main(void) {
     setUpMatrices(*light_shader, camera.getProjectionMatrix(), camera.getViewMatrix(), light_model);
     setUpLightShader(*light_shader, glm::vec3(1.0f));
 
-// GENERATING TEXTURE
-    auto texture0 = Texture::create("res/images/container2.png");    
-    auto texture1 = Texture::create("res/images/container2_specular.png");
+//    Model model = Model("res/models/survival_guitar_backpack/scene.gltf");
 
 
 // Input setting up
@@ -320,6 +317,8 @@ int main(void) {
 
         
         setUpMatrices(*multiple_shader, camera.getProjectionMatrix(), camera.getViewMatrix(), crate_model);
+
+
         setUpMultipleShader(*multiple_shader,
                             camera.getPos(),
                             glm::vec3(0.05f),
@@ -336,11 +335,12 @@ int main(void) {
                         );
 
         glActiveTexture(GL_TEXTURE0);
-        texture0->bind();
+        texture0.bind();
         glActiveTexture(GL_TEXTURE1);
-        texture1->bind();
+        texture1.bind();
 
         
+
         for (size_t i = 0; i < 10; i++)
         {
             crate_model = glm::mat4(1.0f);
@@ -355,8 +355,8 @@ int main(void) {
             crate->draw();
         }
     
-        texture0->unbind();
-        texture1->unbind();
+        texture0.unbind();
+        texture1.unbind();
 
 
         setUpMatrices(*light_shader, camera.getProjectionMatrix(), camera.getViewMatrix(), light_model);

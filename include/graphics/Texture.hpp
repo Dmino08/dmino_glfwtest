@@ -4,7 +4,6 @@
 #include <glad/glad.h>
 
 #include <iostream>
-#include <memory>
 
 struct TextureParams {
     GLenum target = GL_TEXTURE_2D;
@@ -27,18 +26,24 @@ class Texture {
     GLenum _target;
     int _width, _height, _nrChannels;
     
-    
+    std::string _path;
+    std::string _file_name;
 
     public:
-        Texture(GLuint id, int width, int height, int nrChannels, GLenum target);
+        std::string _type;
+        Texture(GLuint id, int width, int height, int nrChannels, GLenum target, std::string path, std::string file_name);
         ~Texture();
 
         void bind() const;
         void unbind() const;
 
-    
-        static std::unique_ptr<Texture> create(
-            std::string path, 
+        std::string getPath() const;
+        std::string getFileName() const;
+
+
+        static Texture create(
+            std::string path,
+            std::string file_name, 
             TextureParams params = TextureParams()
         );
 };

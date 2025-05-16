@@ -9,11 +9,11 @@ set(BUILD_SHARED_LIBS ON)
 set(GLFW_BUILD_EXAMPLES OFF)
 set(GLFW_BUILD_TESTS OFF)
 set(GLFW_BUILD_DOCS OFF)
-set(CMAKE_FIND_DEBUG_MODE ON)
+#set(CMAKE_FIND_DEBUG_MODE ON)
+
 
 
 find_package(OpenGL REQUIRED)
-
 
 find_package(assimp CONFIG REQUIRED)
 
@@ -34,11 +34,11 @@ add_custom_command(TARGET GLFWTest POST_BUILD
     ${CMAKE_SOURCE_DIR}/res $<TARGET_FILE_DIR:GLFWTest>/res
 )
 
-add_custom_command(TARGET GLFWTest POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        $<TARGET_FILE:glfw>
-        $<TARGET_FILE_DIR:GLFWTest>
-)
+# add_custom_command(TARGET GLFWTest POST_BUILD
+#     COMMAND ${CMAKE_COMMAND} -E copy_if_different
+#         $<TARGET_FILE:glfw>
+#         $<TARGET_FILE_DIR:GLFWTest>
+# )
 
 
 target_link_libraries(
