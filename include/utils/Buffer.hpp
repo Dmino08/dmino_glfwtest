@@ -76,7 +76,7 @@ namespace util {
                 return ptr_.get() + size_;
             }
 
-            inline uint getSize() const {
+            inline uint size() const {
                 return size_;
             }
             inline uint getByteSize() const {

@@ -23,6 +23,11 @@
 #include "graphics/core/Texture.hpp"
 #include "graphics/core/Mesh.hpp"
 
+#include "utils/Transform.hpp"
+
+#include "test/Voxel.hpp"
+
+
 #include "stb_image.h"
 
 
@@ -50,7 +55,7 @@ void setUpMultipleShader(Shader& shd,
                          glm::vec3 specular,
                          glm::vec3 direciton,
                          glm::vec3 camera_position,
-                         glm::vec3* point_positions,
+                         util::Buffer<Voxel> voxels,
                          float constant, 
                          float linear,
                          float quadratic,
@@ -66,7 +71,7 @@ void setUpMultipleShader(Shader& shd,
 
     shd.uniform3f("direction_light.direction", glm::vec3(0.0f,-1.0f, 0.0f));
     // point_lights
-    for (size_t i = 0; i < 4; i++)
+    for (size_t i = 0; i < voxels.size(); i++)
     {
         std::string base = "point_lights[" + std::to_string(i) + "].";
 
@@ -74,7 +79,7 @@ void setUpMultipleShader(Shader& shd,
         shd.uniform3f(base + "base.diffuse", diffuse);
         shd.uniform3f(base + "base.specular", specular);
 
-        shd.uniform3f(base + "position", point_positions[i]);
+        shd.uniform3f(base + "position", voxels[i].transform.getPosition());
 
         shd.uniform1f(base + "attenuation.constant", constant);
         shd.uniform1f(base + "attenuation.linear", linear);
@@ -99,13 +104,6 @@ void setUpMultipleShader(Shader& shd,
 
 void setUpLightShader(Shader& shd, glm::vec3 color) {
     shd.uniform3f("color", color);
-}
-
-void setUpMatrices(Shader& shd, const glm::mat4& projection, const glm::mat4& view, const glm::mat4& model) {
-    shd.use();
-    shd.uniformMatrix("model", model);
-    shd.uniformMatrix("view", view);
-    shd.uniformMatrix("projection", projection);    
 }
 
 
@@ -150,90 +148,34 @@ int main(void) {
     Texture texture1 = Texture::create("res/images", "container2_specular.png");
 
 
-
-// Vertex data
-    util::Buffer<Vertex> cubeVertices = {
-        // ЗАДНЯЯ грань (нормаль: -Z)
-        {{-0.5f, -0.5f, -0.5f},  { 0.0f,  0.0f, -1.0f},  {0.0f, 0.0f}},
-        {{ 0.5f, -0.5f, -0.5f},  { 0.0f,  0.0f, -1.0f},  {1.0f, 0.0f}},
-        {{ 0.5f,  0.5f, -0.5f},  { 0.0f,  0.0f, -1.0f},  {1.0f, 1.0f}},
-        {{-0.5f,  0.5f, -0.5f},  { 0.0f,  0.0f, -1.0f},  {0.0f, 1.0f}},
-
-        // ПЕРЕДНЯЯ грань (нормаль: +Z)
-        {{-0.5f, -0.5f,  0.5f},  { 0.0f,  0.0f,  1.0f},  {0.0f, 0.0f}},
-        {{ 0.5f, -0.5f,  0.5f},  { 0.0f,  0.0f,  1.0f},  {1.0f, 0.0f}},
-        {{ 0.5f,  0.5f,  0.5f},  { 0.0f,  0.0f,  1.0f},  {1.0f, 1.0f}},
-        {{-0.5f,  0.5f,  0.5f},  { 0.0f,  0.0f,  1.0f},  {0.0f, 1.0f}},
-
-        // ЛЕВАЯ грань (нормаль: -X)
-        {{-0.5f, -0.5f,  0.5f},  {-1.0f,  0.0f,  0.0f},  {0.0f, 0.0f}},
-        {{-0.5f, -0.5f, -0.5f},  {-1.0f,  0.0f,  0.0f},  {1.0f, 0.0f}},
-        {{-0.5f,  0.5f, -0.5f},  {-1.0f,  0.0f,  0.0f},  {1.0f, 1.0f}},
-        {{-0.5f,  0.5f,  0.5f},  {-1.0f,  0.0f,  0.0f},  {0.0f, 1.0f}},
-
-        // ПРАВАЯ грань (нормаль: +X)
-        {{ 0.5f, -0.5f, -0.5f},  { 1.0f,  0.0f,  0.0f},  {0.0f, 0.0f}},
-        {{ 0.5f, -0.5f,  0.5f},  { 1.0f,  0.0f,  0.0f},  {1.0f, 0.0f}},
-        {{ 0.5f,  0.5f,  0.5f},  { 1.0f,  0.0f,  0.0f},  {1.0f, 1.0f}},
-        {{ 0.5f,  0.5f, -0.5f},  { 1.0f,  0.0f,  0.0f},  {0.0f, 1.0f}},
-
-        // НИЖНЯЯ грань (нормаль: -Y)
-        {{-0.5f, -0.5f, -0.5f},  { 0.0f, -1.0f,  0.0f},  {0.0f, 0.0f}},
-        {{ 0.5f, -0.5f, -0.5f},  { 0.0f, -1.0f,  0.0f},  {1.0f, 0.0f}},
-        {{ 0.5f, -0.5f,  0.5f},  { 0.0f, -1.0f,  0.0f},  {1.0f, 1.0f}},
-        {{-0.5f, -0.5f,  0.5f},  { 0.0f, -1.0f,  0.0f},  {0.0f, 1.0f}},
-
-        // ВЕРХНЯЯ грань (нормаль: +Y)
-        {{-0.5f,  0.5f,  0.5f},  { 0.0f,  1.0f,  0.0f},  {0.0f, 0.0f}},
-        {{ 0.5f,  0.5f,  0.5f},  { 0.0f,  1.0f,  0.0f},  {1.0f, 0.0f}},
-        {{ 0.5f,  0.5f, -0.5f},  { 0.0f,  1.0f,  0.0f},  {1.0f, 1.0f}},
-        {{-0.5f,  0.5f, -0.5f},  { 0.0f,  1.0f,  0.0f},  {0.0f, 1.0f}},
+//  Our blocks
+    util::Buffer<Voxel> crates = {
+        {glm::vec3( 0.0f,  0.0f,  0.0f)},
+        {glm::vec3( 2.0f,  5.0f, -15.0f)},
+        {glm::vec3(-1.5f, -2.2f, -2.5f)},
+        {glm::vec3(-3.8f, -2.0f, -12.3f)},
+        {glm::vec3( 2.4f, -0.4f, -3.5f)},
+        {glm::vec3(-1.7f,  3.0f, -7.5f)},
+        {glm::vec3( 1.3f, -2.0f, -2.5f)},
+        {glm::vec3( 1.5f,  2.0f, -2.5f)},
+        {glm::vec3( 1.5f,  0.2f, -1.5f)},
+        {glm::vec3(-1.3f,  1.0f, -1.5f)}
     };
-// Indices data
-    util::Buffer<uint> cubeIndices = {
-        0,  1,  2,  2,  3,  0,      // задняя
-        4,  5,  6,  6,  7,  4,      // передняя
-        8,  9, 10, 10, 11,  8,      // левая
-        12, 13, 14, 14, 15, 12,     // правая
-        16, 17, 18, 18, 19, 16,     // нижняя
-        20, 21, 22, 22, 23, 20      // верхняя
-    };
-
-    MeshData meshData{std::move(cubeVertices), std::move(cubeIndices)};
-
-//  Our crate
-    Mesh* crate = new Mesh(meshData);
-
-    // Crate positions
-    glm::vec3 crate_positions[10] = {
-        glm::vec3( 0.0f,  0.0f,  0.0f),
-        glm::vec3( 2.0f,  5.0f, -15.0f),
-        glm::vec3(-1.5f, -2.2f, -2.5f),
-        glm::vec3(-3.8f, -2.0f, -12.3f),
-        glm::vec3( 2.4f, -0.4f, -3.5f),
-        glm::vec3(-1.7f,  3.0f, -7.5f),
-        glm::vec3( 1.3f, -2.0f, -2.5f),
-        glm::vec3( 1.5f,  2.0f, -2.5f),
-        glm::vec3( 1.5f,  0.2f, -1.5f),
-        glm::vec3(-1.3f,  1.0f, -1.5f)
-    };
-    // Crate model matrix
-    glm::mat4 crate_model = glm::mat4(1.0f);
 
 
 // Our light
-    Mesh* light = new Mesh(meshData);
-
-    // Point light positions
-    glm::vec3 point_light_positions[] = {
-        glm::vec3( 0.7f, 0.2f, 2.0f),
-        glm::vec3( 2.3f, -3.3f, -4.0f),
-        glm::vec3(-4.0f, 2.0f, -12.0f),
-        glm::vec3( 0.0f, 0.0f, -3.0f)
+    util::Buffer<Voxel> lights = {
+        {glm::vec3( 0.7f, 0.2f, 2.0f)},
+        {glm::vec3( 2.3f, -3.3f, -4.0f)},
+        {glm::vec3(-4.0f, 2.0f, -12.0f)},
+        {glm::vec3( 0.0f, 0.0f, -3.0f)}
     };
 
-    // Crate model matrix
-    glm::mat4 light_model = glm::mat4(1.0f);
+    for (auto &i : lights)
+    {
+        i.transform.applyScale(0.2f, 0.2f, 0.2f);
+    }
+    
     
 
 // Multiple shader
@@ -241,7 +183,7 @@ int main(void) {
     if (multiple_shader == nullptr) {
         return -1;
     }
-    setUpMatrices(*multiple_shader, camera.getProjectionMatrix(), camera.getViewMatrix(), crate_model);
+    multiple_shader->setMatrices(camera.getProjectionMatrix(), camera.getViewMatrix());
     // Material setting
     multiple_shader->uniform1i("material.diffuse", 0);
     multiple_shader->uniform1i("material.specular", 1);
@@ -252,7 +194,7 @@ int main(void) {
     if (light_shader == nullptr) {
         return -1;
     }
-    setUpMatrices(*light_shader, camera.getProjectionMatrix(), camera.getViewMatrix(), light_model);
+    light_shader->setMatrices(camera.getProjectionMatrix(), camera.getViewMatrix());
     setUpLightShader(*light_shader, glm::vec3(1.0f));
 
 //    Model model = Model("res/models/survival_guitar_backpack/scene.gltf");
@@ -277,6 +219,7 @@ int main(void) {
 
     std::thread delta_thread(countDelta, std::ref(deltaTime));
     delta_thread.detach();
+
 // Loop 
     while (!window.shouldClose())
     { 
@@ -315,7 +258,7 @@ int main(void) {
         }     
 
         
-        setUpMatrices(*multiple_shader, camera.getProjectionMatrix(), camera.getViewMatrix(), crate_model);
+        multiple_shader->setMatrices(camera.getProjectionMatrix(), camera.getViewMatrix());
 
 
         setUpMultipleShader(*multiple_shader,
@@ -325,7 +268,7 @@ int main(void) {
                             glm::vec3(1.0f),
                             camera.getFront(),
                             camera.getPos(),
-                            point_light_positions,
+                            lights,
                             1.0f,
                             0.09f,
                             0.032f,
@@ -339,42 +282,34 @@ int main(void) {
         texture1.bind();
 
         
+        
 
-        for (size_t i = 0; i < 10; i++)
+        for (size_t i = 0; i < crates.size(); i++)
         {
-            crate_model = glm::mat4(1.0f);
-            crate_model = glm::translate(crate_model, crate_positions[i]);
-
             float angle = 20 * i;
 
-            crate_model = glm::rotate(crate_model, glm::radians(angle),
-                                     glm::vec3(1.0f, 0.3f, 0.5f));
-            multiple_shader->uniformMatrix("model", crate_model);
+            crates[i].transform.setRotation(glm::vec3(1.0f * angle, 0.3f * angle, 0.5f * angle));
 
-            crate->draw();
+            multiple_shader->uniformMatrix("model", crates[i].transform.getModel());
+
+            crates[i].draw();
         }
     
         texture0.unbind();
         texture1.unbind();
 
 
-        setUpMatrices(*light_shader, camera.getProjectionMatrix(), camera.getViewMatrix(), light_model);
+        light_shader->setMatrices(camera.getProjectionMatrix(), camera.getViewMatrix());
 
-        for (size_t i = 0; i < 4; i++)
+
+        for (size_t i = 0; i < lights.size(); i++)
         {
-            light_model = glm::mat4(1.0f);
-            light_model = glm::translate(light_model, point_light_positions[i]);
+            light_shader->uniformMatrix("model", lights[i].transform.getModel());
 
-            float angle = 20 * i;
-
-            light_model = glm::rotate(light_model, glm::radians(angle),
-                                     glm::vec3(1.0f, 0.3f, 0.5f));
-            light_model = glm::scale(light_model, glm::vec3(0.2f));
-
-            light_shader->uniformMatrix("model", light_model);
-
-            light->draw();
+            lights[i].draw();
         }
+
+
 
         window.swapBuffers();  
         

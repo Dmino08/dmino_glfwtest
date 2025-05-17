@@ -121,7 +121,12 @@ void Shader::uniformMatrix(const std::string& name, glm::mat4 matrix) {
     }
 }  
 
+void Shader::setMatrices(const glm::mat4& projection, const glm::mat4& view) {
+    use();
+    uniformMatrix("projection", projection);
+    uniformMatrix("view", view);
 
+}
 
 
 

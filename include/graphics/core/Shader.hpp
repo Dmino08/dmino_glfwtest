@@ -39,6 +39,8 @@ class Shader {
         void uniform3f(const std::string& name, glm::vec3 xyz);
         void uniformMatrix(const std::string& name, glm::mat4 matrix);
 
+        void setMatrices(const glm::mat4& projection, const glm::mat4& view);
+
 
         static std::unique_ptr<Shader> create(const char* vertex_path, const char* fragment_path);
 };

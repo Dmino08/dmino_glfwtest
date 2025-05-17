@@ -1,5 +1,6 @@
 #include "graphics/core/Mesh.hpp"
 
+
 Mesh::Mesh(MeshData data) : vao_(0), vbo_(0), ebo_(0), data_(data){
     // Generating Vertex Array and its Buffers
     glGenVertexArrays(1, &vao_);
@@ -26,8 +27,10 @@ Mesh::Mesh(MeshData data) : vao_(0), vbo_(0), ebo_(0), data_(data){
 
     glBindVertexArray(0);
 
-    verticeCount_ = data.vertices.getSize();
-    indiceCount_ = data.indices.getSize();
+    verticeCount_ = data.vertices.size();
+    indiceCount_ = data.indices.size();
+
+    
 }
 
 void Mesh::draw() {
