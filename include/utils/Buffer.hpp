@@ -68,6 +68,14 @@ namespace util {
                 return ptr_.get() + size_;
             }
 
+            T* begin() {
+                return ptr_.get();
+            }
+
+            T* end() {
+                return ptr_.get() + size_;
+            }
+
             inline uint getSize() const {
                 return size_;
             }

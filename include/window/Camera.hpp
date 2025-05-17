@@ -23,71 +23,71 @@ struct CameraParams {
 
 
 class Camera {
-    glm::vec3 _front;
-    glm::vec3 _right;
-    glm::vec3 _up;
-    glm::vec3 _dir;
+    glm::vec3 front_;
+    glm::vec3 right_;
+    glm::vec3 up_;
+    glm::vec3 dir_;
 
-    glm::vec3 _position;
+    glm::vec3 position_;
     
-    glm::mat4 _projection;
-    glm::mat4 _rotation;
+    glm::mat4 projection_;
+    glm::mat4 rotation_;
 
-    float _fov;
-    float _z_near;
-    float _z_far;
+    float fov_;
+    float zNear_;
+    float zFar_;
 
-    float _sensitivity;
+    float sensitivity_;
 
-    float _zoom;
+    float zoom_;
 
-    int _width, _height;
+    int width_, height_;
     CameraType _type;
 
-    float _cam_x;
-    float _cam_y;
+    float camX_;
+    float camY_;
 
     
     inline void updateProjection() {     
         
         if (_type == CameraType::ORTHOGRAPHIC) {
 
-            float halfWidth = (_width * _zoom) / 2.0f;
-            float halfHeight = (_height * _zoom) / 2.0f;
+            float halfWidth = (width_ * zoom_) / 2.0f;
+            float halfHeight = (height_ * zoom_) / 2.0f;
 
             float left = -halfWidth;
             float right = halfWidth;
             float bottom = -halfHeight;
             float top = halfHeight;    
                    
-            _projection = glm::ortho(left, right, bottom, top, _z_near, _z_far);
+            projection_ = glm::ortho(left, right, bottom, top, zNear_, zFar_);
         }
         else if (_type == CameraType::PERSPECTIVE) {
-            float aspect = float(_width) / float(_height);
-            _projection = glm::perspective(_fov * _zoom, aspect, _z_near, _z_far);
+            float aspect = float(width_) / float(height_);
+            projection_ = glm::perspective(fov_ * zoom_, aspect, zNear_, zFar_);
         }        
     }
 
     inline void updateVectors() {
-        _front = glm::vec3(_rotation * glm::vec4(0.0f, 0.0f, -1.0f, 1.0f));
-        _right = glm::vec3(_rotation * glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-        _up = glm::vec3(_rotation * glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
-        _dir = _front;
-        _dir.y = 0.0f;
+        front_ = glm::vec3(rotation_ * glm::vec4(0.0f, 0.0f, -1.0f, 1.0f));
+        right_ = glm::vec3(rotation_ * glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+        up_ = glm::vec3(rotation_ * glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+        dir_ = front_;
+        dir_.y = 0.0f;
     }
 
     public:
         Camera(CameraParams params);
         ~Camera() = default;
 
-        void process3DMouseRotation(double x_pos, double y_pos);
+        void process3DMouseRotation(double deltaX, double deltaY);
 
         void translate(glm::vec3 offset);
-        void setTransform(glm::vec3 new_position);
+        void setTransform(glm::vec3 value);
 
         void rotate(float x, float y, float z);
 
-        void toZoom(float delta_zoom);
+        void toZoom(float deltaZoom);
 
         glm::mat4 getViewMatrix() const;
         const glm::mat4& getProjectionMatrix() const;

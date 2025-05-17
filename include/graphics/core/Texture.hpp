@@ -22,15 +22,15 @@ struct TextureParams {
 
 
 class Texture {
-    GLuint _id;
-    GLenum _target;
-    int _width, _height, _nrChannels;
+    GLuint id_;
+    GLenum target_;
+    int width_, height_, nrChannels_;
     
-    std::string _path;
-    std::string _file_name;
+    std::string path_;
+    std::string fileName_;
 
     public:
-        std::string _type;
+        std::string type;
         Texture(GLuint id, int width, int height, int nrChannels, GLenum target, std::string path, std::string file_name);
         ~Texture();
 

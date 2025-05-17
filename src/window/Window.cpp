@@ -4,87 +4,87 @@
 
 
 Window::Window(unsigned int width, unsigned int height, std::string title) : 
-    _width(width),
-    _height(height),
-    _title(title),
+    width_(width),
+    height_(height),
+    title_(title),
 
-    _valid(true),
-    _input()
+    valid_(true),
+    input_()
 {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_DEPTH_BITS, 24);
 
-    _window = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
+    window_ = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
 
-    if(!_window) {
+    if(!window_) {
         glfwTerminate();
         logger.log(Logger::ERROR, "Window is not created");
-        _valid = false;
+        valid_ = false;
     } 
     else {
-        glfwMakeContextCurrent(_window);
+        glfwMakeContextCurrent(window_);
 
 
 
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-            glfwDestroyWindow(_window);
+            glfwDestroyWindow(window_);
             glfwTerminate();
             logger.log(Logger::ERROR, "GLAD is not initialized");
-            _valid = false;
+            valid_ = false;
         }
 
-        _input.setWindow(_window);
+        input_.setWindow(window_);
     }
 }
 
 
 
 Window::~Window() {
-    glfwDestroyWindow(_window);
-    _window = nullptr;
+    glfwDestroyWindow(window_);
+    window_ = nullptr;
 }
 
 
 
 bool Window::shouldClose() const {
-    return glfwWindowShouldClose(_window);
+    return glfwWindowShouldClose(window_);
 }
 
 void Window::swapBuffers() const {
-    glfwSwapBuffers(_window);
+    glfwSwapBuffers(window_);
 }
 
 void Window::pollEvents() {
-    _input.update();
+    input_.update();
 }
 
 void Window::setTitle(const std::string& title) {
-    glfwSetWindowTitle(_window, title.c_str());
+    glfwSetWindowTitle(window_, title.c_str());
 }
 
 void Window::setFramebufferSizeCallback(GLFWframebuffersizefun callback) {
-    glfwSetFramebufferSizeCallback(_window, callback);
+    glfwSetFramebufferSizeCallback(window_, callback);
 }
 
 void Window::setCursorPosCallback(GLFWcursorposfun callback) {
-    glfwSetCursorPosCallback(_window, callback);
+    glfwSetCursorPosCallback(window_, callback);
 }
 
 void Window::setScrollCallback(GLFWscrollfun callback) {
-    glfwSetScrollCallback(_window, callback);
+    glfwSetScrollCallback(window_, callback);
 }
 
 void Window::setCursorMode(int mode) {
-    glfwSetInputMode(_window, GLFW_CURSOR, mode);
+    glfwSetInputMode(window_, GLFW_CURSOR, mode);
 }
 
 
 bool Window::isValid() const {
-    return _valid;
+    return valid_;
 }
 
 InputManager& Window::getInput() {
-    return _input;
+    return input_;
 }

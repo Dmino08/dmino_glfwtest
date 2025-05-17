@@ -6,92 +6,92 @@
 Camera::Camera(CameraParams params) :
     _type(params.type),
 
-    _width(params.width),
-    _height(params.height),
+    width_(params.width),
+    height_(params.height),
 
-    _fov(params.fov),
-    _z_near(params.z_near),
-    _z_far(params.z_far),
-    _sensitivity(params.sensitivity),
+    fov_(params.fov),
+    zNear_(params.z_near),
+    zFar_(params.z_far),
+    sensitivity_(params.sensitivity),
 
-    _rotation(glm::mat4(1.0f)),
+    rotation_(glm::mat4(1.0f)),
 
-    _position(glm::vec3(0.0f, 0.0f, 0.0f)),
-    _front(glm::vec3(0.0f, 0.0f, -1.0f)),
-    _up(glm::vec3(0.0f, 1.0f, 0.0f)),
-    _dir(glm::vec3(0.0f, 1.0f, 0.0f)),
+    position_(glm::vec3(0.0f, 0.0f, 0.0f)),
+    front_(glm::vec3(0.0f, 0.0f, -1.0f)),
+    up_(glm::vec3(0.0f, 1.0f, 0.0f)),
+    dir_(glm::vec3(0.0f, 1.0f, 0.0f)),
 
-    _zoom(1.0f),
+    zoom_(1.0f),
 
-    _cam_x(0.0f),
-    _cam_y(0.0f)
+    camX_(0.0f),
+    camY_(0.0f)
 
 {
     updateProjection();
     updateVectors();
 }
 
-void Camera::process3DMouseRotation(double delta_x, double delta_y) {
-    _cam_y += (-delta_y / float(_height)) * _sensitivity;
-    _cam_x += (-delta_x / float(_height)) * _sensitivity;
+void Camera::process3DMouseRotation(double deltaX, double deltaY) {
+    camY_ += (-deltaY / float(height_)) * sensitivity_;
+    camX_ += (-deltaX / float(height_)) * sensitivity_;
 
-    if (_cam_y < -glm::radians(89.0f)){
-        _cam_y = -glm::radians(89.0f);
+    if (camY_ < -glm::radians(89.0f)){
+        camY_ = -glm::radians(89.0f);
     }
-    if (_cam_y > glm::radians(89.0f)){
-        _cam_y = glm::radians(89.0f);
+    if (camY_ > glm::radians(89.0f)){
+        camY_ = glm::radians(89.0f);
     }
 
-    _rotation = glm::mat4(1.0f);
+    rotation_ = glm::mat4(1.0f);
 
-    rotate(_cam_y, _cam_x, 0.0f);
+    rotate(camY_, camX_, 0.0f);
 }
 
 void Camera::translate(glm::vec3 offset) {
-    _position += offset;
+    position_ += offset;
 }
-void Camera::setTransform(glm::vec3 new_position) {
-    _position = glm::vec3(new_position);
+void Camera::setTransform(glm::vec3 value) {
+    position_ = glm::vec3(value);
 }
 
 void Camera::rotate(float x, float y, float z) {
 
-    _rotation = glm::rotate(_rotation, z, glm::vec3(0.0f, 0.0f, 1.0f));
-    _rotation = glm::rotate(_rotation, y, glm::vec3(0.0f, 1.0f, 0.0f));
-    _rotation = glm::rotate(_rotation, x, glm::vec3(1.0f, 0.0f, 0.0f));
+    rotation_ = glm::rotate(rotation_, z, glm::vec3(0.0f, 0.0f, 1.0f));
+    rotation_ = glm::rotate(rotation_, y, glm::vec3(0.0f, 1.0f, 0.0f));
+    rotation_ = glm::rotate(rotation_, x, glm::vec3(1.0f, 0.0f, 0.0f));
 
     updateVectors();
 }
 
-void Camera::toZoom(float delta_zoom) {
-    _zoom += delta_zoom;
+void Camera::toZoom(float deltaZoom) {
+    zoom_ += deltaZoom;
     updateProjection();
 }
 
 glm::mat4 Camera::getViewMatrix() const {
-    return glm::lookAt(_position, _position + _front, _up);
+    return glm::lookAt(position_, position_ + front_, up_);
 }
 
 const glm::mat4& Camera::getProjectionMatrix() const {
-    return _projection;
+    return projection_;
 }
 
 const glm::vec3& Camera::getFront() const {
-    return _front;
+    return front_;
 }
 
 const glm::vec3& Camera::getRight() const {
-    return _right;
+    return right_;
 }
 
 const glm::vec3& Camera::getUp() const {
-    return _up;
+    return up_;
 }
 
 const glm::vec3& Camera::getDir() const {
-    return _dir;
+    return dir_;
 }
 
 const glm::vec3& Camera::getPos() const {
-    return _position;
+    return position_;
 }

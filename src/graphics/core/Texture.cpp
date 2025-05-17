@@ -1,39 +1,39 @@
-#include "graphics/Texture.hpp"
+#include "graphics/core/Texture.hpp"
 #include "stb_image.h"
 
 #include "Core/Logger.hpp"
 
 
 Texture::Texture(GLuint id, int width, int height, int nrChannels, GLenum target, std::string path, std::string file_name) : 
-    _id(id), 
-    _width(width), 
-    _height(height), 
-    _nrChannels(nrChannels), 
-    _target(target),
-    _path(path),
-    _file_name(file_name) {}
+    id_(id), 
+    width_(width), 
+    height_(height), 
+    nrChannels_(nrChannels), 
+    target_(target),
+    path_(path),
+    fileName_(file_name) {}
 
 
 Texture::~Texture() {
-    if (_id != 0) {
-        glDeleteTextures(1, &_id);
-        _id = 0;
+    if (id_ != 0) {
+        glDeleteTextures(1, &id_);
+        id_ = 0;
     }
 }
 
 void Texture::bind() const {
-    glBindTexture(_target, _id);
+    glBindTexture(target_, id_);
 }
 void Texture::unbind() const {
-    glBindTexture(_target, 0);
+    glBindTexture(target_, 0);
 }
 
 std::string Texture::getPath() const {
-    return _path;
+    return path_;
 }
 
 std::string Texture::getFileName() const {
-    return _file_name;
+    return fileName_;
 }
 
 

@@ -19,13 +19,12 @@
 
 #include "core/Logger.hpp"
 
-#include "graphics/Shader.hpp"
-#include "graphics/Texture.hpp"
-#include "graphics/Mesh.hpp"
+#include "graphics/core/Shader.hpp"
+#include "graphics/core/Texture.hpp"
+#include "graphics/core/Mesh.hpp"
 
 #include "stb_image.h"
 
-#include <assimp/Importer.hpp>
 
 
 int width = 1280;
@@ -35,11 +34,11 @@ Camera camera = Camera(CameraParams());
 
 
 
-void updateTitle(Window& window, float timer, float& timer_elapsed, float delta_time) {
-    timer_elapsed += delta_time;
-    if (timer <= timer_elapsed) {
-        window.setTitle("FPS:" + std::to_string(int(1.0f/delta_time)));
-        timer_elapsed = 0.0f;
+void updateTitle(Window& window, float timer, float& timerElapsed, float deltaTime) {
+    timerElapsed += deltaTime;
+    if (timer <= timerElapsed) {
+        window.setTitle("FPS:" + std::to_string(int(1.0f/deltaTime)));
+        timerElapsed = 0.0f;
     }
 
 }
@@ -114,7 +113,7 @@ void frameBufferCallback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }
 
-void coutDelta(float& delta) {
+void countDelta(float& delta) {
     while (true)
     {
         std::cout << delta << std::endl;
@@ -200,7 +199,7 @@ int main(void) {
         20, 21, 22, 22, 23, 20      // верхняя
     };
 
-    MeshData meshData{cubeVertices, cubeIndices};
+    MeshData meshData{std::move(cubeVertices), std::move(cubeIndices)};
 
 //  Our crate
     Mesh* crate = new Mesh(meshData);
@@ -267,22 +266,22 @@ int main(void) {
    glfwSwapInterval(1);
 
     float timer = 1.0f;
-    float timer_elapsed = 0.0f;
+    float timerElapsed = 0.0f;
 
     float camera_speed = 5.f;
 
-    float delta_time = 0.016f;
+    float deltaTime = 0.016f;
     int FPS = 60;
 
-    auto target_delta = std::chrono::microseconds(1000000 / FPS);
+    auto targetDelta = std::chrono::microseconds(1000000 / FPS);
 
-    std::thread delta_thread(coutDelta, std::ref(delta_time));
+    std::thread delta_thread(countDelta, std::ref(deltaTime));
     delta_thread.detach();
 // Loop 
     while (!window.shouldClose())
     { 
         auto frame_start = std::chrono::high_resolution_clock::now();
-        updateTitle(window, timer, timer_elapsed, delta_time);
+        updateTitle(window, timer, timerElapsed, deltaTime);
 
         window.pollEvents();
 
@@ -299,19 +298,19 @@ int main(void) {
             camera.process3DMouseRotation(input.getDeltaX(), input.getDeltaY());
 
             if (input.pressed(GLFW_KEY_W)) {
-                camera.translate(camera_speed * camera.getFront() * delta_time);
+                camera.translate(camera_speed * camera.getFront() * deltaTime);
             }
             if (input.pressed(GLFW_KEY_S)) {
-                camera.translate(-camera_speed * camera.getFront() * delta_time);
+                camera.translate(-camera_speed * camera.getFront() * deltaTime);
             }
             if (input.pressed(GLFW_KEY_A)) {
-                camera.translate(-camera_speed * camera.getRight() * delta_time);
+                camera.translate(-camera_speed * camera.getRight() * deltaTime);
             }
             if (input.pressed(GLFW_KEY_D)) {
-                camera.translate(camera_speed * camera.getRight() * delta_time);
+                camera.translate(camera_speed * camera.getRight() * deltaTime);
             }   
 
-            camera.toZoom(input.getScrollDeltaY() * 0.05f * delta_time);
+            camera.toZoom(input.getScrollDeltaY() * 0.05f * deltaTime);
 
         }     
 
@@ -385,14 +384,14 @@ int main(void) {
         auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(frame_end - frame_start);
 
         // It doesn't work as it should
-        // if (elapsed < target_delta)
+        // if (elapsed < targetDelta)
         // {
-        //     std::this_thread::sleep_for(target_delta - elapsed);
+        //     std::this_thread::sleep_for(targetDelta - elapsed);
             
         //     frame_end = std::chrono::high_resolution_clock::now();
         //     elapsed = std::chrono::duration_cast<std::chrono::microseconds>(frame_end - frame_start);
         // }
-        delta_time = elapsed.count() / 1'000'000.0;
+        deltaTime = elapsed.count() / 1'000'000.0;
         
     }
 

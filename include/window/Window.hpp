@@ -8,14 +8,14 @@
 #include "window/InputManager.hpp"
 
 class Window {
-    GLFWwindow* _window;
-    InputManager _input;
+    GLFWwindow* window_;
+    InputManager input_;
 
-    unsigned int _width;
-    unsigned int _height;
-    std::string _title;
+    unsigned int width_;
+    unsigned int height_;
+    std::string title_;
 
-    bool _valid;
+    bool valid_;
 
     static void frameBufferSizeCallback(GLFWwindow* window, int width, int height);
 

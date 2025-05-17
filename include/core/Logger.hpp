@@ -8,7 +8,6 @@ class Logger {
     public:
         enum LogLevel {INFO, WARNING, ERROR};
         void log(LogLevel level, std::string message);
-    private:
 
 };
 

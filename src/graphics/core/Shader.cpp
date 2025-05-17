@@ -1,4 +1,4 @@
-#include "graphics/Shader.hpp"
+#include "graphics/core/Shader.hpp"
 
 #include <fstream>
 #include <sstream>
@@ -8,16 +8,16 @@
 
 
 unsigned int Shader::getUniformLocation(const std::string& name) {
-    auto found = uniform_Locations_.find(name);
+    auto found = uniformLocations_.find(name);
     
-    if (found == uniform_Locations_.end())
+    if (found == uniformLocations_.end())
     {
         unsigned int location = glGetUniformLocation(ID_, name.c_str());
         if (location == -1) {
             logger.log(Logger::WARNING, "Shader doesn't have the uniform variable " + name);
         }
         else {
-            uniform_Locations_.try_emplace(name, location);
+            uniformLocations_.try_emplace(name, location);
         }
         return location;
     }

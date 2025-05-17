@@ -7,30 +7,30 @@
 #define BUTTONS 8
 
 class InputManager {
-    bool _keys[KEYS];
-    bool _buttons[BUTTONS];
-    unsigned long _frames[KEYS + BUTTONS];
+    bool keys_[KEYS];
+    bool buttons_[BUTTONS];
+    unsigned long frames_[KEYS + BUTTONS];
 
-    unsigned long _current_frame;
+    unsigned long currentFrame_;
 
 
-    bool _cursor_started;
-    bool _cursor_locked;
+    bool cursorStarted_;
+    bool cursorLocked_;
 
-    float _x_pos;
-    float _y_pos;
-    float _delta_x;
-    float _delta_y;
+    float xPos_;
+    float yPos_;
+    float deltaX_;
+    float deltaY_;
 
-    float _scroll_x_offset;
-    float _scroll_y_offset;
-    float _scroll_x_delta;
-    float _scroll_y_delta;
+    float scrollXoffset_;
+    float scrollYoffset_;
+    float scrollXdelta_;
+    float scrollYdelta_;
 
 
     
     
-    GLFWwindow* _window;
+    GLFWwindow* window_;
 
     static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
     static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
