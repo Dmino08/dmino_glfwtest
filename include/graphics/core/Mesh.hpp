@@ -4,6 +4,7 @@
 #include <glad/glad.h>
 #include "utils/Buffer.hpp"
 
+
 struct Vertex {
     float position[3];
     float normal[3];
@@ -24,6 +25,7 @@ class Mesh {
     uint indiceCount_;
 
     public:
+        Mesh();
         Mesh(MeshData data);
         void draw();
 

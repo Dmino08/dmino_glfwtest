@@ -23,6 +23,8 @@
 #include "graphics/core/Texture.hpp"
 #include "graphics/core/Mesh.hpp"
 
+#include "graphics/glsl/GLSLStructures.hpp"
+
 #include "utils/Transform.hpp"
 
 #include "test/Voxel.hpp"
@@ -48,73 +50,17 @@ void updateTitle(Window& window, float timer, float& timerElapsed, float deltaTi
 
 }
 
-void setUpMultipleShader(Shader& shd, 
-                         glm::vec3 view_pos,
-                         glm::vec3 ambient,
-                         glm::vec3 diffuse,
-                         glm::vec3 specular,
-                         glm::vec3 direciton,
-                         glm::vec3 camera_position,
-                         util::Buffer<Voxel> voxels,
-                         float constant, 
-                         float linear,
-                         float quadratic,
-                         float cut_off,
-                         float outer_cut_off
-                        ) 
-{
-    shd.uniform3f("view_pos", view_pos);
-    // direction_light
-    shd.uniform3f("direction_light.base.ambient", glm::vec3(0.05f));
-    shd.uniform3f("direction_light.base.diffuse", glm::vec3(0.4f));
-    shd.uniform3f("direction_light.base.specular", glm::vec3(0.5f));
-
-    shd.uniform3f("direction_light.direction", glm::vec3(0.0f,-1.0f, 0.0f));
-    // point_lights
-    for (size_t i = 0; i < voxels.size(); i++)
-    {
-        std::string base = "point_lights[" + std::to_string(i) + "].";
-
-        shd.uniform3f(base + "base.ambient", ambient);
-        shd.uniform3f(base + "base.diffuse", diffuse);
-        shd.uniform3f(base + "base.specular", specular);
-
-        shd.uniform3f(base + "position", voxels[i].transform.getPosition());
-
-        shd.uniform1f(base + "attenuation.constant", constant);
-        shd.uniform1f(base + "attenuation.linear", linear);
-        shd.uniform1f(base + "attenuation.quadratic", quadratic);
-    }
-    // spot_light
-    shd.uniform3f("spot_light.base.ambient", glm::vec3(0.0f));
-    shd.uniform3f("spot_light.base.diffuse", glm::vec3(1.0f));
-    shd.uniform3f("spot_light.base.specular", glm::vec3(1.0f));
-
-    shd.uniform1f("spot_light.cut_off", cut_off);
-    shd.uniform1f("spot_light.outer_cut_off", outer_cut_off);    
-
-    shd.uniform1f("spot_light.attenuation.constant", constant);
-    shd.uniform1f("spot_light.attenuation.linear", linear);
-    shd.uniform1f("spot_light.attenuation.quadratic", quadratic);
-
-    shd.uniform3f("spot_light.direction", direciton);    
-    shd.uniform3f("spot_light.position", camera_position); 
-    
-}
 
 void setUpLightShader(Shader& shd, glm::vec3 color) {
     shd.uniform3f("color", color);
 }
 
 
-void frameBufferCallback(GLFWwindow* window, int width, int height) {
-    glViewport(0, 0, width, height);
-}
 
 void countDelta(float& delta) {
     while (true)
     {
-        std::cout << delta << std::endl;
+        std::cout << delta * 1000 * 1000 << std::endl;
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 }
@@ -138,17 +84,14 @@ int main(void) {
     stbi_set_flip_vertically_on_load(true);
     
     glEnable(GL_DEPTH_TEST);
-    glViewport(0, 0, width, height);
 
-    window.setFramebufferSizeCallback(frameBufferCallback);
-//    window.setScrollCallback(scrollCallback);
 
 // GENERATING TEXTURE
     Texture texture0 = Texture::create("res/images", "container2.png");    
     Texture texture1 = Texture::create("res/images", "container2_specular.png");
 
 
-//  Our blocks
+//  Our crates
     util::Buffer<Voxel> crates = {
         {glm::vec3( 0.0f,  0.0f,  0.0f)},
         {glm::vec3( 2.0f,  5.0f, -15.0f)},
@@ -163,7 +106,7 @@ int main(void) {
     };
 
 
-// Our light
+// Light positions
     util::Buffer<Voxel> lights = {
         {glm::vec3( 0.7f, 0.2f, 2.0f)},
         {glm::vec3( 2.3f, -3.3f, -4.0f)},
@@ -175,8 +118,43 @@ int main(void) {
     {
         i.transform.applyScale(0.2f, 0.2f, 0.2f);
     }
+
+// DirectionalLight
+    glsl::DirectionalLight direction_light;
+    direction_light.base.ambient = glm::vec3(0.05f, 0.05f, 0.05f);
+    direction_light.base.diffuse = glm::vec3(0.4f, 0.4f, 0.4f);
+    direction_light.base.specular = glm::vec3(0.5f, 0.5f, 0.5f);
     
+    direction_light.direction = glm::vec3(0.0f, -1.0f, 0.0f);
+
+// PointLight
+    glsl::PointLight point_light;
+    point_light.base.ambient = glm::vec3(0.05f, 0.05f, 0.05f);
+    point_light.base.diffuse = glm::vec3(0.8f, 0.8f, 0.8f);
+    point_light.base.specular = glm::vec3(1.0f, 1.0f, 1.0f);
+
+    point_light.attenuation.constant = 1.0f;
+    point_light.attenuation.linear = 0.009f;
+    point_light.attenuation.quadratic = 0.0032f;
     
+    point_light.position = glm::vec3(0.0f, 0.0f, 0.0f);
+
+// SpotLight
+    glsl::SpotLight spot_light;
+    spot_light.base.ambient = glm::vec3(0.0f, 0.0f, 0.0f);
+    spot_light.base.diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+    spot_light.base.specular = glm::vec3(1.0f, 1.0f, 1.0f);
+
+    spot_light.cut_off = 12.5f;
+    spot_light.outer_cut_off = 17.5f;
+
+    spot_light.attenuation.constant = 1.0f;
+    spot_light.attenuation.linear = 0.009f;
+    spot_light.attenuation.quadratic = 0.0032f;
+
+    spot_light.position = glm::vec3(0.0f, 0.0f, 0.0f);
+    spot_light.direction = glm::vec3(0.0f, -1.0f, 0.0f);
+
 
 // Multiple shader
     auto multiple_shader = Shader::create("res/shaders/light_test.vert","res/shaders/multiple_lights.frag");
@@ -185,9 +163,24 @@ int main(void) {
     }
     multiple_shader->setMatrices(camera.getProjectionMatrix(), camera.getViewMatrix());
     // Material setting
-    multiple_shader->uniform1i("material.diffuse", 0);
-    multiple_shader->uniform1i("material.specular", 1);
-    multiple_shader->uniform1f("material.shininess", 32.0f);
+    glsl::setMaterial(*multiple_shader, "material", glsl::Material{0, 1, 32.0f});
+
+    // Light setting
+    glsl::setDirectionalLight(*multiple_shader, "direction_light", direction_light);
+    glsl::setSpotLight(*multiple_shader, "spot_light", spot_light);
+
+    point_light.position = lights[0].transform.getPosition();
+    glsl::setPointLight(*multiple_shader, "point_lights[0]", point_light);
+
+    point_light.position = lights[1].transform.getPosition();
+    glsl::setPointLight(*multiple_shader, "point_lights[1]", point_light);
+
+    point_light.position = lights[2].transform.getPosition();
+    glsl::setPointLight(*multiple_shader, "point_lights[2]", point_light);
+
+    point_light.position = lights[3].transform.getPosition();
+    glsl::setPointLight(*multiple_shader, "point_lights[3]", point_light);   
+
 
 // Light shader
     auto light_shader = Shader::create("res/shaders/light.vert","res/shaders/light.frag");
@@ -196,6 +189,7 @@ int main(void) {
     }
     light_shader->setMatrices(camera.getProjectionMatrix(), camera.getViewMatrix());
     setUpLightShader(*light_shader, glm::vec3(1.0f));
+
 
 //    Model model = Model("res/models/survival_guitar_backpack/scene.gltf");
 
@@ -213,9 +207,12 @@ int main(void) {
     float camera_speed = 5.f;
 
     float deltaTime = 0.016f;
-    int FPS = 60;
+    int FPS = 120;
 
-    auto targetDelta = std::chrono::microseconds(1000000 / FPS);
+    using clock = std::chrono::steady_clock;
+
+    auto targetDelta = std::chrono::microseconds(1'000'000 / FPS);
+    std::cout << "TARGET: " << targetDelta.count() << std::endl;
 
     std::thread delta_thread(countDelta, std::ref(deltaTime));
     delta_thread.detach();
@@ -223,7 +220,7 @@ int main(void) {
 // Loop 
     while (!window.shouldClose())
     { 
-        auto frame_start = std::chrono::high_resolution_clock::now();
+        auto frameStart = clock::now();
         updateTitle(window, timer, timerElapsed, deltaTime);
 
         window.pollEvents();
@@ -234,7 +231,7 @@ int main(void) {
         
 
         if (input.justPressed(GLFW_KEY_TAB)) {
-            input.toggleCursor();
+            window.toggleCursor();
         }
         if (input.isCursorLocked()) {
 
@@ -259,22 +256,8 @@ int main(void) {
 
         
         multiple_shader->setMatrices(camera.getProjectionMatrix(), camera.getViewMatrix());
-
-
-        setUpMultipleShader(*multiple_shader,
-                            camera.getPos(),
-                            glm::vec3(0.05f),
-                            glm::vec3(0.8f),
-                            glm::vec3(1.0f),
-                            camera.getFront(),
-                            camera.getPos(),
-                            lights,
-                            1.0f,
-                            0.09f,
-                            0.032f,
-                            glm::cos(glm::radians(7.5f)),
-                            glm::cos(glm::radians(9.5f))
-                        );
+        multiple_shader->uniform3f("spot_light.position", camera.getPos());
+        multiple_shader->uniform3f("spot_light.direction", camera.getFront());
 
         glActiveTexture(GL_TEXTURE0);
         texture0.bind();
@@ -313,21 +296,21 @@ int main(void) {
 
         window.swapBuffers();  
         
+        auto frameEnd = clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(frameEnd - frameStart);
 
-
-        auto frame_end = std::chrono::high_resolution_clock::now();
-        auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(frame_end - frame_start);
-
-        // It doesn't work as it should
         // if (elapsed < targetDelta)
         // {
         //     std::this_thread::sleep_for(targetDelta - elapsed);
-            
-        //     frame_end = std::chrono::high_resolution_clock::now();
-        //     elapsed = std::chrono::duration_cast<std::chrono::microseconds>(frame_end - frame_start);
+
+        //     frameEnd = clock::now();
+        //     elapsed = std::chrono::duration_cast<std::chrono::microseconds>(frameEnd - frameStart);
         // }
-        deltaTime = elapsed.count() / 1'000'000.0;
+
+        deltaTime = float(elapsed.count()) / 1'000'000.0;
         
+
+
     }
 
 

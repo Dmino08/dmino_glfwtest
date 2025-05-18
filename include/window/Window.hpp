@@ -17,6 +17,14 @@ class Window {
 
     bool valid_;
 
+    static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+    
+    static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+     
+    static void cursorPosCallback(GLFWwindow* window, double xpos, double ypos);
+
+    static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+
     static void frameBufferSizeCallback(GLFWwindow* window, int width, int height);
 
     public:
@@ -29,14 +37,12 @@ class Window {
         void pollEvents();
 
         void setTitle(const std::string& title);
-        
-        void setFramebufferSizeCallback(GLFWframebuffersizefun callback);
-        void setCursorPosCallback(GLFWcursorposfun callback);
-        void setScrollCallback(GLFWscrollfun callback);
 
         void setCursorMode(int mode);
 
         bool isValid() const;
+
+        void toggleCursor();
 
         InputManager& getInput();
 };

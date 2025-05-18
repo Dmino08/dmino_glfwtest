@@ -7,6 +7,8 @@
 #define BUTTONS 8
 
 class InputManager {
+    friend class Window;
+
     bool keys_[KEYS];
     bool buttons_[BUTTONS];
     unsigned long frames_[KEYS + BUTTONS];
@@ -29,21 +31,8 @@ class InputManager {
 
 
     
-    
-    GLFWwindow* window_;
-
-    static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-    static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
-     
-    static void cursorPosCallback(GLFWwindow* window, double xpos, double ypos);
-
-    static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
-    
     public:
         InputManager();
-        ~InputManager();
-
-        void setWindow(GLFWwindow *window);
 
         void update();
 
@@ -69,5 +58,4 @@ class InputManager {
 
         bool isCursorLocked() const;
     
-        void toggleCursor();
 };

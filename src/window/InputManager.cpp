@@ -1,70 +1,6 @@
 #include "window/InputManager.hpp"
 
 
-void InputManager::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
-
-    InputManager* input = static_cast<InputManager*>(glfwGetWindowUserPointer(window));
-
-    if (action == GLFW_PRESS) {
-        input->keys_[key] = true;
-        input->frames_[key] = input->currentFrame_;
-    }
-    else if(action == GLFW_RELEASE) {
-        input->keys_[key] = false;
-        input->frames_[key] = input->currentFrame_;        
-    }
- 
-}
-
-void InputManager::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
-    
-    InputManager* input = static_cast<InputManager*>(glfwGetWindowUserPointer(window));
-
-    if (action == GLFW_PRESS) {
-        input->buttons_[button] = true;
-        input->frames_[KEYS + button] = input->currentFrame_;
-    }
-    else if(action == GLFW_RELEASE) {
-        input->buttons_[button] = false;
-        input->frames_[KEYS + button] = input->currentFrame_;        
-    }
-
-}
-
-
-void InputManager::cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
-    
-    InputManager* input = static_cast<InputManager*>(glfwGetWindowUserPointer(window));
-
-    if(input->cursorStarted_) {
-        input->xPos_ = xpos;
-        input->yPos_ = ypos;
-        input->deltaX_ = 0.0;
-        input->deltaY_ = 0.0;
-        input->cursorStarted_ = false;
-        return;    
-    }
-
-    input->deltaX_ += xpos - input->xPos_;
-    input->deltaY_ += ypos - input->yPos_;
-
-    input->xPos_ = xpos;
-    input->yPos_ = ypos;
-}
-
-void InputManager::scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
-
-    InputManager* input = static_cast<InputManager*>(glfwGetWindowUserPointer(window));
-
-
-    input->scrollXdelta_ += xoffset - input->scrollXoffset_;
-    input->scrollYdelta_ += xoffset - input->scrollYoffset_;
-
-    input->scrollXoffset_ = xoffset;
-    input->scrollYoffset_ = yoffset;
-}
-
-
 InputManager::InputManager() : 
     keys_{}, 
     buttons_{}, 
@@ -83,36 +19,9 @@ InputManager::InputManager() :
     scrollXoffset_(0.0f),
     scrollYoffset_(0.0f),
     scrollXdelta_(0.0f),
-    scrollYdelta_(0.0f),
-
-    window_(nullptr) 
+    scrollYdelta_(0.0f)
     {}
 
-
-InputManager::~InputManager() {
-    window_ = nullptr;
-}
-
-void InputManager::setWindow(GLFWwindow* window)
-{
-    if (window_) {
-        glfwSetKeyCallback(window_, nullptr);
-        glfwSetMouseButtonCallback(window_, nullptr);
-        glfwSetCursorPosCallback(window_, nullptr);
-        glfwSetScrollCallback(window_, nullptr);
-        glfwSetWindowUserPointer(window_, nullptr);
-    }
-
-    if (window) {
-        window_ = window;
-        glfwSetKeyCallback(window_, keyCallback);
-        glfwSetMouseButtonCallback(window_, mouseButtonCallback);
-        glfwSetCursorPosCallback(window_, cursorPosCallback);
-        glfwSetScrollCallback(window_, scrollCallback);
-        glfwSetWindowUserPointer(window_, this);
-    }
-
-}
 
 
 void InputManager::update() {
@@ -216,10 +125,4 @@ float InputManager::getScrollDeltaY() const {
 
 bool InputManager::isCursorLocked() const {
     return cursorLocked_;
-}
-
-
-void InputManager::toggleCursor() {
-    cursorLocked_ = !cursorLocked_;
-    glfwSetInputMode(window_, GLFW_CURSOR, cursorLocked_ ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
 }
