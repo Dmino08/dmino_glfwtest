@@ -2,13 +2,15 @@
 
 
 #include <glad/glad.h>
+#include <glm/glm.hpp>
+
 #include "utils/Buffer.hpp"
 
 
 struct Vertex {
-    float position[3];
-    float normal[3];
-    float tex_coord[2];
+    glm::vec3 position;
+    glm::vec3 normal;
+    glm::vec2 uv_coord;
 };
 
 struct MeshData {
@@ -26,7 +28,7 @@ class Mesh {
 
     public:
         Mesh();
-        Mesh(MeshData data);
+        void createMesh(const MeshData& data);
         void draw();
 
 };

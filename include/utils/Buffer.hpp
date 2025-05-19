@@ -13,23 +13,22 @@ namespace util {
     class Buffer {
         std::unique_ptr<T[]> ptr_;
         size_t size_;
-        uint count_;
 
         public:
-            Buffer(uint size) : size_(size), count_(0) {
+            Buffer(uint size) : size_(size) {
                 ptr_ = std::make_unique<T[]>(size_);
             }
 
-            Buffer(std::initializer_list<T> list) : size_(list.size()), count_(0) {
+            Buffer(std::initializer_list<T> list) : size_(list.size()){
                 ptr_ = std::make_unique<T[]>(size_);
                 std::copy(list.begin(), list.end(), ptr_.get());
             }
 
-            Buffer(const Buffer<T>& other)  : size_(other.size_), count_(0) {
+            Buffer(const Buffer<T>& other)  : size_(other.size_) {
                 ptr_ = std::make_unique<T[]>(size_);
                 std::copy(other.begin(), other.end(), ptr_.get());
             }
-            Buffer(Buffer<T>&& other) noexcept : size_(other.size_), ptr_(std::move(other.ptr_)), count_(0) {
+            Buffer(Buffer<T>&& other) noexcept : size_(other.size_), ptr_(std::move(other.ptr_)) {
                 other.size_ = 0;
             }
 
@@ -83,14 +82,6 @@ namespace util {
             inline uint getByteSize() const {
                 return size_ * sizeof(T);
                 
-            }
-
-            inline void push_back(T value) {
-                if (count_ >= size_) {
-                    std::cerr << "Buffer overflow" << std::endl;
-                    return;
-                }
-                ptr_[count_++] = value;
             }
     };
 

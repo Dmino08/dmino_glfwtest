@@ -4,9 +4,7 @@
 #include "utils/Transform.hpp"
 
 class Voxel {
-    static Mesh* mesh_;
-    
-
+    static Mesh mesh_;
 
     static void generateMesh();
     static bool meshGenerated_;

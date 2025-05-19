@@ -3,7 +3,17 @@
 Mesh::Mesh() : vao_(0), vbo_(0), ebo_(0), data_(MeshData{}) {}
 
 
-Mesh::Mesh(MeshData data) : vao_(0), vbo_(0), ebo_(0), data_(data){
+void Mesh::createMesh(const MeshData& data) {
+    
+    if (vao_ != 0)
+    {
+        glDeleteVertexArrays(1, &vao_);
+        glDeleteBuffers(1, &vbo_);
+        glDeleteBuffers(1, &ebo_);
+    }
+    
+    data_ = data;
+
     // Generating Vertex Array and its Buffers
     glGenVertexArrays(1, &vao_);
     glGenBuffers(1, &vbo_);
@@ -24,11 +34,11 @@ Mesh::Mesh(MeshData data) : vao_(0), vbo_(0), ebo_(0), data_(data){
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
     glEnableVertexAttribArray(1);
     // Texture Coord Attribute
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, tex_coord));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, uv_coord));
     glEnableVertexAttribArray(2);
 
     glBindVertexArray(0);
-
+    
     verticeCount_ = data.vertices.size();
     indiceCount_ = data.indices.size();
 

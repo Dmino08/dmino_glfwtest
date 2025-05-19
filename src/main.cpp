@@ -22,6 +22,7 @@
 #include "graphics/core/Shader.hpp"
 #include "graphics/core/Texture.hpp"
 #include "graphics/core/Mesh.hpp"
+#include "graphics/core/Sprite.hpp"
 
 #include "graphics/glsl/GLSLStructures.hpp"
 
@@ -134,8 +135,8 @@ int main(void) {
     point_light.base.specular = glm::vec3(1.0f, 1.0f, 1.0f);
 
     point_light.attenuation.constant = 1.0f;
-    point_light.attenuation.linear = 0.009f;
-    point_light.attenuation.quadratic = 0.0032f;
+    point_light.attenuation.linear = 0.09f;
+    point_light.attenuation.quadratic = 0.032f;
     
     point_light.position = glm::vec3(0.0f, 0.0f, 0.0f);
 
@@ -145,8 +146,8 @@ int main(void) {
     spot_light.base.diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
     spot_light.base.specular = glm::vec3(1.0f, 1.0f, 1.0f);
 
-    spot_light.cut_off = 12.5f;
-    spot_light.outer_cut_off = 17.5f;
+    spot_light.cut_off = 7.5f;
+    spot_light.outer_cut_off = 9.5f;
 
     spot_light.attenuation.constant = 1.0f;
     spot_light.attenuation.linear = 0.009f;
@@ -181,6 +182,7 @@ int main(void) {
     point_light.position = lights[3].transform.getPosition();
     glsl::setPointLight(*multiple_shader, "point_lights[3]", point_light);   
 
+    multiple_shader->uniform1i("on_flash_light", true);
 
 // Light shader
     auto light_shader = Shader::create("res/shaders/light.vert","res/shaders/light.frag");
@@ -191,7 +193,24 @@ int main(void) {
     setUpLightShader(*light_shader, glm::vec3(1.0f));
 
 
-//    Model model = Model("res/models/survival_guitar_backpack/scene.gltf");
+// Standart shader
+    auto std_shader = Shader::create("res/shaders/standart.vert","res/shaders/standart.frag");
+
+
+// Creating sprite
+    Sprite sprite;
+    sprite.setTexture(&texture0);
+    sprite.setRegion(256,256, 256, 256);
+    sprite.transform.setPosition(glm::vec3(1.0f, 5.0f, 10.0f));
+    sprite.generate();
+
+
+
+
+// Use std_shader
+    std_shader->use();
+
+    std_shader->uniformMatrix("model", sprite.transform.getModel());
 
 
 // Input setting up
@@ -274,10 +293,7 @@ int main(void) {
         texture0.bind();
         glActiveTexture(GL_TEXTURE1);
         texture1.bind();
-
         
-        
-
         for (size_t i = 0; i < crates.size(); i++)
         {
             float angle = 20 * i;
@@ -289,6 +305,12 @@ int main(void) {
             crates[i].draw();
         }
     
+
+        std_shader->setMatrices(camera.getProjectionMatrix(), camera.getViewMatrix());
+
+        std_shader->uniformMatrix("model", sprite.transform.getModel());
+        sprite.draw();
+
         texture0.unbind();
         texture1.unbind();
 

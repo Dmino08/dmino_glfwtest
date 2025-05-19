@@ -40,6 +40,8 @@ class Texture {
         std::string getPath() const;
         std::string getFileName() const;
 
+        int getWidth() const;
+        int getHeight() const;
 
         static Texture create(
             std::string path,

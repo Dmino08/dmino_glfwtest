@@ -36,8 +36,12 @@ std::string Texture::getFileName() const {
     return fileName_;
 }
 
-
-
+int Texture::getWidth() const {
+    return width_;
+}
+int Texture::getHeight() const {
+    return height_;
+}
 
 Texture Texture::create(
     std::string path, 

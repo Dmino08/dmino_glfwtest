@@ -1,7 +1,7 @@
 #include "test/Voxel.hpp"
 
 
-Mesh* Voxel::mesh_ = nullptr;
+Mesh Voxel::mesh_ = Mesh();
 bool Voxel::meshGenerated_ = false;
 
 
@@ -57,7 +57,7 @@ void Voxel::generateMesh() {
 
     MeshData meshData{std::move(cubeVertices), std::move(cubeIndices)}; 
     
-    Voxel::mesh_ = new Mesh(meshData);
+    Voxel::mesh_.createMesh(meshData);
     meshGenerated_ = true;
 }
 
@@ -76,6 +76,7 @@ Voxel::Voxel(const glm::vec3& position) : transform(position) {
     
 }
 
+
 void Voxel::draw() {
-    Voxel::mesh_->draw();
+    Voxel::mesh_.draw();
 }
