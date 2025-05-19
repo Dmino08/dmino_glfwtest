@@ -56,6 +56,7 @@ uniform Material material;
 uniform DirectionalLight direction_light;
 uniform PointLight point_lights[POINT_LIGHT_SIZE];
 uniform SpotLight spot_light; 
+uniform bool on_flash_light;
 
 vec3 calculateDirectionalLight() {
 // ambient
@@ -148,7 +149,11 @@ void main() {
 
     vec3 dir = calculateDirectionalLight();
     vec3 point = calculatePointLights();
-    vec3 spot = calculateSpotLight();
+
+    vec3 spot;
+    if (on_flash_light) {
+        spot = calculateSpotLight();
+    }
 // result
     vec3 result = dir + point + spot;
     frag_color = vec4(result, 1.0f);

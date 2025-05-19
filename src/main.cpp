@@ -217,6 +217,7 @@ int main(void) {
     std::thread delta_thread(countDelta, std::ref(deltaTime));
     delta_thread.detach();
 
+    bool onFlashLight = true;
 // Loop 
     while (!window.shouldClose())
     { 
@@ -249,6 +250,16 @@ int main(void) {
             if (input.pressed(GLFW_KEY_D)) {
                 camera.translate(camera_speed * camera.getRight() * deltaTime);
             }   
+
+            if (input.justPressed(GLFW_KEY_C))
+            {
+                onFlashLight = !onFlashLight;
+
+                multiple_shader->use();
+                multiple_shader->uniform1i("on_flash_light", onFlashLight);
+            }
+            
+
 
             camera.toZoom(input.getScrollDeltaY() * 0.05f * deltaTime);
 
