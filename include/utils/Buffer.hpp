@@ -8,7 +8,6 @@
 
 
 
-
 namespace util {
 
     template <typename T>
@@ -38,7 +37,10 @@ namespace util {
                 other.size_ = 0;
             }
 
-            Buffer(T* rawPtr, size_t size) : ptr_(rawPtr), size_(size), count_(0) {}
+            Buffer(const T* rawPtr, size_t size) : size_(size), count_(size) {
+                ptr_ = std::make_unique<T[]>(size_);
+                std::copy(rawPtr, rawPtr + size_, ptr_.get());
+            }
 
             T& at(size_t index) {
                 if (index < 0 || index >= size_) {
@@ -101,7 +103,9 @@ namespace util {
 
             void resize(size_t size) {
                 if (size_ != size) {
-                    this = Buffer(size);
+                    size_ = size;
+                    ptr_ = std::make_unique<T[]>(size_);
+                    count_ = 0;
                 }
             }
 

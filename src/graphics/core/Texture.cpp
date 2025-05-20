@@ -2,16 +2,16 @@
 #include "stb_image.h"
 
 #include "Core/Logger.hpp"
+#include "graphics/core/Image.hpp"
 
 
-Texture::Texture(GLuint id, int width, int height, int nrChannels, GLenum target, std::string path, std::string file_name) : 
+Texture::Texture(GLuint id, int width, int height, GLenum target) : 
     id_(id), 
-    width_(width), 
-    height_(height), 
-    nrChannels_(nrChannels), 
     target_(target),
-    path_(path),
-    fileName_(file_name) {}
+    width_(width), 
+    height_(height)
+    {}
+
 
 
 Texture::~Texture() {
@@ -28,14 +28,6 @@ void Texture::unbind() const {
     glBindTexture(target_, 0);
 }
 
-std::string Texture::getPath() const {
-    return path_;
-}
-
-std::string Texture::getFileName() const {
-    return fileName_;
-}
-
 int Texture::getWidth() const {
     return width_;
 }
@@ -43,9 +35,9 @@ int Texture::getHeight() const {
     return height_;
 }
 
+
 Texture Texture::create(
-    std::string path, 
-    std::string file_name, 
+    const Image& image, 
     TextureParams params
 ) {
     GLuint id;
@@ -70,42 +62,13 @@ Texture Texture::create(
     glTexParameteri(params.target, GL_TEXTURE_MIN_FILTER, params.min_filter);
     
 
-    int width, height, nrChannels;
-    unsigned char* data = stbi_load((path + "/" + file_name).c_str(), &width, &height, &nrChannels, 0);
-    
 
-    if (!data) {
-        std::string log = "Image at the path: [" + path + "] wasn't loaded";
-        logger.log(Logger::WARNING, log);
-        
-        if (id != 0) {
-            glDeleteTextures(1, &id);
-        }
-        
-        return Texture(0, 0, 0, 0, 0, "", "");        
+    switch (params.target) {
+        default: glTexImage2D(params.target, 0, params.internal_format, image.getWidth(), image.getHeight(), 0, image.getFormat(), GL_UNSIGNED_BYTE, image.getData()); break;
     }
-    else {
-        GLenum format = GL_RGB;
-        if (nrChannels == 1) format = GL_RED;
-        else if (nrChannels == 3) format = GL_RGB;
-        else if (nrChannels == 4) format = GL_RGBA;
-        else {
-            logger.log(Logger::WARNING, "Unknown channel count: " + std::to_string(nrChannels));
-            stbi_image_free(data);
-            glDeleteTextures(1, &id);
-            return Texture(0, 0, 0, 0, 0, "", "");
-        }
 
-
-        switch (params.target) {
-        
-        default: glTexImage2D(params.target, 0, params.internal_format, width, height, 0, format, GL_UNSIGNED_BYTE, data); break;
-        }
-
-        glGenerateMipmap(params.target);
-    }
-    stbi_image_free(data);
+    glGenerateMipmap(params.target);
 
     
-    return Texture(id, width, height, nrChannels, params.target, path, file_name);
+    return Texture(id, image.getWidth(), image.getHeight(), params.target);
 }

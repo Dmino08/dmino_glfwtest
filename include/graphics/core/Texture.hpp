@@ -5,6 +5,8 @@
 
 #include <iostream>
 
+class Image;
+
 struct TextureParams {
     GLenum target = GL_TEXTURE_2D;
 
@@ -24,28 +26,21 @@ struct TextureParams {
 class Texture {
     GLuint id_;
     GLenum target_;
-    int width_, height_, nrChannels_;
-    
-    std::string path_;
-    std::string fileName_;
+    int width_, height_;
 
     public:
         std::string type;
-        Texture(GLuint id, int width, int height, int nrChannels, GLenum target, std::string path, std::string file_name);
+        Texture(GLuint id, int width, int height, GLenum target);
         ~Texture();
 
         void bind() const;
         void unbind() const;
 
-        std::string getPath() const;
-        std::string getFileName() const;
-
         int getWidth() const;
         int getHeight() const;
 
         static Texture create(
-            std::string path,
-            std::string file_name, 
+            const Image& image,
             TextureParams params = TextureParams()
         );
 };

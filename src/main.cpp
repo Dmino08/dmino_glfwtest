@@ -20,6 +20,7 @@
 #include "core/Logger.hpp"
 
 #include "graphics/core/Shader.hpp"
+#include "graphics/core/Image.hpp"
 #include "graphics/core/Texture.hpp"
 #include "graphics/core/Mesh.hpp"
 #include "graphics/core/Sprite.hpp"
@@ -84,8 +85,12 @@ int main(void) {
 
 
 // GENERATING TEXTURE
-    Texture texture0 = Texture::create("res/images", "container2.png");    
-    Texture texture1 = Texture::create("res/images", "container2_specular.png");
+    Image image0;
+    image0.load("res/images/container2.png");
+    Image image1;
+    image1.load("res/images/container2_specular.png");
+    Texture texture0 = Texture::create(image0);    
+    Texture texture1 = Texture::create(image1);
 
 
 //  Our crates
@@ -265,7 +270,7 @@ int main(void) {
             
 
 
-            camera.toZoom(input.getScrollDeltaY() * 0.05f * deltaTime);
+            camera.toZoom(-input.getScrollDeltaY() * 0.05f * deltaTime);
 
         }     
 

@@ -1,6 +1,6 @@
 #include "window/Camera.hpp"
 
-
+#include <algorithm>
 
 Camera::Camera(Window& window, CameraParams params) :
     window_(window),
@@ -60,8 +60,13 @@ void Camera::rotate(float x, float y, float z) {
     updateVectors();
 }
 
-void Camera::toZoom(float deltaZoom) {
-    zoom_ += deltaZoom;
+void Camera::toZoom(float deltaZoom, float min, float max) {
+    
+    if (min > max) std::swap(min, max);
+
+    float newZoom = zoom_ + deltaZoom;
+    
+    zoom_ = std::clamp(newZoom, min, max);
     updateProjection();
 }
 

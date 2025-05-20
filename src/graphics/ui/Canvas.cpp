@@ -1,4 +1,4 @@
-#include "graphics/core/Canvas.hpp"
+#include "graphics/ui/Canvas.hpp"
 
 
 Canvas::Canvas(Window& window) 
@@ -24,6 +24,8 @@ void Canvas::begin() {
 }
 
 void Canvas::end() {
+
+    
 
     shader_->use();
     mesh_.draw();

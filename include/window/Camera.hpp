@@ -67,7 +67,7 @@ class Camera {
         }
         else if (_type == CameraType::PERSPECTIVE) {
             float aspect = float(window_.getWidth()) / float(window_.getHeight());
-            projection_ = glm::perspective(fov_ * zoom_, aspect, zNear_, zFar_);
+            projection_ = glm::perspective(fov_ / zoom_, aspect, zNear_, zFar_);
         }        
     }
 
@@ -90,7 +90,7 @@ class Camera {
 
         void rotate(float x, float y, float z);
 
-        void toZoom(float deltaZoom);
+        void toZoom(float deltaZoom, float min = 1.0f, float max = 2.0f);
 
         glm::mat4 getViewMatrix() const;
         const glm::mat4& getProjectionMatrix() const;
