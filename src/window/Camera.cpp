@@ -2,12 +2,9 @@
 
 
 
-
-Camera::Camera(CameraParams params) :
+Camera::Camera(Window& window, CameraParams params) :
+    window_(window),
     _type(params.type),
-
-    width_(params.width),
-    height_(params.height),
 
     fov_(params.fov),
     zNear_(params.z_near),
@@ -32,8 +29,8 @@ Camera::Camera(CameraParams params) :
 }
 
 void Camera::process3DMouseRotation(double deltaX, double deltaY) {
-    camY_ += (-deltaY / float(height_)) * sensitivity_;
-    camX_ += (-deltaX / float(height_)) * sensitivity_;
+    camY_ += (-deltaY / float(window_.getHeight())) * sensitivity_;
+    camX_ += (-deltaX / float(window_.getHeight())) * sensitivity_;
 
     if (camY_ < -glm::radians(89.0f)){
         camY_ = -glm::radians(89.0f);

@@ -28,7 +28,7 @@ class Mesh {
 
     public:
         Mesh();
-        void createMesh(const MeshData& data);
+        void createMesh(const MeshData& data, GLenum usage = GL_STATIC_DRAW);
         void draw();
 
 };

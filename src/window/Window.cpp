@@ -74,7 +74,7 @@ void Window::frameBufferSizeCallback(GLFWwindow* window, int width, int height) 
 }
 
 
-Window::Window(unsigned int width, unsigned int height, std::string title) : 
+Window::Window(int width, int height, std::string title) : 
     width_(width),
     height_(height),
     title_(title),
@@ -144,6 +144,13 @@ void Window::setTitle(const std::string& title) {
 
 void Window::setCursorMode(int mode) {
     glfwSetInputMode(window_, GLFW_CURSOR, mode);
+}
+
+int Window::getWidth() const {
+    return width_;
+}
+int Window::getHeight() const {
+    return height_;
 }
 
 

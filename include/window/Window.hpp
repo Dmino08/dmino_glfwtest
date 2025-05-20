@@ -11,8 +11,8 @@ class Window {
     GLFWwindow* window_;
     InputManager input_;
 
-    unsigned int width_;
-    unsigned int height_;
+    int width_;
+    int height_;
     std::string title_;
 
     bool valid_;
@@ -28,7 +28,7 @@ class Window {
     static void frameBufferSizeCallback(GLFWwindow* window, int width, int height);
 
     public:
-        Window(unsigned int width, unsigned int height, std::string title);
+        Window(int width, int height, std::string title);
         ~Window();
 
         bool shouldClose() const;
@@ -37,8 +37,10 @@ class Window {
         void pollEvents();
 
         void setTitle(const std::string& title);
-
         void setCursorMode(int mode);
+    
+        int getWidth() const;
+        int getHeight() const;
 
         bool isValid() const;
 

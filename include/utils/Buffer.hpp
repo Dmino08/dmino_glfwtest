@@ -7,6 +7,8 @@
 #include "typedefs.hpp"
 
 
+
+
 namespace util {
 
     template <typename T>
@@ -14,22 +16,36 @@ namespace util {
         std::unique_ptr<T[]> ptr_;
         size_t size_;
 
+        size_t count_;
+
         public:
-            Buffer(uint size) : size_(size) {
+            Buffer() : size_(0) {}
+
+            Buffer(size_t size) : size_(size), count_(0) {
                 ptr_ = std::make_unique<T[]>(size_);
             }
 
-            Buffer(std::initializer_list<T> list) : size_(list.size()){
+            Buffer(std::initializer_list<T> list) : size_(list.size()), count_(0){
                 ptr_ = std::make_unique<T[]>(size_);
                 std::copy(list.begin(), list.end(), ptr_.get());
             }
 
-            Buffer(const Buffer<T>& other)  : size_(other.size_) {
+            Buffer(const Buffer<T>& other)  : size_(other.size_), count_(0) {
                 ptr_ = std::make_unique<T[]>(size_);
                 std::copy(other.begin(), other.end(), ptr_.get());
             }
-            Buffer(Buffer<T>&& other) noexcept : size_(other.size_), ptr_(std::move(other.ptr_)) {
+            Buffer(Buffer<T>&& other) noexcept : size_(other.size_), ptr_(std::move(other.ptr_)), count_(0) {
                 other.size_ = 0;
+            }
+
+            Buffer(T* rawPtr, size_t size) : ptr_(rawPtr), size_(size), count_(0) {}
+
+            T& at(size_t index) {
+                if (index < 0 || index >= size_) {
+                    std::cerr << "Warning: index " << index << " out of range (max " << size_-1 << ")\n";
+                    return ptr_[0];
+                }
+                return ptr_[index];
             }
 
             T& operator[](size_t index) { 
@@ -81,7 +97,22 @@ namespace util {
             }
             inline uint getByteSize() const {
                 return size_ * sizeof(T);
+            }
+
+            void resize(size_t size) {
+                if (size_ != size) {
+                    this = Buffer(size);
+                }
+            }
+
+            void push_back(T value) {
+                if (count_ >= size_) return;
                 
+                ptr_[count_++] = value;
+            }
+
+            void clearCount() {
+                count_ = 0;
             }
     };
 

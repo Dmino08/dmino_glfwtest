@@ -2,6 +2,8 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "window/Window.hpp"
+
 enum CameraType {
     PERSPECTIVE,
     ORTHOGRAPHIC
@@ -14,7 +16,6 @@ enum CameraType {
  */
 struct CameraParams {
     CameraType type = CameraType::PERSPECTIVE;
-    int width = 1280, height = 720;
     float fov = 45.0f;
     float z_near = 0.1f;
     float z_far = 100.0f;
@@ -23,6 +24,8 @@ struct CameraParams {
 
 
 class Camera {
+    Window& window_;
+    
     glm::vec3 front_;
     glm::vec3 right_;
     glm::vec3 up_;
@@ -41,19 +44,19 @@ class Camera {
 
     float zoom_;
 
-    int width_, height_;
     CameraType _type;
 
     float camX_;
     float camY_;
+
 
     
     inline void updateProjection() {     
         
         if (_type == CameraType::ORTHOGRAPHIC) {
 
-            float halfWidth = (width_ * zoom_) / 2.0f;
-            float halfHeight = (height_ * zoom_) / 2.0f;
+            float halfWidth = (window_.getWidth() * zoom_) / 2.0f;
+            float halfHeight = (window_.getHeight() * zoom_) / 2.0f;
 
             float left = -halfWidth;
             float right = halfWidth;
@@ -63,7 +66,7 @@ class Camera {
             projection_ = glm::ortho(left, right, bottom, top, zNear_, zFar_);
         }
         else if (_type == CameraType::PERSPECTIVE) {
-            float aspect = float(width_) / float(height_);
+            float aspect = float(window_.getWidth()) / float(window_.getHeight());
             projection_ = glm::perspective(fov_ * zoom_, aspect, zNear_, zFar_);
         }        
     }
@@ -77,7 +80,7 @@ class Camera {
     }
 
     public:
-        Camera(CameraParams params);
+        Camera(Window& window, CameraParams params);
         ~Camera() = default;
 
         void process3DMouseRotation(double deltaX, double deltaY);

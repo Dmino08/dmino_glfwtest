@@ -157,7 +157,7 @@ std::unique_ptr<Shader> Shader::create(const char* vertex_path, const char* frag
     }
     catch(const std::ifstream::failure& e)
     {
-        std::cerr << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ: " << e.what() << '\n';
+        logger.log(Logger::ERROR, "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ: " + std::string(e.what()));
     }
 
     const char* vShaderCode = vertexCode.c_str();
@@ -176,8 +176,8 @@ std::unique_ptr<Shader> Shader::create(const char* vertex_path, const char* frag
     if (!success)
     {
         glGetShaderInfoLog(vertex, 512, nullptr, infoLog);
-        std::cerr << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << '\n';
 
+        logger.log(Logger::ERROR, "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" + std::string(infoLog));
         return nullptr;
     }
     
@@ -190,8 +190,8 @@ std::unique_ptr<Shader> Shader::create(const char* vertex_path, const char* frag
     if (!success)
     {
         glGetShaderInfoLog(fragment, 512, nullptr, infoLog);
-        std::cerr << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << '\n';
 
+        logger.log(Logger::ERROR, "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" + std::string(infoLog));
         glDeleteShader(vertex);
         return nullptr;
     }
@@ -206,7 +206,8 @@ std::unique_ptr<Shader> Shader::create(const char* vertex_path, const char* frag
     if (!success)
     {
         glGetProgramInfoLog(id, 512, nullptr, infoLog);
-        std::cerr << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << '\n';
+
+        logger.log(Logger::ERROR, "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" + std::string(infoLog));
         glDeleteShader(vertex);
         glDeleteShader(fragment);
         

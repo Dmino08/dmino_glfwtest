@@ -3,7 +3,7 @@
 Mesh::Mesh() : vao_(0), vbo_(0), ebo_(0), data_(MeshData{}) {}
 
 
-void Mesh::createMesh(const MeshData& data) {
+void Mesh::createMesh(const MeshData& data, GLenum usage) {
     
     if (vao_ != 0)
     {
@@ -20,12 +20,13 @@ void Mesh::createMesh(const MeshData& data) {
     glGenBuffers(1, &ebo_);
     // Binding Vertex Array
     glBindVertexArray(vao_);
+    
     // Binding VBO Buffer
     glBindBuffer(GL_ARRAY_BUFFER, vbo_);
-    glBufferData(GL_ARRAY_BUFFER, data_.vertices.getByteSize(), data_.vertices.begin(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, data_.vertices.getByteSize(), data_.vertices.begin(), usage);
     // Binding EBO Buffer
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, data_.indices.getByteSize(), data_.indices.begin(), GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, data_.indices.getByteSize(), data_.indices.begin(), usage);
 
     // Position Attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));

@@ -30,17 +30,7 @@
 
 #include "test/Voxel.hpp"
 
-
 #include "stb_image.h"
-
-
-
-int width = 1280;
-int height = 720;
-Camera camera = Camera(CameraParams());
-
-
-
 
 void updateTitle(Window& window, float timer, float& timerElapsed, float deltaTime) {
     timerElapsed += deltaTime;
@@ -61,8 +51,8 @@ void setUpLightShader(Shader& shd, glm::vec3 color) {
 void countDelta(float& delta) {
     while (true)
     {
-        std::cout << delta * 1000 * 1000 << std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::cout << delta << std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(400));
     }
 }
 
@@ -75,6 +65,10 @@ int main(void) {
         return -1;
     }
 
+    int width = 1280;
+    int height = 720;
+    
+
 
     Window window = Window(width, height, "Window");
     if(!window.isValid()) {
@@ -83,8 +77,10 @@ int main(void) {
     logger.log(Logger::INFO, "Window was created");
     
     stbi_set_flip_vertically_on_load(true);
-    
+
     glEnable(GL_DEPTH_TEST);
+
+    Camera camera = Camera(window, CameraParams());
 
 
 // GENERATING TEXTURE
@@ -185,16 +181,13 @@ int main(void) {
     multiple_shader->uniform1i("on_flash_light", true);
 
 // Light shader
-    auto light_shader = Shader::create("res/shaders/light.vert","res/shaders/light.frag");
+    auto light_shader = Shader::create("res/shaders/ui.vert","res/shaders/light.frag");
     if (light_shader == nullptr) {
         return -1;
     }
     light_shader->setMatrices(camera.getProjectionMatrix(), camera.getViewMatrix());
     setUpLightShader(*light_shader, glm::vec3(1.0f));
 
-
-// Standart shader
-    auto std_shader = Shader::create("res/shaders/standart.vert","res/shaders/standart.frag");
 
 
 // Creating sprite
@@ -203,14 +196,6 @@ int main(void) {
     sprite.setRegion(256,256, 256, 256);
     sprite.transform.setPosition(glm::vec3(1.0f, 5.0f, 10.0f));
     sprite.generate();
-
-
-
-
-// Use std_shader
-    std_shader->use();
-
-    std_shader->uniformMatrix("model", sprite.transform.getModel());
 
 
 // Input setting up
@@ -305,10 +290,7 @@ int main(void) {
             crates[i].draw();
         }
     
-
-        std_shader->setMatrices(camera.getProjectionMatrix(), camera.getViewMatrix());
-
-        std_shader->uniformMatrix("model", sprite.transform.getModel());
+        multiple_shader->uniformMatrix("model", sprite.transform.getModel());
         sprite.draw();
 
         texture0.unbind();
@@ -342,11 +324,7 @@ int main(void) {
 
         deltaTime = float(elapsed.count()) / 1'000'000.0;
         
-
-
     }
-
-
 
     glfwTerminate();
     return 0;
