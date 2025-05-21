@@ -8,7 +8,7 @@ bool Voxel::meshGenerated_ = false;
 void Voxel::generateMesh() {
     
     // Vertex data
-    util::Buffer<Vertex> cubeVertices = {
+    std::vector<Vertex> cubeVertices = {
         // ЗАДНЯЯ грань (нормаль: -Z)
         {{-0.5f, -0.5f, -0.5f},  { 0.0f,  0.0f, -1.0f},  {0.0f, 0.0f}},
         {{ 0.5f, -0.5f, -0.5f},  { 0.0f,  0.0f, -1.0f},  {1.0f, 0.0f}},
@@ -46,7 +46,7 @@ void Voxel::generateMesh() {
         {{-0.5f,  0.5f, -0.5f},  { 0.0f,  1.0f,  0.0f},  {0.0f, 1.0f}},
     };
     // Indices data
-    util::Buffer<uint> cubeIndices = {
+    std::vector<uint> cubeIndices = {
         0,  1,  2,  2,  3,  0,      // задняя
         4,  5,  6,  6,  7,  4,      // передняя
         8,  9, 10, 10, 11,  8,      // левая

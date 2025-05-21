@@ -4,7 +4,9 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
-#include "utils/Buffer.hpp"
+#include <vector>
+#include "typedefs.hpp"
+
 
 
 struct Vertex {
@@ -14,8 +16,8 @@ struct Vertex {
 };
 
 struct MeshData {
-    util::Buffer<Vertex> vertices;
-    util::Buffer<uint> indices;
+    std::vector<Vertex> vertices;
+    std::vector<uint> indices;
 };
 
 

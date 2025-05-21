@@ -58,6 +58,8 @@ uniform PointLight point_lights[POINT_LIGHT_SIZE];
 uniform SpotLight spot_light; 
 uniform bool on_flash_light;
 
+uniform bool use_specular_map;
+
 vec3 calculateDirectionalLight() {
 // ambient
     vec3 ambient = direction_light.base.ambient * vec3(texture(material.diffuse, coord));
@@ -72,7 +74,8 @@ vec3 calculateDirectionalLight() {
     vec3 view_dir = normalize(view_pos - frag_pos);
     vec3 reflect_dir = reflect(-light_dir, norm);
     float spec = pow(max(dot(view_dir, reflect_dir), 0.0), material.shininess);
-    vec3 specular = direction_light.base.specular * spec * vec3(texture(material.specular, coord));
+    vec3 spec_color = use_specular_map ? vec3(texture(material.specular, coord)) : vec3(0.5f);
+    vec3 specular = direction_light.base.specular * spec * spec_color;
 
 // result
     vec3 result = ambient + diffuse + specular;
@@ -95,7 +98,8 @@ vec3 calculatePointLights() {
         vec3 view_dir = normalize(view_pos - frag_pos);
         vec3 reflect_dir = reflect(-light_dir, norm);
         float spec = pow(max(dot(view_dir, reflect_dir), 0.0), material.shininess);
-        vec3 specular = point_lights[i].base.specular * spec * vec3(texture(material.specular, coord));
+        vec3 spec_color = use_specular_map ? vec3(texture(material.specular, coord)) : vec3(0.5f);
+        vec3 specular = point_lights[i].base.specular * spec * spec_color;
     // attenuation
         float distance = length(point_lights[i].position - frag_pos);
         float attenuation = 1.0 / (point_lights[i].attenuation.constant + 
@@ -123,7 +127,8 @@ vec3 calculateSpotLight() {
     vec3 view_dir = normalize(view_pos - frag_pos);
     vec3 reflect_dir = reflect(-light_dir, norm);
     float spec = pow(max(dot(view_dir, reflect_dir), 0.0), material.shininess);
-    vec3 specular = spot_light.base.specular * spec * vec3(texture(material.specular, coord));
+    vec3 spec_color = use_specular_map ? vec3(texture(material.specular, coord)) : vec3(0.5f);
+    vec3 specular = spot_light.base.specular * spec * spec_color;
 // spot light
     float theta = dot(light_dir, normalize(-spot_light.direction));
     float epsilon = spot_light.cut_off - spot_light.outer_cut_off;
@@ -150,7 +155,7 @@ void main() {
     vec3 dir = calculateDirectionalLight();
     vec3 point = calculatePointLights();
 
-    vec3 spot;
+    vec3 spot= vec3(0.0);
     if (on_flash_light) {
         spot = calculateSpotLight();
     }

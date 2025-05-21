@@ -87,12 +87,15 @@ int main(void) {
     image0.load("res/images/container2.png");
     Image image1;
     image1.load("res/images/container2_specular.png");
+    Image image2;
+    image2.load("res/images/Prototype_Grid_Gray_03-512x512.png");
 
     Texture texture0 = Texture::create(image0);    
     Texture texture1 = Texture::create(image1);
+    Texture texture2 = Texture::create(image2);
 
 //  Our crates
-    util::Buffer<Voxel> crates = {
+    std::vector<Voxel> crates = {
         {glm::vec3( 0.0f,  0.0f,  0.0f)},
         {glm::vec3( 2.0f,  5.0f, -15.0f)},
         {glm::vec3(-1.5f, -2.2f, -2.5f)},
@@ -102,12 +105,20 @@ int main(void) {
         {glm::vec3( 1.3f, -2.0f, -2.5f)},
         {glm::vec3( 1.5f,  2.0f, -2.5f)},
         {glm::vec3( 1.5f,  0.2f, -1.5f)},
-        {glm::vec3(-1.3f,  1.0f, -1.5f)}
+        {glm::vec3(-1.3f,  1.0f, -1.5f)},
+
+        {glm::vec3(-7.3f,  -5.0f, -5.5f)},
+        {glm::vec3(-4.3f,  4.0f, 4.5f)},
+        {glm::vec3(5.3f,  4.0f, -1.5f)},
+        {glm::vec3(-1.3f,  4.0f, 4.5f)},
+        {glm::vec3(12.3f,  12.0f, -1.5f)},
+        {glm::vec3(4.3f,  1.0f, -1.5f)}
     };
 
+    crates[3].transform.setScale(glm::vec3(4.0f));
 
 // Light positions
-    util::Buffer<Voxel> lights = {
+    std::vector<Voxel> lights = {
         {glm::vec3( 0.7f, 0.2f, 2.0f)},
         {glm::vec3( 2.3f, -3.3f, -4.0f)},
         {glm::vec3(-4.0f, 2.0f, -12.0f)},
@@ -182,6 +193,7 @@ int main(void) {
     glsl::setPointLight(*multiple_shader, "point_lights[3]", point_light);   
 
     multiple_shader->uniform1i("on_flash_light", true);
+    multiple_shader->uniform1i("use_specular_map", true);
 
 // Light shader
     auto light_shader = Shader::create("res/shaders/ui.vert","res/shaders/light.frag");
@@ -191,26 +203,23 @@ int main(void) {
     light_shader->setMatrices(camera.getProjectionMatrix(), camera.getViewMatrix());
     setUpLightShader(*light_shader, glm::vec3(1.0f));
 
-
-
 // Creating sprite
-    Sprite sprite;
-    sprite.setTexture(&texture0);
+    Sprite plane;
+    plane.setTexture(&texture2);
 
-    int U_SIZE = texture0.getWidth() / 2;
-    int V_SIZE = texture0.getHeight() / 2;
+    const float planeScale = 100.0f;
+    plane.transform.setPosition(glm::vec3(0.0f, -10.0f, 0.0f));
+    plane.transform.rotate(glm::vec3(-90.0f, 0.0f, 0.0f));
+    plane.transform.setScale(glm::vec3(planeScale));
 
-    sprite.setRegion(U_SIZE, V_SIZE, U_SIZE, V_SIZE);
-    sprite.transform.setPosition(glm::vec3(1.0f, 5.0f, 10.0f));
-    sprite.generate();
-
+    plane.setRegion(0, 0, 512 * int(planeScale), 512 * int(planeScale));
+    plane.generate();
 
 // Input setting up
     InputManager& input = window.getInput();
 
-
 // Some loop variables
-   glfwSwapInterval(1);
+    glfwSwapInterval(1);
 
     float timer = 1.0f;
     float timerElapsed = 0.0f;
@@ -230,6 +239,8 @@ int main(void) {
 
     bool onFlashLight = true;
 
+    glDepthFunc(GL_LESS);
+
 
 // Loop 
     while (!window.shouldClose())
@@ -238,11 +249,10 @@ int main(void) {
         updateTitle(window, timer, timerElapsed, deltaTime);
 
         window.pollEvents();
-
+        
         glClearColor(0.42, 0.42, 0.6, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        
 
         if (input.justPressed(GLFW_KEY_TAB)) {
             window.toggleCursor();
@@ -282,11 +292,13 @@ int main(void) {
         multiple_shader->setMatrices(camera.getProjectionMatrix(), camera.getViewMatrix());
         multiple_shader->uniform3f("spot_light.position", camera.getPos());
         multiple_shader->uniform3f("spot_light.direction", camera.getFront());
+        multiple_shader->uniform1i("use_specular_map", true);
 
         glActiveTexture(GL_TEXTURE0);
         texture0.bind();
         glActiveTexture(GL_TEXTURE1);
         texture1.bind();
+
         
         for (size_t i = 0; i < crates.size(); i++)
         {
@@ -298,12 +310,20 @@ int main(void) {
 
             crates[i].draw();
         }
-    
-        multiple_shader->uniformMatrix("model", sprite.transform.getModel());
-        sprite.draw();
+   
+        glActiveTexture(GL_TEXTURE0);
+        texture2.bind();
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        multiple_shader->uniform1i("use_specular_map", false);
+
+        multiple_shader->uniformMatrix("model", plane.transform.getModel());
+        plane.draw();
 
         texture0.unbind();
         texture1.unbind();
+        texture2.unbind();
 
 
         light_shader->setMatrices(camera.getProjectionMatrix(), camera.getViewMatrix());
@@ -315,7 +335,6 @@ int main(void) {
 
             lights[i].draw();
         }
-
 
 
         window.swapBuffers();  

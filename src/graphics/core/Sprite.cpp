@@ -31,7 +31,7 @@ void Sprite::generate() {
     glm::vec2 uv_min = region_.getUVMin();
     glm::vec2 uv_max = region_.getUVMax();
 
-    util::Buffer<Vertex> vertices = {
+    std::vector<Vertex> vertices = {
     //        position              normal            uv_coord
         {{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {uv_min.x, uv_min.y}},
         {{ 0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {uv_max.x, uv_min.y}}, 
@@ -39,7 +39,7 @@ void Sprite::generate() {
         {{-0.5f,  0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {uv_min.x, uv_max.y}}
 
     };
-    util::Buffer<uint> indices = {
+    std::vector<uint> indices = {
         0, 1, 2,
         2, 3, 0
     };    

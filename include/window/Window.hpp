@@ -7,6 +7,7 @@
 
 #include "window/InputManager.hpp"
 
+
 class Window {
     GLFWwindow* window_;
     InputManager input_;
@@ -26,6 +27,7 @@ class Window {
     static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
     static void frameBufferSizeCallback(GLFWwindow* window, int width, int height);
+
 
     public:
         Window(int width, int height, std::string title);
