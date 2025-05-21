@@ -5,6 +5,12 @@
 #include <ctime>
 #include <fstream>
 
+#define DEBUG_MOD
+
+#ifdef DEBUG_MOD
+    #define debugPrint(x) std::cout << x << std::endl
+#endif
+
 class Logger {
     std::ofstream current_log_;
     std::ofstream log_;

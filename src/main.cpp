@@ -70,7 +70,6 @@ int main(void) {
     int height = 720;
     
 
-
     Window window = Window(width, height, "Window");
     if(!window.isValid()) {
         return -1;
@@ -83,15 +82,14 @@ int main(void) {
 
     Camera camera = Camera(window, CameraParams());
 
-
 // GENERATING TEXTURE
     Image image0;
     image0.load("res/images/container2.png");
     Image image1;
     image1.load("res/images/container2_specular.png");
+
     Texture texture0 = Texture::create(image0);    
     Texture texture1 = Texture::create(image1);
-
 
 //  Our crates
     util::Buffer<Voxel> crates = {
@@ -198,7 +196,11 @@ int main(void) {
 // Creating sprite
     Sprite sprite;
     sprite.setTexture(&texture0);
-    sprite.setRegion(256,256, 256, 256);
+
+    int U_SIZE = texture0.getWidth() / 2;
+    int V_SIZE = texture0.getHeight() / 2;
+
+    sprite.setRegion(U_SIZE, V_SIZE, U_SIZE, V_SIZE);
     sprite.transform.setPosition(glm::vec3(1.0f, 5.0f, 10.0f));
     sprite.generate();
 
@@ -227,6 +229,8 @@ int main(void) {
     delta_thread.detach();
 
     bool onFlashLight = true;
+
+
 // Loop 
     while (!window.shouldClose())
     { 
