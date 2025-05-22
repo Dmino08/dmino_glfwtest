@@ -78,47 +78,81 @@ int main(void) {
     
     stbi_set_flip_vertically_on_load(true);
 
-    glEnable(GL_DEPTH_TEST);
+    
 
-    Camera camera = Camera(window, CameraParams());
+    CameraParams cParams;
+    cParams.z_far = 15000.0f;
+    Camera camera = Camera(window, cParams);
 
 // GENERATING TEXTURE
     Image image0;
     image0.load("res/images/container2.png");
     Image image1;
     image1.load("res/images/container2_specular.png");
+
     Image image2;
     image2.load("res/images/Prototype_Grid_Gray_03-512x512.png");
 
-    Texture texture0 = Texture::create(image0);    
-    Texture texture1 = Texture::create(image1);
-    Texture texture2 = Texture::create(image2);
+    Image image3;
+    image3.load("res/images/pngegg.png");
+
+    TextureParams tParams;
+    tParams.min_filter = GL_LINEAR_MIPMAP_LINEAR;
+    tParams.internal_format = GL_RGBA;
+    
+    Texture texture0 = Texture::create(image0, tParams);    
+    Texture texture1 = Texture::create(image1, tParams);
+    
+    Texture texture2 = Texture::create(image2, tParams);
+    
+    Texture texture3 = Texture::create(image3, tParams);
+
+    float world_height = 0.0f;
+
+// Creating sprite
+    Sprite plane;
+    plane.setTexture(&texture2);
+
+    const float planeScale = 10000.0f;
+    plane.transform.setPosition(glm::vec3(0.0f, world_height - 0.5f, 0.0f));
+    plane.transform.rotate(glm::vec3(-90.0f, 0.0f, 0.0f));
+    plane.transform.setScale(glm::vec3(planeScale));
+
+    plane.setRegion(0, 0, 512 * int(planeScale) / 4, 512 * int(planeScale) / 4);
+    plane.generate();
+
+// Grass
+    Sprite grass;
+    grass.setTexture(&texture3);
+
+    grass.transform.setPosition(glm::vec3(5.0f, world_height, 5.0f));
+    grass.generate();
 
 //  Our crates
     std::vector<Voxel> crates = {
-        {glm::vec3( 0.0f,  0.0f,  0.0f)},
-        {glm::vec3( 2.0f,  0.0f, -15.0f)},
-        {glm::vec3(-1.5f,  0.0f, -2.5f)},
-        {glm::vec3(-3.8f,  0.0f, -12.3f)},
-        {glm::vec3( 2.4f,  0.0f, -3.5f)},
-        {glm::vec3(-1.7f,  0.0f, -7.5f)},
-        {glm::vec3( 1.3f,  0.0f, -2.5f)},
-        {glm::vec3( 1.5f,  0.0f, -2.5f)},
-        {glm::vec3( 1.5f,  0.0f, -1.5f)},
-        {glm::vec3(-1.3f,  0.0f, -1.5f)},
+        {glm::vec3( 0.0f,  world_height,  0.0f)},
+        {glm::vec3( 2.0f,  world_height, -15.0f)},
+        {glm::vec3(-1.5f,  world_height, -2.5f)},
+        {glm::vec3(-3.8f,  world_height, -12.3f)},
+        {glm::vec3( 2.4f,  world_height, -3.5f)},
+        {glm::vec3(-1.7f,  world_height, -7.5f)},
+        {glm::vec3( 1.3f,  world_height, -2.5f)},
+        {glm::vec3( 1.5f,  world_height, -2.5f)},
+        {glm::vec3( 1.5f,  world_height, -1.5f)},
+        {glm::vec3(-1.3f,  world_height, -1.5f)},
 
-        {glm::vec3(-7.3f,  0.0f, -5.5f)},
-        {glm::vec3(-4.3f,  0.0f, 4.5f)},
-        {glm::vec3(5.3f,   0.0f, -1.5f)},
-        {glm::vec3(-1.3f,  0.0f, 4.5f)},
-        {glm::vec3(12.3f,  0.0f, -1.5f)},
-        {glm::vec3(4.3f,   0.0f, -1.5f)}
+        {glm::vec3(-7.3f,  world_height, -5.5f)},
+        {glm::vec3(-4.3f,  world_height, 4.5f)},
+        {glm::vec3(5.3f,   world_height, -1.5f)},
+        {glm::vec3(-1.3f,  world_height, 4.5f)},
+        {glm::vec3(12.3f,  world_height, -1.5f)},
+        {glm::vec3(4.3f,   world_height, -1.5f)}
     };
 
 // Light positions
     std::vector<Voxel> lights = {
         {glm::vec3( 0.7f, 0.2f, 2.0f)},
-        {glm::vec3( 2.3f, -3.3f, -4.0f)},
+        {glm::vec3( 2.3f, 3.3f, -4.0f)},
         {glm::vec3(-4.0f, 2.0f, -12.0f)},
         {glm::vec3( 0.0f, 0.0f, -3.0f)}
     };
@@ -193,6 +227,19 @@ int main(void) {
     multiple_shader->uniform1i("on_flash_light", true);
     multiple_shader->uniform1i("use_specular_map", true);
 
+// Setting up the textures
+    glActiveTexture(GL_TEXTURE0);
+    texture0.bind();
+    glActiveTexture(GL_TEXTURE1);
+    texture1.bind();
+    glActiveTexture(GL_TEXTURE2);
+    texture2.bind();
+    glActiveTexture(GL_TEXTURE3);
+    texture3.bind();
+
+
+
+
 // Outline shader
     auto outline_shader = Shader::create("res/shaders/light_test.vert", "res/shaders/stencil_test.frag");
     outline_shader->setMatrices(camera.getProjectionMatrix(), camera.getViewMatrix());
@@ -205,17 +252,7 @@ int main(void) {
     light_shader->setMatrices(camera.getProjectionMatrix(), camera.getViewMatrix());
     setUpLightShader(*light_shader, glm::vec3(1.0f));
 
-// Creating sprite
-    Sprite plane;
-    plane.setTexture(&texture2);
 
-    const float planeScale = 100.0f;
-    plane.transform.setPosition(glm::vec3(0.0f, -0.5f, 0.0f));
-    plane.transform.rotate(glm::vec3(-90.0f, 0.0f, 0.0f));
-    plane.transform.setScale(glm::vec3(planeScale));
-
-    plane.setRegion(0, 0, 512 * int(planeScale) / 4, 512 * int(planeScale) / 4);
-    plane.generate();
 
 // Input setting up
     InputManager& input = window.getInput();
@@ -226,7 +263,7 @@ int main(void) {
     float timer = 1.0f;
     float timerElapsed = 0.0f;
 
-    float camera_speed = 5.f;
+    float camera_speed = 10.f;
 
     float deltaTime = 0.016f;
     int FPS = 120;
@@ -241,10 +278,15 @@ int main(void) {
 
     bool onFlashLight = true;
 
+// Setting up OpenGL
+    glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
+
     glEnable(GL_STENCIL_TEST);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
-
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 // Loop 
     while (!window.shouldClose())
     { 
@@ -252,10 +294,7 @@ int main(void) {
         updateTitle(window, timer, timerElapsed, deltaTime);
 
         window.pollEvents();
-        
-        glEnable(GL_DEPTH_TEST);
-        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-                  
+              
         glClearColor(0.42, 0.42, 0.6, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
@@ -288,12 +327,60 @@ int main(void) {
                 multiple_shader->uniform1i("on_flash_light", onFlashLight);
             }
             
+            if(input.justPressed(GLFW_KEY_LEFT_SHIFT)) {
+                camera_speed *= 3;
+            }
+            if(input.justReleased(GLFW_KEY_LEFT_SHIFT)) {
+                camera_speed /= 3;
+            }
 
 
             camera.toZoom(-input.getScrollDeltaY() * 0.05f * deltaTime);
 
         }     
         glStencilMask(0x00);
+
+        multiple_shader->setMatrices(camera.getProjectionMatrix(), camera.getViewMatrix());
+        multiple_shader->uniform3f("spot_light.position", camera.getPos());
+        multiple_shader->uniform3f("spot_light.direction", camera.getFront());
+          
+        multiple_shader->uniform1i("material.diffuse", 0);
+        multiple_shader->uniform1i("material.specular", 1);
+        multiple_shader->uniform1i("use_specular_map", true);
+
+        outline_shader->setMatrices(camera.getProjectionMatrix(), camera.getViewMatrix());
+
+        for (size_t i = 0; i < crates.size(); i++)
+        {
+            glClear(GL_STENCIL_BUFFER_BIT);
+
+            glStencilFunc(GL_ALWAYS, 1, 0xFF);
+            glStencilMask(0xFF);      
+            glEnable(GL_DEPTH_TEST);
+
+            multiple_shader->use();
+            multiple_shader->uniformMatrix("model", crates[i].transform.getModel());
+            crates[i].draw();
+
+
+
+            glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+            glStencilMask(0x00);
+            glEnable(GL_DEPTH_TEST);
+            glDepthFunc(GL_LEQUAL);
+
+            outline_shader->use();
+            auto outline_model = glm::scale(crates[i].transform.getModel(), glm::vec3(1.05f));
+            outline_shader->uniformMatrix("model", outline_model);
+            crates[i].draw();
+
+            glDepthFunc(GL_LESS);
+        }
+
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        glStencilMask(0xFF);
+        glEnable(GL_DEPTH_TEST);
+
         light_shader->setMatrices(camera.getProjectionMatrix(), camera.getViewMatrix());
         for (size_t i = 0; i < lights.size(); i++)
         {
@@ -302,63 +389,31 @@ int main(void) {
             lights[i].draw();
         }
 
-        multiple_shader->setMatrices(camera.getProjectionMatrix(), camera.getViewMatrix());
-        multiple_shader->uniform3f("spot_light.position", camera.getPos());
-        multiple_shader->uniform3f("spot_light.direction", camera.getFront());
-        
-        glActiveTexture(GL_TEXTURE0);
-        texture2.bind();
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, 0);
+        multiple_shader->use();
 
-        
+        multiple_shader->uniform1i("use_specular_map", false);
+
+
         multiple_shader->uniformMatrix("model", plane.transform.getModel());
+        multiple_shader->uniform1i("material.diffuse", 2);
+        plane.draw();  
+
+        multiple_shader->uniformMatrix("model", grass.transform.getModel());
+        multiple_shader->uniform1i("material.diffuse", 3);
+        grass.draw();      
         
-        plane.draw();        
         
-
-        glActiveTexture(GL_TEXTURE0);
-        texture0.bind();
-        glActiveTexture(GL_TEXTURE1);
-        texture1.bind();
-
-        glStencilFunc(GL_ALWAYS, 1, 0xFF);
-        glStencilMask(0xFF);
-        for (size_t i = 0; i < crates.size(); i++)
-        {
-            multiple_shader->uniformMatrix("model", crates[i].transform.getModel());
-
-            crates[i].draw();
-        }
-   
-        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-        glStencilMask(0x00);
-        glDisable(GL_DEPTH_TEST);
-        outline_shader->setMatrices(camera.getProjectionMatrix(), camera.getViewMatrix());
-        for (size_t i = 0; i < crates.size(); i++)
-        {
-            auto outline_model = glm::scale(crates[i].transform.getModel(), glm::vec3(1.05f));
-            outline_shader->uniformMatrix("model", outline_model);
-
-            crates[i].draw();
-        }
-        glStencilMask(0xFF);
-        glStencilFunc(GL_ALWAYS, 1, 0xFF);
-        glEnable(GL_DEPTH_TEST);
-
-
-        texture0.unbind();
-        texture1.unbind();
-        texture2.unbind();
-
-         
-
 
         window.swapBuffers();  
         auto frameEnd = clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(frameEnd - frameStart);
         deltaTime = float(elapsed.count()) / 1'000'000.0;    
     }
+
+    texture0.unbind();
+    texture1.unbind();
+    texture2.unbind();
+    texture3.unbind();
 
     glfwTerminate();
     return 0;
