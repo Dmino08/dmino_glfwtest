@@ -28,6 +28,27 @@ Camera::Camera(Window& window, CameraParams params) :
     updateVectors();
 }
 
+
+void Camera::updateProjection() {      
+    if (_type == CameraType::ORTHOGRAPHIC) {
+
+        float halfWidth = (window_.getWidth() * zoom_) / 2.0f;
+        float halfHeight = (window_.getHeight() * zoom_) / 2.0f;
+
+        float left = -halfWidth;
+        float right = halfWidth;
+        float bottom = -halfHeight;
+        float top = halfHeight;    
+                
+        projection_ = glm::ortho(left, right, bottom, top, zNear_, zFar_);
+    }
+    else if (_type == CameraType::PERSPECTIVE) {
+        float aspect = float(window_.getWidth()) / float(window_.getHeight());
+        projection_ = glm::perspective(fov_ / zoom_, aspect, zNear_, zFar_);
+    }        
+}
+
+
 void Camera::process3DMouseRotation(double deltaX, double deltaY) {
     camY_ += (-deltaY / float(window_.getHeight())) * sensitivity_;
     camX_ += (-deltaX / float(window_.getHeight())) * sensitivity_;

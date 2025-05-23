@@ -9,7 +9,7 @@
 
 
 class Window {
-    GLFWwindow* window_;
+    GLFWwindow* handle_;
     InputManager input_;
 
     int width_;
@@ -17,6 +17,7 @@ class Window {
     std::string title_;
 
     bool valid_;
+    bool resized_;
 
     static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
     
@@ -45,6 +46,7 @@ class Window {
         int getHeight() const;
 
         bool isValid() const;
+        bool isResized() const;
 
         void toggleCursor();
 

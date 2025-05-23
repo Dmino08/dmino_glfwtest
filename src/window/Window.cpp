@@ -80,6 +80,7 @@ Window::Window(int width, int height, std::string title) :
     title_(title),
 
     valid_(true),
+    resized_(false),
     input_()
 {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -87,50 +88,52 @@ Window::Window(int width, int height, std::string title) :
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_DEPTH_BITS, 24);
 
-    window_ = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
+    handle_ = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
 
-    if(!window_) {
+    if(!handle_) {
         glfwTerminate();
         logger.log(Logger::ERROR, "Window is not created");
         valid_ = false;
     } 
     else {
-        glfwMakeContextCurrent(window_);
+        glfwMakeContextCurrent(handle_);
 
 
 
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-            glfwDestroyWindow(window_);
+            glfwDestroyWindow(handle_);
             glfwTerminate();
             logger.log(Logger::ERROR, "GLAD is not initialized");
             valid_ = false;
         }
 
-        glfwSetKeyCallback(window_, keyCallback);
-        glfwSetMouseButtonCallback(window_, mouseButtonCallback);
-        glfwSetCursorPosCallback(window_, cursorPosCallback);
-        glfwSetScrollCallback(window_, scrollCallback);
+        glfwSetWindowUserPointer(handle_, this);
 
+        glfwSetKeyCallback(handle_, keyCallback);
+        glfwSetMouseButtonCallback(handle_, mouseButtonCallback);
+        glfwSetCursorPosCallback(handle_, cursorPosCallback);
+        glfwSetScrollCallback(handle_, scrollCallback);
+        glfwSetFramebufferSizeCallback(handle_, frameBufferSizeCallback);
 
-        glfwSetWindowUserPointer(window_, this);
+        
     }
 }
 
 
 
 Window::~Window() {
-    glfwDestroyWindow(window_);
-    window_ = nullptr;
+    glfwDestroyWindow(handle_);
+    handle_ = nullptr;
 }
 
 
 
 bool Window::shouldClose() const {
-    return glfwWindowShouldClose(window_);
+    return glfwWindowShouldClose(handle_);
 }
 
 void Window::swapBuffers() const {
-    glfwSwapBuffers(window_);
+    glfwSwapBuffers(handle_);
 }
 
 void Window::pollEvents() {
@@ -138,12 +141,12 @@ void Window::pollEvents() {
 }
 
 void Window::setTitle(const std::string& title) {
-    glfwSetWindowTitle(window_, title.c_str());
+    glfwSetWindowTitle(handle_, title.c_str());
 }
 
 
 void Window::setCursorMode(int mode) {
-    glfwSetInputMode(window_, GLFW_CURSOR, mode);
+    glfwSetInputMode(handle_, GLFW_CURSOR, mode);
 }
 
 int Window::getWidth() const {
@@ -158,9 +161,14 @@ bool Window::isValid() const {
     return valid_;
 }
 
+bool Window::isResized() const {
+    return resized_;
+}
+
+
 void Window::toggleCursor() {
     input_.cursorLocked_ = !input_.cursorLocked_;
-    glfwSetInputMode(window_, GLFW_CURSOR, input_.cursorLocked_ ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+    glfwSetInputMode(handle_, GLFW_CURSOR, input_.cursorLocked_ ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
 }
 
 

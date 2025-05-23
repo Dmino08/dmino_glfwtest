@@ -33,6 +33,10 @@
 
 #include "stb_image.h"
 
+#include <random>
+
+#include <map>
+
 void updateTitle(Window& window, float timer, float& timerElapsed, float deltaTime) {
     timerElapsed += deltaTime;
     if (timer <= timerElapsed) {
@@ -66,8 +70,8 @@ int main(void) {
         return -1;
     }
 
-    int width = 1920;
-    int height = 1080;
+    int width = 1280;
+    int height = 720;
     
 
     Window window = Window(width, height, "Window");
@@ -94,7 +98,7 @@ int main(void) {
     image2.load("res/images/Prototype_Grid_Gray_03-512x512.png");
 
     Image image3;
-    image3.load("res/images/pngegg.png");
+    image3.load("res/images/Window.png");
 
     TextureParams tParams;
     tParams.min_filter = GL_LINEAR_MIPMAP_LINEAR;
@@ -121,16 +125,34 @@ int main(void) {
     plane.setRegion(0, 0, 512 * int(planeScale) / 4, 512 * int(planeScale) / 4);
     plane.generate();
 
-// Grass
-    Sprite grass;
-    grass.setTexture(&texture3);
+// Small random generator
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> distrib(1, 10);
+    
 
-    grass.transform.setPosition(glm::vec3(5.0f, world_height, 5.0f));
-    grass.generate();
+
+// Grass
+    std::vector<Sprite> v_window;
+    v_window.reserve(15);
+    for (int i = 0; i < 15; i++)
+    {
+        Sprite spr;
+        spr.setTexture(&texture3);
+        spr.transform.setPosition(glm::vec3(5.0f + float(distrib(gen)) / 2, world_height, 5.0f + float(distrib(gen)) / 2));
+        spr.generate();
+        v_window.push_back(spr);
+    }
+
+    std::vector<float> distances(v_window.size());
+    std::vector<int> draw_order(v_window.size());
+    
+    
+    
 
 //  Our crates
     std::vector<Voxel> crates = {
-        {glm::vec3( 0.0f,  world_height,  0.0f)},
+        {glm::vec3( 0.0f,  world_height + 0.5f,  0.0f)},
         {glm::vec3( 2.0f,  world_height, -15.0f)},
         {glm::vec3(-1.5f,  world_height, -2.5f)},
         {glm::vec3(-3.8f,  world_height, -12.3f)},
@@ -287,6 +309,10 @@ int main(void) {
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
 // Loop 
     while (!window.shouldClose())
     { 
@@ -295,10 +321,16 @@ int main(void) {
 
         window.pollEvents();
               
+        
+
         glClearColor(0.42, 0.42, 0.6, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 
+        if (window.isResized()) {
+            camera.updateProjection();
+        }
+//INPUT HANDLES......................................................................................
         if (input.justPressed(GLFW_KEY_TAB)) {
             window.toggleCursor();
         }
@@ -335,9 +367,12 @@ int main(void) {
             }
 
 
-            camera.toZoom(-input.getScrollDeltaY() * 0.05f * deltaTime);
+            camera.toZoom(-input.getScrollDeltaY() * 0.0035f);
 
         }     
+//......................................................................................INPUT HANDLES
+
+//CRATES AND OUTLINE DRAWING......................................................................................
         glStencilMask(0x00);
 
         multiple_shader->setMatrices(camera.getProjectionMatrix(), camera.getViewMatrix());
@@ -357,18 +392,14 @@ int main(void) {
             glStencilFunc(GL_ALWAYS, 1, 0xFF);
             glStencilMask(0xFF);      
             glEnable(GL_DEPTH_TEST);
-
             multiple_shader->use();
             multiple_shader->uniformMatrix("model", crates[i].transform.getModel());
             crates[i].draw();
-
-
 
             glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
             glStencilMask(0x00);
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_LEQUAL);
-
             outline_shader->use();
             auto outline_model = glm::scale(crates[i].transform.getModel(), glm::vec3(1.05f));
             outline_shader->uniformMatrix("model", outline_model);
@@ -376,6 +407,7 @@ int main(void) {
 
             glDepthFunc(GL_LESS);
         }
+//......................................................................................CRATES AND OUTLINE DRAWING
 
         glStencilFunc(GL_ALWAYS, 1, 0xFF);
         glStencilMask(0xFF);
@@ -389,6 +421,9 @@ int main(void) {
             lights[i].draw();
         }
 
+//SPRITE RENDER......................................................................................
+        glDisable(GL_CULL_FACE); 
+
         multiple_shader->use();
 
         multiple_shader->uniform1i("use_specular_map", false);
@@ -396,13 +431,37 @@ int main(void) {
 
         multiple_shader->uniformMatrix("model", plane.transform.getModel());
         multiple_shader->uniform1i("material.diffuse", 2);
-        plane.draw();  
+        plane.draw();      
 
-        multiple_shader->uniformMatrix("model", grass.transform.getModel());
-        multiple_shader->uniform1i("material.diffuse", 3);
-        grass.draw();      
-        
-        
+        //BLENDING......................................................................................
+        for (size_t i = 0; i < v_window.size(); i++)
+        {
+            distances[i] = glm::length(camera.getPos() - v_window[i].transform.getPosition());
+            draw_order[i] = i;
+        }
+        for (size_t i = 0; i < v_window.size(); i++)
+        {
+            for (size_t j = 0; j < v_window.size() - 1 - i; j++)
+            {
+                if (distances[draw_order[j]] < distances[draw_order[j + 1]])
+                {
+                    int temp = draw_order[j];
+                    draw_order[j] = draw_order[j + 1];
+                    draw_order[j + 1] = temp;
+                }
+            }
+            
+        }
+        for (size_t i = 0; i < v_window.size(); i++)
+        {
+            multiple_shader->uniformMatrix("model", v_window[draw_order[i]].transform.getModel());
+            multiple_shader->uniform1i("material.diffuse", 3);            
+            v_window[draw_order[i]].draw();
+        }
+        //......................................................................................BLENDING
+        glEnable(GL_CULL_FACE); 
+//......................................................................................SPRITE RENDER
+
 
         window.swapBuffers();  
         auto frameEnd = clock::now();
