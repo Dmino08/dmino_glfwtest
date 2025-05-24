@@ -5,11 +5,11 @@
 #include "graphics/core/Image.hpp"
 
 
-Texture::Texture(GLuint id, int width, int height, GLenum target) : 
-    id_(id), 
-    target_(target),
-    width_(width), 
-    height_(height)
+Texture::Texture() : 
+    id_(0), 
+    target_(0),
+    width_(0), 
+    height_(0)
     {}
 
 
@@ -36,10 +36,16 @@ int Texture::getHeight() const {
 }
 
 
-Texture Texture::create(
+void Texture::create(
     const Image& image, 
     TextureParams params
 ) {
+
+    if (id_ != 0) {
+        glDeleteTextures(1, &id_);
+        id_ = 0;
+    }
+
     GLuint id;
     glGenTextures(1, &id);
 
@@ -70,5 +76,8 @@ Texture Texture::create(
     glGenerateMipmap(params.target);
 
     
-    return Texture(id, image.getWidth(), image.getHeight(), params.target);
+    id_ = id; 
+    width_ = image.getWidth(); 
+    height_ = image.getHeight(); 
+    target_ = params.target;
 }

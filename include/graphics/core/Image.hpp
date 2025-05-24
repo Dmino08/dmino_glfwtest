@@ -27,5 +27,7 @@ class Image {
         int GetChannels() const;
         GLenum getFormat() const;
 
+        static void flipLoad(bool value);
+
 
 };

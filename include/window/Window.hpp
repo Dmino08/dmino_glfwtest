@@ -7,6 +7,8 @@
 
 #include "window/InputManager.hpp"
 
+#define TYPE_GLFW 0
+using WindowType = int;
 
 class Window {
     GLFWwindow* handle_;
@@ -19,6 +21,11 @@ class Window {
     bool valid_;
     bool resized_;
 
+    void initGLAD();
+
+    static bool is_glfw_initialized_;
+    static bool is_glad_initialized_;
+
     static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
     
     static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
@@ -29,9 +36,10 @@ class Window {
 
     static void frameBufferSizeCallback(GLFWwindow* window, int width, int height);
 
+    
 
     public:
-        Window(int width, int height, std::string title);
+        Window(int width, int height, std::string title, WindowType type = TYPE_GLFW);
         ~Window();
 
         bool shouldClose() const;
@@ -51,4 +59,7 @@ class Window {
         void toggleCursor();
 
         InputManager& getInput();
+
+        static int initGLFW();
+        
 };

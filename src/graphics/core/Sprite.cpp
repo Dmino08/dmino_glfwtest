@@ -47,6 +47,6 @@ void Sprite::generate() {
 
 }
 
-void Sprite::draw() {
+void Sprite::draw() const{
     mesh_.draw();
 }

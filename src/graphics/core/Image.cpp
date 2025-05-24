@@ -68,3 +68,7 @@ int Image::GetChannels() const {
 GLenum Image::getFormat() const {
     return format_;
 }
+
+void Image::flipLoad(bool value) {
+    stbi_set_flip_vertically_on_load(value);
+}

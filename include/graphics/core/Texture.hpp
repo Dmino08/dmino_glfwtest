@@ -30,7 +30,7 @@ class Texture {
 
     public:
         std::string type;
-        Texture(GLuint id, int width, int height, GLenum target);
+        Texture();
         ~Texture();
 
         void bind() const;
@@ -39,7 +39,7 @@ class Texture {
         int getWidth() const;
         int getHeight() const;
 
-        static Texture create(
+        void create(
             const Image& image,
             TextureParams params = TextureParams()
         );

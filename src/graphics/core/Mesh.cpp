@@ -2,6 +2,14 @@
 
 Mesh::Mesh() : vao_(0), vbo_(0), ebo_(0), data_(MeshData{}) {}
 
+Mesh::~Mesh() {
+    if (vao_ != 0)
+    {
+        glDeleteVertexArrays(1, &vao_);
+        glDeleteBuffers(1, &vbo_);
+        glDeleteBuffers(1, &ebo_);
+    }
+}
 
 void Mesh::createMesh(const MeshData& data, GLenum usage) {
     
@@ -46,7 +54,7 @@ void Mesh::createMesh(const MeshData& data, GLenum usage) {
     
 }
 
-void Mesh::draw() {
+void Mesh::draw() const{
     glBindVertexArray(vao_);
 
     if (ebo_ != 0) {

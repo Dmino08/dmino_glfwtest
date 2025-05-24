@@ -34,7 +34,6 @@
 #include "stb_image.h"
 
 #include <random>
-
 #include <map>
 
 void updateTitle(Window& window, float timer, float& timerElapsed, float deltaTime) {
@@ -46,12 +45,9 @@ void updateTitle(Window& window, float timer, float& timerElapsed, float deltaTi
 
 }
 
-
 void setUpLightShader(Shader& shd, glm::vec3 color) {
     shd.uniform3f("color", color);
 }
-
-
 
 void countDelta(float& delta) {
     while (true)
@@ -65,24 +61,16 @@ int main(void) {
 
     std::cout << PROJECT_VERSION_MAJOR << "." << PROJECT_VERSION_MINOR << std::endl;
 
-    if(!glfwInit()) {
-        logger.log(Logger::ERROR, "GLFW is not initialized");
-        return -1;
-    }
-
     int width = 1280;
     int height = 720;
     
+    Window::initGLFW();
+    Image::flipLoad(true);
 
     Window window = Window(width, height, "Window");
     if(!window.isValid()) {
         return -1;
     }
-    logger.log(Logger::INFO, "Window was created");
-    
-    stbi_set_flip_vertically_on_load(true);
-
-    
 
     CameraParams cParams;
     cParams.z_far = 15000.0f;
@@ -104,12 +92,17 @@ int main(void) {
     tParams.min_filter = GL_LINEAR_MIPMAP_LINEAR;
     tParams.internal_format = GL_RGBA;
     
-    Texture texture0 = Texture::create(image0, tParams);    
-    Texture texture1 = Texture::create(image1, tParams);
+    Texture texture0;
+    texture0.create(image0, tParams);  
+
+    Texture texture1;
+    texture1.create(image1, tParams);
+
+    Texture texture2;
+    texture2.create(image2, tParams);
     
-    Texture texture2 = Texture::create(image2, tParams);
-    
-    Texture texture3 = Texture::create(image3, tParams);
+    Texture texture3;
+    texture3.create(image3, tParams);
 
     float world_height = 0.0f;
 
@@ -141,7 +134,7 @@ int main(void) {
         spr.setTexture(&texture3);
         spr.transform.setPosition(glm::vec3(5.0f + float(distrib(gen)) / 2, world_height, 5.0f + float(distrib(gen)) / 2));
         spr.generate();
-        v_window.push_back(spr);
+        v_window.push_back(std::move(spr));
     }
 
     std::vector<float> distances(v_window.size());
@@ -249,7 +242,7 @@ int main(void) {
     multiple_shader->uniform1i("on_flash_light", true);
     multiple_shader->uniform1i("use_specular_map", true);
 
-// Setting up the textures
+//SETTING TEXTURES......................................................................................
     glActiveTexture(GL_TEXTURE0);
     texture0.bind();
     glActiveTexture(GL_TEXTURE1);
@@ -258,7 +251,7 @@ int main(void) {
     texture2.bind();
     glActiveTexture(GL_TEXTURE3);
     texture3.bind();
-
+//......................................................................................SETTING TEXTURES
 
 
 
@@ -281,6 +274,7 @@ int main(void) {
 
 // Some loop variables
     glfwSwapInterval(1);
+    bool vsync = true;
 
     float timer = 1.0f;
     float timerElapsed = 0.0f;
@@ -300,7 +294,20 @@ int main(void) {
 
     bool onFlashLight = true;
 
-// Setting up OpenGL
+//CREATING FRAMEBUFFER......................................................................................
+    unsigned fbo;
+    glGenFramebuffers(1, &fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE)
+    {
+        std::cout << "FRAMEBUFFER GENERATION IS COMPLETE\n";
+    }
+    
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+//SETTING OPENGL......................................................................................
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
 
@@ -313,24 +320,24 @@ int main(void) {
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
+//......................................................................................SETTING OPENGL
 // Loop 
     while (!window.shouldClose())
     { 
+    //LOOP BEGINNING......................................................................................
         auto frameStart = clock::now();
         updateTitle(window, timer, timerElapsed, deltaTime);
 
         window.pollEvents();
-              
-        
 
         glClearColor(0.42, 0.42, 0.6, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-
+    //......................................................................................LOOP BEGINNING    
         if (window.isResized()) {
             camera.updateProjection();
         }
-//INPUT HANDLES......................................................................................
+    //INPUT HANDLES......................................................................................
+    {
         if (input.justPressed(GLFW_KEY_TAB)) {
             window.toggleCursor();
         }
@@ -366,13 +373,20 @@ int main(void) {
                 camera_speed /= 3;
             }
 
+            if(input.justPressed(GLFW_KEY_F)) {
+                vsync = !vsync;
+                glfwSwapInterval(vsync ? 1 : 0);
+            }          
+
 
             camera.toZoom(-input.getScrollDeltaY() * 0.0035f);
 
-        }     
-//......................................................................................INPUT HANDLES
+        }  
+    }   
+    //......................................................................................INPUT HANDLES
 
-//CRATES AND OUTLINE DRAWING......................................................................................
+    //CRATES AND OUTLINE DRAWING......................................................................................
+    {
         glStencilMask(0x00);
 
         multiple_shader->setMatrices(camera.getProjectionMatrix(), camera.getViewMatrix());
@@ -407,12 +421,14 @@ int main(void) {
 
             glDepthFunc(GL_LESS);
         }
-//......................................................................................CRATES AND OUTLINE DRAWING
+    }
+    //......................................................................................CRATES AND OUTLINE DRAWING
 
         glStencilFunc(GL_ALWAYS, 1, 0xFF);
         glStencilMask(0xFF);
         glEnable(GL_DEPTH_TEST);
-
+    //LIGHT OBJECTS DRAWING......................................................................................
+    {
         light_shader->setMatrices(camera.getProjectionMatrix(), camera.getViewMatrix());
         for (size_t i = 0; i < lights.size(); i++)
         {
@@ -420,8 +436,10 @@ int main(void) {
 
             lights[i].draw();
         }
-
-//SPRITE RENDER......................................................................................
+    }
+    //......................................................................................LIGHT OBJECTS DRAWING
+    //SPRITE RENDER......................................................................................
+    { 
         glDisable(GL_CULL_FACE); 
 
         multiple_shader->use();
@@ -460,7 +478,8 @@ int main(void) {
         }
         //......................................................................................BLENDING
         glEnable(GL_CULL_FACE); 
-//......................................................................................SPRITE RENDER
+    }
+    //......................................................................................SPRITE RENDER
 
 
         window.swapBuffers();  
@@ -468,11 +487,7 @@ int main(void) {
         auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(frameEnd - frameStart);
         deltaTime = float(elapsed.count()) / 1'000'000.0;    
     }
-
-    texture0.unbind();
-    texture1.unbind();
-    texture2.unbind();
-    texture3.unbind();
+    glDeleteFramebuffers(1, &fbo);
 
     glfwTerminate();
     return 0;

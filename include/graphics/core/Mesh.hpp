@@ -30,7 +30,8 @@ class Mesh {
 
     public:
         Mesh();
+        ~Mesh();
         void createMesh(const MeshData& data, GLenum usage = GL_STATIC_DRAW);
-        void draw();
+        void draw() const;
 
 };

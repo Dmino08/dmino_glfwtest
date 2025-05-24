@@ -25,5 +25,5 @@ class Sprite {
         const UVRegion& getRegion() const;
 
         void generate();
-        void draw();
+        void draw() const;
 };
