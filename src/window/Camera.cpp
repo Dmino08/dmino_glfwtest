@@ -1,4 +1,5 @@
 #include "window/Camera.hpp"
+#include <iostream>
 
 #include <algorithm>
 
@@ -32,8 +33,8 @@ Camera::Camera(Window& window, CameraParams params) :
 void Camera::updateProjection() {      
     if (_type == CameraType::ORTHOGRAPHIC) {
 
-        float halfWidth = (window_.getWidth() * zoom_) / 2.0f;
-        float halfHeight = (window_.getHeight() * zoom_) / 2.0f;
+        float halfWidth = (window_.getWidth() / zoom_) / 2.0f;
+        float halfHeight = (window_.getHeight() / zoom_) / 2.0f;
 
         float left = -halfWidth;
         float right = halfWidth;
@@ -44,7 +45,8 @@ void Camera::updateProjection() {
     }
     else if (_type == CameraType::PERSPECTIVE) {
         float aspect = float(window_.getWidth()) / float(window_.getHeight());
-        projection_ = glm::perspective(fov_ / zoom_, aspect, zNear_, zFar_);
+        float adjustedFov = fov_ / zoom_;
+        projection_ = glm::perspective(glm::radians(adjustedFov), aspect, zNear_, zFar_);
     }        
 }
 
@@ -81,13 +83,16 @@ void Camera::rotate(float x, float y, float z) {
     updateVectors();
 }
 
-void Camera::toZoom(float deltaZoom, float min, float max) {
-    
+void Camera::toZoom(float deltaZoom, float min, float max) { 
     if (min > max) std::swap(min, max);
 
+    if (_type == CameraType::PERSPECTIVE)
+    {
+        min = 1.0f;
+    }
     float newZoom = zoom_ + deltaZoom;
-    
     zoom_ = std::clamp(newZoom, min, max);
+    
     updateProjection();
 }
 

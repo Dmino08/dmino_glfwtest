@@ -33,8 +33,17 @@
 
 #include "stb_image.h"
 
+#include "assets/BaseAsset.hpp"
+#include "assets/Assets.hpp"
+
 #include <random>
 #include <map>
+
+class TestAsset : public BaseAsset {
+    public:
+        void hello() {std::cout << "Hello" << std::endl;}
+};
+
 
 void updateTitle(Window& window, float timer, float& timerElapsed, float deltaTime) {
     timerElapsed += deltaTime;
@@ -73,7 +82,9 @@ int main(void) {
     }
 
     CameraParams cParams;
+    cParams.z_near = 0.1f;
     cParams.z_far = 15000.0f;
+    cParams.type = CameraType::PERSPECTIVE;
     Camera camera = Camera(window, cParams);
 
 // GENERATING TEXTURE
@@ -320,6 +331,31 @@ int main(void) {
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
+// CHECK MY ASSETS STUFF
+    Assets assets;
+    TestAsset tesset;
+    assets.addItem<TestAsset>(tesset, "test");
+
+    if (assets.hasItem<TestAsset>("test"))
+    {
+        std::cout << "It has test" << std::endl;
+    }
+    
+    auto test = assets.getItem<TestAsset>("test");
+    if (test)
+    {
+        TestAsset& assetRef = test->get();
+
+        // Теперь можно работать с assetRef
+        assetRef.hello();
+    }
+    assets.DeleteItem<TestAsset>("test");
+    if (!assets.hasItem<TestAsset>("test"))
+    {
+        std::cout << "It hasn't test" << std::endl;
+    }
+
+
 //......................................................................................SETTING OPENGL
 // Loop 
     while (!window.shouldClose())
@@ -379,7 +415,7 @@ int main(void) {
             }          
 
 
-            camera.toZoom(-input.getScrollDeltaY() * 0.0035f);
+            camera.toZoom(-input.getScrollDeltaY(), 1.0f, 20.0f);
 
         }  
     }   

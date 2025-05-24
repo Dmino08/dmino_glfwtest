@@ -70,7 +70,7 @@ class Camera {
 
         void rotate(float x, float y, float z);
 
-        void toZoom(float deltaZoom, float min = 1.0f, float max = 2.0f);
+        void toZoom(float deltaZoom, float min = 1.0f, float max = 10.0f);
 
         glm::mat4 getViewMatrix() const;
         const glm::mat4& getProjectionMatrix() const;
