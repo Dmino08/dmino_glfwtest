@@ -1,18 +1,18 @@
 #pragma once
 
-
+class Engine;
 
 class IScene {
+    protected:
+        Engine& engine_;
     public:
+        IScene(Engine& engine);
         virtual ~IScene() = 0;
-
-        virtual int init() = 0;
-
-        virtual void preUpdate() {}
-
-        virtual void update(float deltaTime) = 0;
-
-        virtual void afterUpdate() {}
+        virtual void init() {}
+        virtual void preUpdate(float delta) {}
+        virtual void update(float delta) {} 
+        virtual void afterUpdate(float delta) {}
 };
 
+inline IScene::IScene(Engine& engine)  : engine_(engine) {}
 inline IScene::~IScene() {}

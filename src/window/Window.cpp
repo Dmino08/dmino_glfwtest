@@ -159,6 +159,11 @@ void Window::swapBuffers() const {
     glfwSwapBuffers(handle_);
 }
 
+void Window::makeContextCurrent() const {
+    glfwMakeContextCurrent(handle_);
+}
+
+
 void Window::pollEvents() {
     input_.update();
 }

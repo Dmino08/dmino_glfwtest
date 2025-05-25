@@ -6,14 +6,11 @@
 #include <memory>
 #include <optional>
 
-class BaseAsset;
 
-using assets_map = std::unordered_map<std::type_index, std::unordered_map<std::string, std::unique_ptr<BaseAsset>>>;
+using assets_map = std::unordered_map<std::type_index, std::unordered_map<std::string, std::shared_ptr<void>>>;
 
-template<typename T>
-constexpr void assert_is_base_asset() {
-    static_assert(std::is_base_of<BaseAsset, T>::value, "T must inherit from BaseAsset");
-}
+template<typename type>
+using asset = std::shared_ptr<type>;
 
 class Assets {
 
@@ -21,14 +18,13 @@ class Assets {
 
     public:
         template<typename T>
-        void addItem(const T& item, const std::string& name) {
-            assert_is_base_asset<T>();
-            assets[std::type_index(typeid(T))][name] = std::make_unique<T>(item);
+        void addItem(const std::shared_ptr<T>& item, const std::string& name) {
+
+            assets[std::type_index(typeid(T))][name] = item;
         }
 
         template<typename T>
         void DeleteItem(const std::string& name) {
-            assert_is_base_asset<T>();
 
             auto type_it = assets.find(std::type_index(typeid(T)));
             if (type_it == assets.end()) return;
@@ -41,25 +37,21 @@ class Assets {
         }
 
         template<typename T>
-        std::optional<std::reference_wrapper<T>> getItem(const std::string& name) const {
-            assert_is_base_asset<T>();
+        std::shared_ptr<T> getItem(const std::string& name) const {
 
             auto type_it = assets.find(std::type_index(typeid(T)));
-            if (type_it == assets.end()) return std::nullopt;  
+            if (type_it == assets.end()) return nullptr;  
 
             auto& inner_map = type_it->second;
 
             auto item_it = inner_map.find(name);
-            if (item_it == inner_map.end()) return std::nullopt;
+            if (item_it == inner_map.end()) return nullptr;
 
-            T& ref = *static_cast<T*>(item_it->second.get());
-
-            return std::ref(ref);
+            return std::static_pointer_cast<T>(item_it->second);
         }
 
         template<typename T>
         bool hasItem(const std::string& name) const {
-            assert_is_base_asset<T>();
 
             auto type_it = assets.find(std::type_index(typeid(T)));
             if (type_it == assets.end()) return false;  

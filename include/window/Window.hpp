@@ -45,6 +45,8 @@ class Window {
         bool shouldClose() const;
         void swapBuffers() const;
 
+        void makeContextCurrent() const;
+
         void pollEvents();
 
         void setTitle(const std::string& title);
