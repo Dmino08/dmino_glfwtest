@@ -64,8 +64,42 @@ void countDelta(float& delta) {
 
 class MainScene : public IScene {
     public:
+
         MainScene(Engine& engine) : IScene(engine) {}
+        
+        float time = 0.0f;
+        float all_time = 0.0f;
+
+        void preUpdate(float delta) override {
+            time += delta;
+            all_time += delta;
+            if (time > 1.0f) {
+                time = 0.0f;
+                std::cout << "Hello 1: " << all_time << std::endl;
+            }
+            
+        }
 };
+
+class SecondScene : public IScene {
+    public:
+
+        SecondScene(Engine& engine) : IScene(engine) {}
+        
+        float time = 0.0f;
+        float all_time = 0.0f;
+
+        void preUpdate(float delta) override {
+            time += delta;
+            all_time += delta;
+            if (time > 1.0f) {
+                time = 0.0f;
+                std::cout << "Hello 2: " << all_time << std::endl;
+            }
+            
+        }
+};
+
 
 
 int main(void) {
@@ -84,10 +118,14 @@ int main(void) {
     auto wind1 = std::make_unique<Window>(width, height, "Window1");
     auto wind2 = std::make_unique<Window>(width, height, "Window2");
 
-    engine.addScene<MainScene>("scene0");
+    engine.addScene<MainScene>("main");
+    engine.addScene<SecondScene>("second");
 
     engine.addWindow("wind1", std::move(wind1));
     engine.addWindow("wind2", std::move(wind2));
+
+    engine.attachSceneToWindow("main", "wind1");
+    engine.attachSceneToWindow("second", "wind2");
 
     auto window1 = engine.getWindow("wind1");
     if (window1) {
@@ -98,7 +136,7 @@ int main(void) {
         std::cout << "Window1 is not here\n";
     }
     
-
+    engine.run();
 
 
     Window window = Window(width, height, "Window");
@@ -121,7 +159,7 @@ int main(void) {
     float deltaTime = 0.016f;
     int FPS = 120;
 
-    using clock = std::chrono::steady_clock;
+    using clock = std::chrono::high_resolution_clock;
 
     auto targetDelta = std::chrono::microseconds(1'000'000 / FPS);
     std::cout << "TARGET: " << targetDelta.count() << std::endl;

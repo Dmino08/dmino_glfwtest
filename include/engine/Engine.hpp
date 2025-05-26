@@ -1,6 +1,9 @@
 #pragma once
 
 #include "assets/Assets.hpp"
+#include "core/Time.hpp"
+
+
 #include <functional>
 
 
@@ -9,13 +12,12 @@ class IScene;
 
 class Engine {
     Assets assets;
+    core::Time time;
 
-    std::unordered_map<std::string, std::unique_ptr<Window>> windows_;
-    std::vector<std::unique_ptr<IScene>> scenes_;
-
+    std::unordered_map<std::string, 
+                       std::pair<std::unique_ptr<Window>, 
+                       std::unique_ptr<IScene>>> pairs_;
     std::unordered_map<std::string, std::function<std::unique_ptr<IScene>()>> factories_;
-    
-    std::unordered_map<std::string, std::string> pairs;
 
     bool shouldEnd = false;
 
@@ -31,6 +33,8 @@ class Engine {
         void attachSceneToWindow(const std::string& scene, const std::string& window);
 
         std::optional<std::reference_wrapper<Window>> getWindow(const std::string& name);
+
+        Assets& getAssets();
 
         void run();
 };

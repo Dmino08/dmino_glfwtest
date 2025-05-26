@@ -14,7 +14,7 @@ unsigned int Shader::getUniformLocation(const std::string& name) {
     {
         unsigned int location = glGetUniformLocation(ID_, name.c_str());
         if (location == -1) {
-            logger.log(Logger::WARNING, "Shader doesn't have the uniform variable " + name);
+            core::logger.log(core::Logger::WARNING, "Shader doesn't have the uniform variable " + name);
         }
         else {
             uniformLocations_.try_emplace(name, location);
@@ -157,7 +157,7 @@ std::unique_ptr<Shader> Shader::create(const char* vertex_path, const char* frag
     }
     catch(const std::ifstream::failure& e)
     {
-        logger.log(Logger::ERROR, "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ: " + std::string(e.what()));
+        core::logger.log(core::Logger::ERROR, "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ: " + std::string(e.what()));
     }
 
     const char* vShaderCode = vertexCode.c_str();
@@ -177,7 +177,7 @@ std::unique_ptr<Shader> Shader::create(const char* vertex_path, const char* frag
     {
         glGetShaderInfoLog(vertex, 512, nullptr, infoLog);
 
-        logger.log(Logger::ERROR, "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" + std::string(infoLog));
+        core::logger.log(core::Logger::ERROR, "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" + std::string(infoLog));
         return nullptr;
     }
     
@@ -191,7 +191,7 @@ std::unique_ptr<Shader> Shader::create(const char* vertex_path, const char* frag
     {
         glGetShaderInfoLog(fragment, 512, nullptr, infoLog);
 
-        logger.log(Logger::ERROR, "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" + std::string(infoLog));
+        core::logger.log(core::Logger::ERROR, "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" + std::string(infoLog));
         glDeleteShader(vertex);
         return nullptr;
     }
@@ -207,7 +207,7 @@ std::unique_ptr<Shader> Shader::create(const char* vertex_path, const char* frag
     {
         glGetProgramInfoLog(id, 512, nullptr, infoLog);
 
-        logger.log(Logger::ERROR, "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" + std::string(infoLog));
+        core::logger.log(core::Logger::ERROR, "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" + std::string(infoLog));
         glDeleteShader(vertex);
         glDeleteShader(fragment);
         

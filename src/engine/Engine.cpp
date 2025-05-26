@@ -5,28 +5,68 @@
 
 
 void Engine::addWindow(const std::string& name, std::unique_ptr<Window>&& window) {
-    windows_.insert_or_assign(name, std::move(window));
+    pairs_[name].first = std::move(window);
+    pairs_[name].second = nullptr;
 }
 
 void Engine::attachSceneToWindow(const std::string& scene, const std::string& window) {
-    pairs.insert_or_assign(window, scene);
+    if (factories_.find(scene) != factories_.end())
+    {
+        pairs_[window].second = factories_[scene]();
+    }
 }
 
-
 std::optional<std::reference_wrapper<Window>> Engine::getWindow(const std::string& name) {
-    auto it = windows_.find(name);
+    auto it = pairs_.find(name);
 
-    if (it != windows_.end()){
-        return std::ref(*it->second.get());
+    if (it != pairs_.end()){
+        return std::ref(*it->second.first.get());
     }
     else {
         return std::nullopt;
     }
 }
 
+Assets& Engine::getAssets() {
+    return assets;
+}
+
 void Engine::run() {
     while (!shouldEnd)
     {
+        time.update();
+        float delta = time.getDeltaTime();
+        
+        for (auto it = pairs_.begin(); it != pairs_.end(); )
+        {
+            auto& [name, pair] = *it;
+            
+            if (!pair.first->shouldClose()) {
+                
+                pair.second->preUpdate(delta);
+                pair.first->makeContextCurrent();
+
+                glClearColor(0.42, 0.42, 0.6, 1.0);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+                pair.first->pollEvents();
+
+                pair.second->update(delta);
+
+                pair.first->swapBuffers();
+
+                pair.second->afterUpdate(delta);
+                ++it;
+            }
+            else {
+                it = pairs_.erase(it);
+            }
+        }
+
+        if (pairs_.empty())
+        {
+            shouldEnd = true;
+        }
         
     }
 }

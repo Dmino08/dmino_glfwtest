@@ -80,13 +80,13 @@ void Window::frameBufferSizeCallback(GLFWwindow* window, int width, int height) 
 
 void Window::initGLAD() {
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        logger.log(Logger::ERROR, "GLAD is not initialized"); 
+        core::logger.log(core::Logger::ERROR, "GLAD is not initialized"); 
         return;
     }
     is_glad_initialized_ = true;
 
     #ifdef DEBUG_MOD
-        logger.log(Logger::INFO, "GLAD is initialized"); 
+        core::logger.log(core::Logger::INFO, "GLAD is initialized"); 
     #endif
 }
 
@@ -111,11 +111,11 @@ Window::Window(int width, int height, std::string title, WindowType type) :
         handle_ = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
 
         if(!handle_) {
-            logger.log(Logger::ERROR, "Window is not created");
+            core::logger.log(core::Logger::ERROR, "Window is not created");
             return;
         } 
         #ifdef DEBUG_MOD
-            logger.log(Logger::INFO, "GLFW Window is created"); 
+            core::logger.log(core::Logger::INFO, "GLFW Window is created"); 
         #endif
 
         glfwMakeContextCurrent(handle_);
@@ -206,11 +206,11 @@ InputManager& Window::getInput() {
 
 int Window::initGLFW() {
     if(!glfwInit()) {
-        logger.log(Logger::ERROR, "GLFW is not initialized");
+        core::logger.log(core::Logger::ERROR, "GLFW is not initialized");
         return -1;
     }
     is_glfw_initialized_ = true;
-    logger.log(Logger::INFO, "GLFW is initialized"); 
+    core::logger.log(core::Logger::INFO, "GLFW is initialized"); 
     return 0;
 }
 

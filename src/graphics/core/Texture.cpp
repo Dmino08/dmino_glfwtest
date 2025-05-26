@@ -1,7 +1,6 @@
 #include "graphics/core/Texture.hpp"
 #include "stb_image.h"
 
-#include "Core/Logger.hpp"
 #include "graphics/core/Image.hpp"
 
 

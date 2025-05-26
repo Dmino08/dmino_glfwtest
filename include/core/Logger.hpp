@@ -11,6 +11,8 @@
     #define debugPrint(x) std::cout << x << std::endl
 #endif
 
+namespace core {
+
 class Logger {
     std::ofstream current_log_;
     std::ofstream log_;
@@ -25,3 +27,5 @@ class Logger {
 };
 
 extern Logger logger;
+
+}

@@ -30,7 +30,7 @@ int Image::load(const std::string& path) {
 
     if (!data_) {
         std::string log = "Image at the path: [" + path + "] wasn't loaded";
-        logger.log(Logger::WARNING, log);
+        core::logger.log(core::Logger::WARNING, log);
 
         data_ = new unsigned char[error_size];
         std::memcpy(data_, error_data, error_size);
@@ -44,7 +44,7 @@ int Image::load(const std::string& path) {
     else if (nrChannels_ == 3) format_ = GL_RGB;
     else if (nrChannels_ == 4) format_ = GL_RGBA;
     else {
-        logger.log(Logger::WARNING, "Unknown channel count: " + std::to_string(nrChannels_));
+        core::logger.log(core::Logger::WARNING, "Unknown channel count: " + std::to_string(nrChannels_));
         complete_code = 2;
     }
     

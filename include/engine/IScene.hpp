@@ -1,12 +1,14 @@
 #pragma once
 
 class Engine;
+#include <string>
 
 class IScene {
     protected:
         Engine& engine_;
     public:
         IScene(Engine& engine);
+
         virtual ~IScene() = 0;
         virtual void init() {}
         virtual void preUpdate(float delta) {}
