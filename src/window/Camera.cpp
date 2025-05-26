@@ -44,7 +44,7 @@ void Camera::updateProjection() {
         projection_ = glm::ortho(left, right, bottom, top, zNear_, zFar_);
     }
     else if (_type == CameraType::PERSPECTIVE) {
-        float aspect = float(window_.getWidth()) / float(window_.getHeight());
+        float aspect = (window_.getHeight() != 0) ? (float)window_.getWidth() / (float)window_.getHeight() : 1.0f;
         float adjustedFov = fov_ / zoom_;
         projection_ = glm::perspective(glm::radians(adjustedFov), aspect, zNear_, zFar_);
     }        

@@ -47,7 +47,7 @@ class Window {
 
         void makeContextCurrent() const;
 
-        void pollEvents();
+        void eventsUpdate();
 
         void setTitle(const std::string& title);
         void setCursorMode(int mode);

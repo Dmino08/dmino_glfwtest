@@ -31,8 +31,6 @@ void InputManager::update() {
     deltaY_ = 0.0f;
     scrollXdelta_ = 0.0f;
     scrollYdelta_ = 0.0f;
-
-    glfwPollEvents();
 }
 
 bool InputManager::pressed(int key) {

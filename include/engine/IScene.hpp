@@ -1,7 +1,10 @@
 #pragma once
 
-class Engine;
+
 #include <string>
+
+class Engine;
+class Window;
 
 class IScene {
     protected:
@@ -10,7 +13,7 @@ class IScene {
         IScene(Engine& engine);
 
         virtual ~IScene() = 0;
-        virtual void init() {}
+        virtual void init(Window& window) {}
         virtual void preUpdate(float delta) {}
         virtual void update(float delta) {} 
         virtual void afterUpdate(float delta) {}

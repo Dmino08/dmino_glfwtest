@@ -159,13 +159,13 @@ void main() {
     //     discard;
 
     vec3 dir = calculateDirectionalLight(texture_color);
-    vec3 point = calculatePointLights(texture_color);
+//    vec3 point = calculatePointLights(texture_color);
 
     vec3 spot= vec3(0.0);
     if (on_flash_light) {
         spot = calculateSpotLight(texture_color);
     }
 // result
-    vec3 result = dir + point + spot;
+    vec3 result = dir + spot;
     frag_color = vec4(result, alfa);
 }

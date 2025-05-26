@@ -22,6 +22,9 @@ class Engine {
     bool shouldEnd = false;
 
     public:
+        Engine();
+        ~Engine();
+
         template<typename T>
         void addScene(const std::string& name) {
             static_assert(std::is_base_of<IScene, T>::value, "T must inherit from IScene");

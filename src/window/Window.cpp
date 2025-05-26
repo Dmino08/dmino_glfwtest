@@ -73,6 +73,7 @@ void Window::frameBufferSizeCallback(GLFWwindow* window, int width, int height) 
     
     Window* ptr = static_cast<Window*>(glfwGetWindowUserPointer(window));
     
+    ptr->makeContextCurrent();
     ptr->width_ = width;
     ptr->height_ = height;
     glViewport(0, 0, width, height);
@@ -145,8 +146,10 @@ Window::Window(int width, int height, std::string title, WindowType type) :
 
 
 Window::~Window() {
-    glfwDestroyWindow(handle_);
-    handle_ = nullptr;
+    if (handle_ != nullptr) {
+        glfwDestroyWindow(handle_);
+        handle_ = nullptr;
+    }
 }
 
 
@@ -164,7 +167,7 @@ void Window::makeContextCurrent() const {
 }
 
 
-void Window::pollEvents() {
+void Window::eventsUpdate() {
     input_.update();
 }
 
