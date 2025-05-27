@@ -73,10 +73,24 @@ void Window::frameBufferSizeCallback(GLFWwindow* window, int width, int height) 
     
     Window* ptr = static_cast<Window*>(glfwGetWindowUserPointer(window));
     
-    ptr->makeContextCurrent();
-    ptr->width_ = width;
-    ptr->height_ = height;
-    glViewport(0, 0, width, height);
+    GLFWwindow* prev = glfwGetCurrentContext();
+
+    if (ptr->handle_ != prev)
+    {
+        ptr->makeContextCurrent();
+        ptr->resized_ = true;
+        ptr->width_ = width;
+        ptr->height_ = height;
+        glViewport(0, 0, width, height);
+
+        glfwMakeContextCurrent(prev);
+    }
+    else {
+        ptr->resized_ = true;
+        ptr->width_ = width;
+        ptr->height_ = height;
+        glViewport(0, 0, width, height);        
+    }
 }
 
 void Window::initGLAD() {
@@ -120,6 +134,7 @@ Window::Window(int width, int height, std::string title, WindowType type) :
         #endif
 
         glfwMakeContextCurrent(handle_);
+        
 
         if (!is_glad_initialized_) {
             initGLAD();
@@ -169,6 +184,7 @@ void Window::makeContextCurrent() const {
 
 void Window::eventsUpdate() {
     input_.update();
+    resized_ = false;
 }
 
 void Window::setTitle(const std::string& title) {
