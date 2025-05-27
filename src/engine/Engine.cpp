@@ -2,6 +2,9 @@
  
 #include "window/Window.hpp"
 #include "engine/IScene.hpp"
+#include "core/Logger.hpp"
+
+#include <iostream>
 
 Engine::Engine() {
     Window::initGLFW();  
@@ -19,9 +22,11 @@ void Engine::addWindow(const std::string& name, std::unique_ptr<Window>&& window
 void Engine::attachSceneToWindow(const std::string& scene, const std::string& window) {
     if (factories_.find(scene) != factories_.end())
     {
-        pairs_[window].first->makeContextCurrent();
-        pairs_[window].second = factories_[scene]();
-        pairs_[window].second->init(*pairs_[window].first);
+        auto& pair = pairs_[window];
+
+        pair.first->makeContextCurrent();
+        pair.second = factories_[scene]();
+        pair.second->init(*pair.first);
     }
 }
 
@@ -41,10 +46,17 @@ Assets& Engine::getAssets() {
 }
 
 void Engine::run() {
+    int frames = 0;
+    float timer = 0.0f;
     while (!shouldEnd)
     {
         time.update();
         float delta = time.getDeltaTime();
+    //    timer += delta;
+
+        if (timer >= 60.0f) {
+            break;
+        }
         
         glfwPollEvents();
 
@@ -52,27 +64,33 @@ void Engine::run() {
         {
             auto& [name, pair] = *it;
 
-            pair.first->makeContextCurrent();
+            if (pairs_.size() > 1) {
+                pair.first->makeContextCurrent();
+            }     
             
             if (!pair.first->shouldClose()) {
-                
+
                 pair.second->preUpdate(delta);
 
                 glClearColor(0.42, 0.42, 0.6, 1.0);
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
                 pair.second->update(delta);
 
-                pair.first->swapBuffers();
-
                 pair.second->afterUpdate(delta);
+
+                pair.first->swapBuffers();
                 
                 pair.first->eventsUpdate();
 
                 ++it;
             }
             else {
-                it = pairs_.erase(it);
+                it = pairs_.erase(it);  
+
+                if (!pairs_.empty()) {
+                    pairs_.begin()->second.first->makeContextCurrent();
+                }                      
             }
         }
 
@@ -80,6 +98,7 @@ void Engine::run() {
         {
             shouldEnd = true;
         }
-        
+        frames++;
     }
+    core::logger.log(core::Logger::INFO, std::to_string(frames));
 }

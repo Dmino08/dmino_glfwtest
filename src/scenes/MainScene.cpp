@@ -94,7 +94,7 @@ void MainScene::init(Window& wind) {
     mult_shader->uniform1i("on_flash_light", true);
 
     // TEXTURE BINDING
-    glActiveTexture(GL_TEXTURE0);
+    glActiveTexture(GL_TEXTURE1);
     texture0.bind();
 
 }
@@ -160,7 +160,7 @@ void MainScene::update(float delta) {
     mult_shader->uniform3f("spot_light.position", camera->getPos());
     mult_shader->uniform3f("spot_light.direction", camera->getFront());
 
-    mult_shader->uniform1i("material.diffuse", 0);
+    mult_shader->uniform1i("material.diffuse", 1);
     mult_shader->uniform1i("use_specular_map", false);    
 
     mult_shader->uniformMatrix("model", floor->transform.getModel());

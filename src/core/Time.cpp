@@ -3,13 +3,12 @@
 namespace core {
 
     Time::Time() {
-        end = clock::now();
+        last = clock::now();
     }
     void Time::update() {
-        auto start = clock::now();
-        auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(start - end);
-        deltaTime = elapsed.count() / 1'000'000.0f;
-        end = start;
+        auto now = clock::now();
+        deltaTime = std::chrono::duration<float>(now - last).count();
+        last = now;
     }
     float Time::getDeltaTime() {
         return deltaTime;
