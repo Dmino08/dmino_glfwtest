@@ -8,7 +8,7 @@ bool Voxel::meshGenerated_ = false;
 void Voxel::generateMesh() {
     
     // Vertex data
-    std::vector<Vertex> cubeVertices = {
+    std::vector<SimpleVertex> cubeVertices = {
         // ЗАДНЯЯ грань (нормаль: -Z)
         {{-0.5f, -0.5f, -0.5f},  { 0.0f,  0.0f, -1.0f},  {0.0f, 0.0f}},
         {{ 0.5f, -0.5f, -0.5f},  { 0.0f,  0.0f, -1.0f},  {1.0f, 0.0f}},
@@ -54,10 +54,8 @@ void Voxel::generateMesh() {
         16,17,18, 16,18,19,     // нижняя
         20,21,22, 20,22,23      // верхняя
     };
-
-    MeshData meshData{std::move(cubeVertices), std::move(cubeIndices)}; 
     
-    Voxel::mesh_.createMesh(meshData);
+    Voxel::mesh_.create<SimpleVertex>(MeshData<SimpleVertex>{cubeVertices, cubeIndices});
     meshGenerated_ = true;
 }
 

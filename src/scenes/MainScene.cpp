@@ -94,7 +94,7 @@ void MainScene::init(Window& wind) {
     mult_shader->uniform1i("on_flash_light", true);
 
     // TEXTURE BINDING
-    glActiveTexture(GL_TEXTURE1);
+    texture0.activeUnit(1);
     texture0.bind();
 
 }
@@ -149,8 +149,10 @@ void MainScene::update(float delta) {
         }
 
         if(input->justPressed(GLFW_KEY_F)) {
+            std::cout << "CONTEXT: "<< window->isContext() << std::endl;
             vsync = !vsync;
             glfwSwapInterval(vsync ? 1 : 0);
+            std::cout << "VSYNC: "<< vsync << std::endl;
         }  
     }   
     camera->toZoom(-input->getScrollDeltaY(), 1.0f, 20.0f);

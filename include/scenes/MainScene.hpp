@@ -40,7 +40,7 @@ class MainScene : public IScene {
         Texture texture0;
 
         float camera_speed = 10.f;
-        bool vsync = true;
+        bool vsync = false;
         bool onFlashLight = true;
 
         void init(Window& window) override;

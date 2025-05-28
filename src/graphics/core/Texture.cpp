@@ -34,6 +34,9 @@ int Texture::getHeight() const {
     return height_;
 }
 
+int Texture::getUnitId() const {
+    return unit_;
+}
 
 void Texture::create(
     const Image& image, 
@@ -79,4 +82,9 @@ void Texture::create(
     width_ = image.getWidth(); 
     height_ = image.getHeight(); 
     target_ = params.target;
+}
+
+void Texture::activeUnit(int index) {
+    glActiveTexture(GL_TEXTURE0 + index);
+    unit_ = index;
 }

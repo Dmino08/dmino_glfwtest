@@ -31,7 +31,7 @@ void Sprite::generate() {
     glm::vec2 uv_min = region_.getUVMin();
     glm::vec2 uv_max = region_.getUVMax();
 
-    std::vector<Vertex> vertices = {
+    std::vector<SimpleVertex> vertices = {
     //        position              normal            uv_coord
         {{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {uv_min.x, uv_min.y}},
         {{ 0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {uv_max.x, uv_min.y}}, 
@@ -43,7 +43,8 @@ void Sprite::generate() {
         0, 1, 2,
         2, 3, 0
     };    
-    mesh_.createMesh(MeshData({vertices, indices}));
+
+    mesh_.create<SimpleVertex>(MeshData<SimpleVertex>({vertices, indices}));
 
 }
 

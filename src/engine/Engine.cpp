@@ -6,14 +6,6 @@
 
 #include <iostream>
 
-Engine::Engine() {
-    Window::initGLFW();  
-}
-
-Engine::~Engine() {
-    glfwTerminate();
-}
-
 void Engine::addWindow(const std::string& name, std::unique_ptr<Window>&& window) {
     pairs_[name].first = std::move(window);
     pairs_[name].second = nullptr;
@@ -52,13 +44,8 @@ void Engine::run() {
     {
         time.update();
         float delta = time.getDeltaTime();
-    //    timer += delta;
 
-        if (timer >= 60.0f) {
-            break;
-        }
-        
-        glfwPollEvents();
+        glfwPollEvents(); 
 
         for (auto it = pairs_.begin(); it != pairs_.end(); )
         {

@@ -4,24 +4,33 @@
 #include "engine/Engine.hpp"
 #include "scenes/MainScene.hpp"
 
+class FrameBuffer {
+    public:
+
+};
+
+
 int main(void) {
 
     std::cout << PROJECT_VERSION_MAJOR << "." << PROJECT_VERSION_MINOR << std::endl;
-
+    
     int width = 1280;
     int height = 720;
 
-    Engine engine;
+    Window::initGLFW();
+    {
+        Engine engine;
 
-    auto wind1 = std::make_unique<Window>(width, height, "Window1");
-    
-    engine.addScene<MainScene>("main");
+        auto wind1 = std::make_unique<Window>(width, height, "Window1");
+        
+        engine.addScene<MainScene>("main");
 
-    engine.addWindow("window1", std::move(wind1));
+        engine.addWindow("window1", std::move(wind1));
 
-    engine.attachSceneToWindow("main", "window1");
+        engine.attachSceneToWindow("main", "window1");
 
-    engine.run();
+        engine.run();
+    }
 
 
     Window fboWindow = Window(width, height, "FBOWindow");
@@ -38,8 +47,8 @@ int main(void) {
             1.0f, -1.0f,  1.0f, 0.0f,
             1.0f,  1.0f,  1.0f, 1.0f
         };    
-
-    MainScene main(engine);
+    Engine engine1;
+    u_ptr<MainScene> main = makeU<MainScene>(engine1);
     
 
     core::Time time;
@@ -80,13 +89,12 @@ int main(void) {
         std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    main.init(fboWindow);      
+    main->init(fboWindow);      
 
     screen_shader->use();
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
     screen_shader->uniform1i("screen_texture", 0);
-      
 
     while (!fboWindow.shouldClose())
     {
@@ -103,23 +111,17 @@ int main(void) {
             std::cout << "RESISED" << std::endl;
             glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, fboWindow.getWidth(), fboWindow.getHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);     
+            
             
             glBindRenderbuffer(GL_RENDERBUFFER, rbo);
             glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, fboWindow.getWidth(), fboWindow.getHeight()); // use a single renderbuffer object for both a depth AND stencil buffer.
-            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
-            // now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
-            if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-                std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
 
         glClearColor(0.42, 0.42, 0.6, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-        main.update(time.getDeltaTime());
+        main->update(time.getDeltaTime());
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glDisable(GL_DEPTH_TEST);
@@ -137,6 +139,6 @@ int main(void) {
         fboWindow.eventsUpdate();
     }
     
-
+    Window::terminateGLFW();
     return 0;
 }

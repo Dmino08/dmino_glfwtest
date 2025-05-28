@@ -1,37 +1,46 @@
 #pragma once
 
-
-#include <glad/glad.h>
-#include <glm/glm.hpp>
-
-#include <vector>
 #include "typedefs.hpp"
 
+#include <glad/glad.h>
+#include <vector>
+#include <array>
+#include <glm/glm.hpp>
 
+struct VertexAttribute {
+    GLuint index;
+    GLint size;
+    GLenum type;
+    GLboolean normalized;
+    GLsizei stride;
+    size_t offset;
+};
 
-struct Vertex {
+struct SimpleVertex {
     glm::vec3 position;
     glm::vec3 normal;
     glm::vec2 uv_coord;
+
+    static const std::array<VertexAttribute, 3> attrs;
 };
 
+template <typename V>
 struct MeshData {
-    std::vector<Vertex> vertices;
+    std::vector<V> vertices;
     std::vector<uint> indices;
 };
 
-
 class Mesh {
-    uint vao_, vbo_, ebo_;
-
-    MeshData data_;
-    uint verticeCount_;
-    uint indiceCount_;
-
+    GLuint vao_, vbo_, ebo_;
+    uint verticeCount_, indiceCount_;
     public:
         Mesh();
         ~Mesh();
-        void createMesh(const MeshData& data, GLenum usage = GL_STATIC_DRAW);
-        void draw() const;
 
+        template <typename V>
+        void create(const MeshData<V>& data, GLenum usage = GL_STATIC_DRAW);
+
+        void draw() const;
 };
+
+#include "graphics/core/Mesh.inl"

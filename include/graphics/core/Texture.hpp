@@ -28,19 +28,24 @@ class Texture {
     GLenum target_;
     int width_, height_;
 
+    int unit_;
+
     public:
         std::string type;
         Texture();
         ~Texture();
-
+        
         void bind() const;
         void unbind() const;
 
         int getWidth() const;
         int getHeight() const;
+        int getUnitId() const;
 
         void create(
             const Image& image,
             TextureParams params = TextureParams()
         );
+
+        void activeUnit(int index);
 };

@@ -46,6 +46,7 @@ class Window {
         void swapBuffers() const;
 
         void makeContextCurrent() const;
+        bool isContext() const;
 
         void eventsUpdate();
 
@@ -63,5 +64,6 @@ class Window {
         InputManager& getInput();
 
         static int initGLFW();
+        static void terminateGLFW();
         
 };

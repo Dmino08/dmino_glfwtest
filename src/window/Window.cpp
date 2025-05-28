@@ -181,6 +181,9 @@ void Window::makeContextCurrent() const {
     glfwMakeContextCurrent(handle_);
 }
 
+bool Window::isContext() const{
+    return handle_ == glfwGetCurrentContext();
+}
 
 void Window::eventsUpdate() {
     input_.update();
@@ -233,3 +236,6 @@ int Window::initGLFW() {
     return 0;
 }
 
+void Window::terminateGLFW() {
+    glfwTerminate();
+}

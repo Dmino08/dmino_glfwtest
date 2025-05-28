@@ -12,7 +12,7 @@ class Canvas {
 
     Mesh mesh_;
 
-    std::vector<Vertex> vertices_;
+    std::vector<SimpleVertex> vertices_;
     std::vector<uint> indices_;
 
     size_t vertex_count_;
