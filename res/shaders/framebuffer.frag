@@ -5,7 +5,7 @@ out vec4 frag_color;
 in vec2 coord;
 
 uniform sampler2D screen_texture;
-const float offset = 1.0 / 300.0;
+// const float offset = 1.0 / 300.0;
 
 void main() {
     // PIXEL PERFECT
@@ -38,6 +38,13 @@ void main() {
     // 2.0 / 16, 4.0 / 16, 2.0 / 16,
     // 1.0 / 16, 2.0 / 16, 1.0 / 16
     // );
+    // My kernel
+    // float blur = 20.0;
+    // float kernel[9] = float[](
+    // -2.0, -1.0, 0.0, 
+    // -1.0, 1.0, 1.0,
+    // 0.0, 1.0, 2.0
+    // );
 
     // vec3 sampleTex[9];
     // for(int i = 0; i < 9; i++)
@@ -51,9 +58,9 @@ void main() {
     // frag_color = vec4(col, 1.0);
 
     // BLACK AND WHITE
-    // vec3 color = vec3(texture(screen_texture, coord));
-    // float average = 0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b;
-    // frag_color = vec4(vec3(average), 1.0);
+    vec3 color = vec3(texture(screen_texture, coord));
+    float average = 0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b;
+    frag_color = vec4(vec3(average), 1.0);
 
-    frag_color = texture(screen_texture, coord);
+    // frag_color = texture(screen_texture, coord);
 }

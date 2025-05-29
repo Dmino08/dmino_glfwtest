@@ -7,6 +7,9 @@
 #include "window/Camera.hpp"
 #include "graphics/core/Sprite.hpp"
 #include "graphics/core/Shader.hpp"
+#include "graphics/render/FrameBuffer.hpp"
+#include "test/Voxel.hpp"
+#include "graphics/core/CubeMap.hpp"
 
 
 class Assets;
@@ -31,11 +34,17 @@ class MainScene : public IScene {
 
         u_ptr<Camera> camera;
 
+        u_ptr<FrameBuffer> fbo;
+
         u_ptr<Shader> mult_shader;
+        u_ptr<Shader> screen_shader;
+        u_ptr<Shader> skybox_shader;
 
         asset<Image> image0;
 
         u_ptr<Sprite> floor;
+        u_ptr<CubeMap> cube_map;
+        u_ptr<Voxel> skybox;
 
         Texture texture0;
 

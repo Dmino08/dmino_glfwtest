@@ -5,11 +5,8 @@
 #include <ctime>
 #include <fstream>
 
-#define DEBUG_MOD
+#define DEBUG_MODE
 
-#ifdef DEBUG_MOD
-    #define debugPrint(x) std::cout << x << std::endl
-#endif
 
 namespace core {
 

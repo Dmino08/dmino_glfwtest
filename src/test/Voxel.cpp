@@ -1,9 +1,11 @@
 #include "test/Voxel.hpp"
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
 
 Mesh Voxel::mesh_ = Mesh();
-bool Voxel::meshGenerated_ = false;
-
+GLFWwindow* Voxel::current_context_ = nullptr;
 
 void Voxel::generateMesh() {
     
@@ -56,18 +58,18 @@ void Voxel::generateMesh() {
     };
     
     Voxel::mesh_.create<SimpleVertex>(MeshData<SimpleVertex>{cubeVertices, cubeIndices});
-    meshGenerated_ = true;
 }
 
 Voxel::Voxel() : transform(glm::vec3(0.0f)) {
-    if (!meshGenerated_)
+    if (current_context_ != glfwGetCurrentContext())
     {
+        current_context_ = glfwGetCurrentContext();
         Voxel::generateMesh();
     }
 }
 
 Voxel::Voxel(const glm::vec3& position) : transform(position) {
-    if (!meshGenerated_)
+    if (current_context_ != glfwGetCurrentContext())
     {
         Voxel::generateMesh();
     }

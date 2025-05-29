@@ -3,11 +3,13 @@
 #include "graphics/core/Mesh.hpp"
 #include "utils/Transform.hpp"
 
+class GLFWwindow;
+
 class Voxel {
     static Mesh mesh_;
+    static GLFWwindow* current_context_;
 
     static void generateMesh();
-    static bool meshGenerated_;
 
     public:
         util::Transform transform;

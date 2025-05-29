@@ -1,5 +1,10 @@
 #include "graphics/core/Mesh.hpp"
+
 #include <cstddef>
+
+#ifdef DEBUG_MODE
+    int generatedMeshes = 0;
+#endif
 
 const std::array<VertexAttribute, 3> SimpleVertex::attrs = {{
     {0, 3, GL_FLOAT, GL_FALSE, sizeof(SimpleVertex), offsetof(SimpleVertex, position)},

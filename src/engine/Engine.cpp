@@ -39,7 +39,7 @@ Assets& Engine::getAssets() {
 
 void Engine::run() {
     int frames = 0;
-    float timer = 0.0f;
+    float elapsed = 0.0f;
     while (!shouldEnd)
     {
         time.update();
@@ -58,9 +58,6 @@ void Engine::run() {
             if (!pair.first->shouldClose()) {
 
                 pair.second->preUpdate(delta);
-
-                glClearColor(0.42, 0.42, 0.6, 1.0);
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
                 pair.second->update(delta);
                 pair.second->draw();
@@ -87,6 +84,10 @@ void Engine::run() {
             shouldEnd = true;
         }
         frames++;
+        elapsed  += time.getDeltaTime();
+        if (elapsed >= 30.0f) {
+            core::logger.log(core::Logger::INFO, "Engine Frames: " + std::to_string(frames));
+            break;
+        }
     }
-    core::logger.log(core::Logger::INFO, std::to_string(frames));
 }

@@ -1,6 +1,11 @@
 #pragma once
 
 #include <iostream>
+#include "core/Logger.hpp"
+
+#ifdef DEBUG_MODE
+    extern int generatedMeshes;
+#endif
 
 template <typename V>
 void Mesh::create(const MeshData<V>& data, GLenum usage) {
@@ -36,4 +41,9 @@ void Mesh::create(const MeshData<V>& data, GLenum usage) {
 
     verticeCount_ = data.vertices.size();
     indiceCount_ = data.indices.size();
+
+    #ifdef DEBUG_MODE
+        generatedMeshes++;
+        core::logger.log(core::Logger::INFO, "Mesh " + std::to_string(generatedMeshes) + " is generated");
+    #endif
 }
