@@ -55,11 +55,11 @@ void Camera::process3DMouseRotation(double deltaX, double deltaY) {
     camY_ += (-deltaY / float(window_.getHeight())) * sensitivity_;
     camX_ += (-deltaX / float(window_.getHeight())) * sensitivity_;
 
-    if (camY_ < -glm::radians(89.0f)){
-        camY_ = -glm::radians(89.0f);
+    if (camY_ < -89.0f){
+        camY_ = -89.0f;
     }
-    if (camY_ > glm::radians(89.0f)){
-        camY_ = glm::radians(89.0f);
+    if (camY_ > 89.0f){
+        camY_ = 89.0f;
     }
 
     rotation_ = glm::mat4(1.0f);
@@ -76,9 +76,9 @@ void Camera::setTransform(glm::vec3 value) {
 
 void Camera::rotate(float x, float y, float z) {
 
-    rotation_ = glm::rotate(rotation_, z, glm::vec3(0.0f, 0.0f, 1.0f));
-    rotation_ = glm::rotate(rotation_, y, glm::vec3(0.0f, 1.0f, 0.0f));
-    rotation_ = glm::rotate(rotation_, x, glm::vec3(1.0f, 0.0f, 0.0f));
+    rotation_ = glm::rotate(rotation_, glm::radians(z), glm::vec3(0.0f, 0.0f, 1.0f));
+    rotation_ = glm::rotate(rotation_, glm::radians(y), glm::vec3(0.0f, 1.0f, 0.0f));
+    rotation_ = glm::rotate(rotation_, glm::radians(x), glm::vec3(1.0f, 0.0f, 0.0f));
 
     updateVectors();
 }

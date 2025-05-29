@@ -7,15 +7,7 @@ void Mesh::create(const MeshData<V>& data, GLenum usage) {
 
     if (data.vertices.empty()) return;
 
-    if (vao_ != 0)
-    {
-        glDeleteVertexArrays(1, &vao_);
-        glDeleteBuffers(1, &vbo_);
-        glDeleteBuffers(1, &ebo_);
-        vao_ = 0;
-        vbo_ = 0;
-        ebo_ = 0;
-    }
+    clear();
 
     glGenVertexArrays(1, &vao_);
     glGenBuffers(1, &vbo_);

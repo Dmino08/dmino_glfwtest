@@ -10,7 +10,47 @@ const std::array<VertexAttribute, 3> SimpleVertex::attrs = {{
 
 Mesh::Mesh() : vao_(0), vbo_(0), ebo_(0), verticeCount_(0), indiceCount_(0) {}
 
+Mesh::Mesh(Mesh&& other) noexcept {
+    vao_ = other.vao_;
+    vbo_ = other.vbo_;
+    ebo_ = other.ebo_;
+    verticeCount_ = other.verticeCount_;
+    indiceCount_ = other.indiceCount_;
+
+    // Очищаем другой объект
+    other.vao_ = 0;
+    other.vbo_ = 0;
+    other.ebo_ = 0;
+    other.verticeCount_ = 0;
+    other.indiceCount_ = 0;
+}
+Mesh& Mesh::operator= (Mesh&& other) noexcept {
+    if (this != &other) {
+            // Удаляем текущие ресурсы
+            clear();
+
+            // Забираем ресурсы
+            vao_ = other.vao_;
+            vbo_ = other.vbo_;
+            ebo_ = other.ebo_;
+            verticeCount_ = other.verticeCount_;
+            indiceCount_ = other.indiceCount_;
+
+            // Очищаем другой объект
+            other.vao_ = 0;
+            other.vbo_ = 0;
+            other.ebo_ = 0;
+            other.verticeCount_ = 0;
+            other.indiceCount_ = 0;
+        }
+    return *this;
+}
+
 Mesh::~Mesh() {
+    clear();  
+}
+
+void Mesh::clear() {
     if (vao_ != 0)
     {
         glDeleteVertexArrays(1, &vao_);
@@ -19,7 +59,7 @@ Mesh::~Mesh() {
         vao_ = 0;
         vbo_ = 0;
         ebo_ = 0;
-    }    
+    }       
 }
 
 void Mesh::draw() const {

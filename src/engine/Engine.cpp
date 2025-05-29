@@ -63,6 +63,7 @@ void Engine::run() {
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
                 pair.second->update(delta);
+                pair.second->draw();
 
                 pair.second->afterUpdate(delta);
 

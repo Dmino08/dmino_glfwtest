@@ -16,6 +16,7 @@ class IScene {
         virtual void init(Window& window) {}
         virtual void preUpdate(float delta) {}
         virtual void update(float delta) {} 
+        virtual void draw() {}
         virtual void afterUpdate(float delta) {}
 };
 

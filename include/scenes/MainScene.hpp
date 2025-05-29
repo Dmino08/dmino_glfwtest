@@ -46,4 +46,6 @@ class MainScene : public IScene {
         void init(Window& window) override;
 
         void update(float delta) override;
+
+        void draw() override;
 };

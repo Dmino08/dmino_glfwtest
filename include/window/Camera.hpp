@@ -19,7 +19,7 @@ struct CameraParams {
     float fov = 45.0f;
     float z_near = 0.1f;
     float z_far = 100.0f;
-    float sensitivity = 1.0f;
+    float sensitivity = 50.0f;
 };
 
 

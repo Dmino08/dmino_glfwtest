@@ -162,8 +162,10 @@ void MainScene::update(float delta) {
     else if (input->getScrollDeltaY() < 0.0f){
         camera->toZoom(1.2f, 0.0f, 20.0f);
     }
-    
 
+}
+
+void MainScene::draw() {
     mult_shader->setMatrices(camera->getProjectionMatrix(), camera->getViewMatrix());
 
     mult_shader->uniform3f("spot_light.position", camera->getPos());

@@ -10,14 +10,14 @@ class FrameBuffer {
     unsigned int framebuffer_, renderbuffer_;
     unsigned int textureColorbuffer_;
 
-    Mesh quad;
-    std::vector<ScreenVertex> quad_vertices;
+    Mesh mesh_;
+    std::vector<ScreenVertex> vertices_;
 
     int slot_;
 
     public:
         FrameBuffer() : framebuffer_(0), textureColorbuffer_(0) {
-            quad_vertices = {
+            vertices_ = {
                 {{-1.0f,  1.0f}, {0.0f, 1.0f}},
                 {{-1.0f, -1.0f}, {0.0f, 0.0f}},
                 {{1.0f, -1.0f},  {1.0f, 0.0f}},
@@ -32,7 +32,7 @@ class FrameBuffer {
             glDeleteRenderbuffers(1, &renderbuffer_);
         }
         void create(int width, int height) {
-            quad.create<ScreenVertex>(MeshData<ScreenVertex>{quad_vertices});
+            mesh_.create<ScreenVertex>(MeshData<ScreenVertex>{vertices_});
             
             if (framebuffer_ != 0)
             {
@@ -92,12 +92,17 @@ class FrameBuffer {
         void drawScreen(const Shader& shader) const {
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glDisable(GL_DEPTH_TEST);
-
-            glClearColor(1.0f, 1.0f, 1.0f, 1.0f); 
-            glClear(GL_COLOR_BUFFER_BIT);  
-            
+ 
             shader.use();
-            quad.draw();
+            mesh_.draw();
+        }
+
+        void setVertices(std::vector<ScreenVertex>&& vertices) {
+            vertices_ = std::move(vertices);
+        }
+
+        void setMesh(Mesh&& mesh) {
+            mesh_ = std::move(mesh);
         }
 
         int getSlot() const {return slot_;}
@@ -123,14 +128,24 @@ int main(void) {
     Engine engine1;
     u_ptr<MainScene> main = makeU<MainScene>(engine1);  
 
-    FrameBuffer fbo;
-    fbo.create(width, height);
+    std::vector<ScreenVertex> mirror_vertices = {
+        {{-0.5f,  1.0f}, {0.0f, 0.0f}},
+        {{-0.5f, 0.5f}, {0.0f, 1.0f}},
+        {{0.5f, 0.5f},  {1.0f, 1.0f}},
+        {{-0.5f,  1.0f}, {0.0f, 0.0f}},
+        {{0.5f, 0.5f},  {1.0f, 1.0f}},
+        {{0.5f,  1.0f},  {1.0f, 0.0f}}
+    };
+
+    FrameBuffer mirror_fbo;
+    mirror_fbo.setVertices(std::move(mirror_vertices));
+    mirror_fbo.create(width, height);
 
     main->init(fboWindow); 
 
-    fbo.setUnitSlot();
+    mirror_fbo.setUnitSlot();
     screen_shader->use();
-    screen_shader->uniform1i("screen_texture", fbo.getSlot());
+    screen_shader->uniform1i("screen_texture", mirror_fbo.getSlot());
 
 
     while (!fboWindow.shouldClose())
@@ -139,19 +154,29 @@ int main(void) {
         
         glfwPollEvents();
 
-        fbo.bind();
-
         if (fboWindow.isResized()) {
             std::cout << "RESISED" << std::endl;
-            fbo.resize(fboWindow.getWidth(), fboWindow.getHeight());
+            mirror_fbo.resize(fboWindow.getWidth(), fboWindow.getHeight());
         }
 
+
+        mirror_fbo.bind();
         glClearColor(0.42, 0.42, 0.6, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-        main->update(time.getDeltaTime());
+        main->camera->rotate(180.0f , 0.0f, 0.0f);
+        main->draw();
+        main->camera->rotate(180.0f , 0.0f, 0.0f);
 
-         fbo.drawScreen(*screen_shader);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClearColor(0.42, 0.42, 0.6, 1.0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+        glEnable(GL_DEPTH_TEST);
+
+        main->update(time.getDeltaTime());
+        main->draw();
+
+        mirror_fbo.drawScreen(*screen_shader); 
 
         fboWindow.swapBuffers();
         

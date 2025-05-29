@@ -35,7 +35,10 @@ class Mesh {
     uint verticeCount_, indiceCount_;
     public:
         Mesh();
+        Mesh(Mesh&& other) noexcept;
+        Mesh& operator=(Mesh&& other) noexcept;
         ~Mesh();
+        void clear();
 
         template <typename V>
         void create(const MeshData<V>& data, GLenum usage = GL_STATIC_DRAW);
