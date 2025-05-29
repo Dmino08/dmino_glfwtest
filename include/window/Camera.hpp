@@ -72,6 +72,8 @@ class Camera {
 
         void toZoom(float deltaZoom, float min = 1.0f, float max = 10.0f);
 
+        void setFov(float value);
+
         glm::mat4 getViewMatrix() const;
         const glm::mat4& getProjectionMatrix() const;
 

@@ -26,7 +26,7 @@ void MainScene::init(Window& wind) {
 
     // SHADER GENERATION
     mult_shader = Shader::create("res/shaders/light_test.vert","res/shaders/multiple_lights.frag");
-
+    mult_shader->use();
 
     // IMAGE GENERATION
     image0 = makeS<Image>();
@@ -155,7 +155,14 @@ void MainScene::update(float delta) {
             std::cout << "VSYNC: "<< vsync << std::endl;
         }  
     }   
-    camera->toZoom(-input->getScrollDeltaY(), 1.0f, 20.0f);
+
+    if (input->getScrollDeltaY() > 0.0f){
+        camera->toZoom(0.8f, 0.0f, 20.0f);
+    }
+    else if (input->getScrollDeltaY() < 0.0f){
+        camera->toZoom(1.2f, 0.0f, 20.0f);
+    }
+    
 
     mult_shader->setMatrices(camera->getProjectionMatrix(), camera->getViewMatrix());
 

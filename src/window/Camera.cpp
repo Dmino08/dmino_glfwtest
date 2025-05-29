@@ -90,9 +90,14 @@ void Camera::toZoom(float deltaZoom, float min, float max) {
     {
         min = 1.0f;
     }
-    float newZoom = zoom_ + deltaZoom;
+    float newZoom = zoom_ * deltaZoom;
     zoom_ = std::clamp(newZoom, min, max);
     
+    updateProjection();
+}
+
+void Camera::setFov(float value) {
+    fov_ = value;
     updateProjection();
 }
 
