@@ -6,31 +6,31 @@ InputManager::InputManager() :
     buttons_{}, 
     frames_{}, 
 
-    currentFrame_(1),
+    current_frame_(1),
     
-    cursorStarted_(true),
-    cursorLocked_(false),
+    cursor_started_(true),
+    cursor_locked_(false),
 
-    xPos_(0.0f), 
-    yPos_(0.0f),
-    deltaX_(0.0f),
-    deltaY_(0.0f),
+    x_pos_(0.0f), 
+    y_pos_(0.0f),
+    delta_x_(0.0f),
+    delta_y_(0.0f),
 
-    scrollXoffset_(0.0f),
-    scrollYoffset_(0.0f),
-    scrollXdelta_(0.0f),
-    scrollYdelta_(0.0f)
+    scroll_x_offset_(0.0f),
+    scroll_y_offset_(0.0f),
+    scroll_x_delta_(0.0f),
+    scroll_y_delta_(0.0f)
     {}
 
 
 
 void InputManager::update() {
 
-    currentFrame_++;
-    deltaX_ = 0.0f;
-    deltaY_ = 0.0f;
-    scrollXdelta_ = 0.0f;
-    scrollYdelta_ = 0.0f;
+    current_frame_++;
+    delta_x_ = 0.0f;
+    delta_y_ = 0.0f;
+    scroll_x_delta_ = 0.0f;
+    scroll_y_delta_ = 0.0f;
 }
 
 bool InputManager::pressed(int key) {
@@ -48,7 +48,7 @@ bool InputManager::justPressed(int key) {
         return false;
     }
 
-    return keys_[key] && currentFrame_ == frames_[key];
+    return keys_[key] && current_frame_ == frames_[key];
 }
 
 bool InputManager::justReleased(int key) {
@@ -57,7 +57,7 @@ bool InputManager::justReleased(int key) {
         return false;
     }
 
-    return !keys_[key] && currentFrame_ == frames_[key];
+    return !keys_[key] && current_frame_ == frames_[key];
 }
 
 
@@ -74,7 +74,7 @@ bool InputManager::butJustPressed(int button) {
     if (button < 0 || button >= BUTTONS) {
         return false;
     }
-     return buttons_[button] && currentFrame_ == frames_[button + KEYS];
+     return buttons_[button] && current_frame_ == frames_[button + KEYS];
 }
 
 bool InputManager::butJustReleased(int button) {
@@ -82,45 +82,45 @@ bool InputManager::butJustReleased(int button) {
     if (button < 0 || button >= BUTTONS) {
         return false;
     }
-     return !buttons_[button] && currentFrame_ == frames_[button + KEYS];    
+     return !buttons_[button] && current_frame_ == frames_[button + KEYS];    
 }
 
 
 float InputManager::getCursorX() const {
-    return xPos_;
+    return x_pos_;
 }
 
 float InputManager::getCursorY() const {
-    return yPos_;
+    return y_pos_;
 }
 
 
 float InputManager::getDeltaX() const {
-    return deltaX_;
+    return delta_x_;
 }
 
 float InputManager::getDeltaY() const {
-    return deltaY_;
+    return delta_y_;
 }
 
 float InputManager::getScrollX() const {
-    return scrollXoffset_;
+    return scroll_x_offset_;
 }
 
 
 float InputManager::getScrollY() const {
-    return scrollYoffset_;
+    return scroll_y_offset_;
 }
 
 float InputManager::getScrollDeltaX() const {
-    return scrollXdelta_;
+    return scroll_x_delta_;
 }
 
 float InputManager::getScrollDeltaY() const {
-    return scrollYdelta_;
+    return scroll_y_delta_;
 }
 
 
 bool InputManager::isCursorLocked() const {
-    return cursorLocked_;
+    return cursor_locked_;
 }

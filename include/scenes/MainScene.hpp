@@ -10,6 +10,7 @@
 #include "graphics/render/FrameBuffer.hpp"
 #include "test/Voxel.hpp"
 #include "graphics/core/CubeMap.hpp"
+#include "graphics/core/Model.hpp"
 
 
 class Assets;
@@ -50,6 +51,8 @@ class MainScene : public IScene {
         u_ptr<Voxel> reflectbox;
 
         Texture texture0;
+
+        u_ptr<modload::Model> model;
 
         float camera_speed = 10.f;
         bool vsync = false;

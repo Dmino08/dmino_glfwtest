@@ -16,8 +16,8 @@ void windowLoop() {
     core::Time time;
     
     Engine engine1;
-    u_ptr<MainScene> main = makeU<MainScene>(engine1);  
-    main->init(window); 
+    MainScene main = MainScene(engine1);  
+    main.init(window); 
 
     int frames = 0;
     float elapsed = 0.0f;
@@ -27,8 +27,8 @@ void windowLoop() {
         
         glfwPollEvents();
 
-        main->update(time.getDeltaTime());
-        main->draw();
+        main.update(time.getDeltaTime());
+        main.draw();
 
 
         window.swapBuffers();
@@ -39,7 +39,8 @@ void windowLoop() {
         elapsed  += time.getDeltaTime();
         if (elapsed >= 60.0f) {
             core::logger.log(core::Logger::INFO, "FBO Frames: " + std::to_string(frames));
-            break;
+            elapsed = 0.0f;
+            // break;
         }
     }
 }
@@ -70,8 +71,6 @@ int main(void) {
     {
         windowLoop();
     }
-
-    
     Window::terminateGLFW();
     return 0;
 }

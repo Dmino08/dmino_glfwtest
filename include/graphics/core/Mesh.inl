@@ -4,7 +4,7 @@
 #include "core/Logger.hpp"
 
 #ifdef DEBUG_MODE
-    extern int generatedMeshes;
+    extern int generated_meshes;
 #endif
 
 template <typename V>
@@ -39,11 +39,11 @@ void Mesh::create(const MeshData<V>& data, GLenum usage) {
 
     glBindVertexArray(0);
 
-    verticeCount_ = data.vertices.size();
-    indiceCount_ = data.indices.size();
+    vertice_count_ = data.vertices.size();
+    indice_count_ = data.indices.size();
 
     #ifdef DEBUG_MODE
-        generatedMeshes++;
-        core::logger.log(core::Logger::INFO, "Mesh " + std::to_string(generatedMeshes) + " is generated");
+        generated_meshes++;
+        core::logger.log(core::Logger::INFO, "Mesh " + std::to_string(generated_meshes) + " is generated");
     #endif
 }

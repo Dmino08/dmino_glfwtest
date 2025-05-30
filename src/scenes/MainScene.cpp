@@ -121,9 +121,13 @@ void MainScene::init(Window& wind) {
     skybox = makeU<Voxel>(glm::vec3(0.0f));
     reflectbox = makeU<Voxel>(glm::vec3(0.0f, 5.0f, 0.0f));
 
+    
+    model = makeU<modload::Model>();
+    model->create("res/models/guitar/source/Survival_BackPack_2.fbx");
+
     fbo->setUnitSlot();
     screen_shader->use();
-    screen_shader->uniform1i("screen_texture", fbo->getSlot());
+    screen_shader->uniform1i("screen_texture", fbo->getUnitSlot());
 }
 
 float fpsTimer = 0.0f;
@@ -186,9 +190,17 @@ void MainScene::update(float delta) {
     else if (input->getScrollDeltaY() < 0.0f){
         camera->toZoom(1.2f, 0.0f, 20.0f);
     }
+
+    if (input->justPressed(GLFW_KEY_I))
+    {
+        core::logger.log(core::Logger::INFO, std::to_string(Mesh::getDrawCalls()));
+    }
+    
 }
 
 void MainScene::draw() {
+    Mesh::clearDrawCalls();
+    
     fbo->bind();
 
     glClearColor(0.42, 0.42, 0.6, 1.0);
@@ -214,6 +226,11 @@ void MainScene::draw() {
 //
     reflect_shader->uniformMatrix("model", reflectbox->transform.getModel());
     reflectbox->draw();
+
+    glm::mat4 md = glm::translate(glm::mat4(1.0f), glm::vec3(5.0f, 4.0f, 0.0f));
+    md = glm::scale(md, glm::vec3(0.01f));
+    reflect_shader->uniformMatrix("model", md);
+    model->draw();
 
 
     fbo->drawScreen(*screen_shader, false); 

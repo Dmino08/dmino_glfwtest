@@ -8,16 +8,16 @@
 
 
 unsigned int Shader::getUniformLocation(const std::string& name) {
-    auto found = uniformLocations_.find(name);
+    auto found = uniform_locations_.find(name);
     
-    if (found == uniformLocations_.end())
+    if (found == uniform_locations_.end())
     {
-        unsigned int location = glGetUniformLocation(ID_, name.c_str());
+        unsigned int location = glGetUniformLocation(id_, name.c_str());
         if (location == -1) {
             core::logger.log(core::Logger::WARNING, "Shader doesn't have the uniform variable " + name);
         }
         else {
-            uniformLocations_.try_emplace(name, location);
+            uniform_locations_.try_emplace(name, location);
         }
         return location;
     }
@@ -26,20 +26,20 @@ unsigned int Shader::getUniformLocation(const std::string& name) {
 }
 
 
-Shader::Shader(GLuint id) : ID_(id) {}
+Shader::Shader(GLuint id) : id_(id) {}
 
 Shader::~Shader() {
-    if (ID_ != 0) {
-        glDeleteProgram(ID_);
-        ID_ = 0;
+    if (id_ != 0) {
+        glDeleteProgram(id_);
+        id_ = 0;
     }
 }
 
 
 
 void Shader::use() const {
-    if (ID_ != 0) {
-        glUseProgram(ID_);
+    if (id_ != 0) {
+        glUseProgram(id_);
     }
 }
 

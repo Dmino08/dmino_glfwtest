@@ -7,11 +7,11 @@
     int frameBuffersCreated = 0;
 #endif
 
-FrameBuffer::FrameBuffer() : framebuffer_(0), renderbuffer_(0), textureColorbuffer_(0) {}
+FrameBuffer::FrameBuffer() : framebuffer_(0), renderbuffer_(0), texture_color_buffer_(0) {}
 
 FrameBuffer::~FrameBuffer() {
     glDeleteFramebuffers(1, &framebuffer_);
-    glDeleteTextures(1, &textureColorbuffer_);
+    glDeleteTextures(1, &texture_color_buffer_);
     glDeleteRenderbuffers(1, &renderbuffer_);
 }
 void FrameBuffer::create(int width, int height) {
@@ -37,16 +37,16 @@ void FrameBuffer::create(int width, int height) {
     glGenFramebuffers(1, &framebuffer_);
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_);
 
-    if (textureColorbuffer_ == 0) {
-        glGenTextures(1, &textureColorbuffer_);
-        glBindTexture(GL_TEXTURE_2D, textureColorbuffer_);
+    if (texture_color_buffer_ == 0) {
+        glGenTextures(1, &texture_color_buffer_);
+        glBindTexture(GL_TEXTURE_2D, texture_color_buffer_);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer_, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_color_buffer_, 0);
     } 
     else {
-        glBindTexture(GL_TEXTURE_2D, textureColorbuffer_);
+        glBindTexture(GL_TEXTURE_2D, texture_color_buffer_);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     }
 
@@ -72,7 +72,7 @@ void FrameBuffer::create(int width, int height) {
     #endif
 }
 void FrameBuffer::resize(int width, int height) {
-    glBindTexture(GL_TEXTURE_2D, textureColorbuffer_);
+    glBindTexture(GL_TEXTURE_2D, texture_color_buffer_);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     
     glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer_);
@@ -86,9 +86,9 @@ void FrameBuffer::bind() const {
 }
 
 void FrameBuffer::setUnitSlot(int slot) {
-    slot_ = slot;
-    glActiveTexture(GL_TEXTURE0 + slot_);
-    glBindTexture(GL_TEXTURE_2D, textureColorbuffer_);
+    unit_ = slot;
+    glActiveTexture(GL_TEXTURE0 + unit_);
+    glBindTexture(GL_TEXTURE_2D, texture_color_buffer_);
 }
 
 void FrameBuffer::drawScreen(const Shader& shader, bool clear) const {
@@ -112,4 +112,4 @@ void FrameBuffer::setMesh(Mesh&& mesh) {
     mesh_ = std::move(mesh);
 }
 
-int FrameBuffer::getSlot() const {return slot_;}
+int FrameBuffer::getUnitSlot() const {return unit_;}

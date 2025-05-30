@@ -4,7 +4,9 @@
 #include "core/Logger.hpp"
 
 
-
+#ifdef DEBUG_MODE
+    int imagesLoaded = 0;
+#endif
 
 
 Image::Image() : data_(nullptr)
@@ -25,7 +27,7 @@ int Image::load(const std::string& path) {
         data_ = nullptr;
     }    
     
-    data_ = stbi_load(path.c_str(), &width_, &height_, &nrChannels_, 0);
+    data_ = stbi_load(path.c_str(), &width_, &height_, &nr_channels_, 0);
 
 
     if (!data_) {
@@ -36,18 +38,23 @@ int Image::load(const std::string& path) {
         std::memcpy(data_, error_data, error_size);
         width_ = 4;
         height_ = 4;
-        nrChannels_ = 3;
+        nr_channels_ = 3;
 
         complete_code = 1;
     }
-    if (nrChannels_ == 1) format_ = GL_RED;
-    else if (nrChannels_ == 3) format_ = GL_RGB;
-    else if (nrChannels_ == 4) format_ = GL_RGBA;
+    if (nr_channels_ == 1) format_ = GL_RED;
+    else if (nr_channels_ == 3) format_ = GL_RGB;
+    else if (nr_channels_ == 4) format_ = GL_RGBA;
     else {
-        core::logger.log(core::Logger::WARNING, "Unknown channel count: " + std::to_string(nrChannels_));
+        core::logger.log(core::Logger::WARNING, "Unknown channel count: " + std::to_string(nr_channels_));
         complete_code = 2;
     }
     
+    #ifdef DEBUG_MODE
+        imagesLoaded++;
+        core::logger.log(core::Logger::INFO, "Image " + std::to_string(imagesLoaded) + " is loaded");
+    #endif
+
     return complete_code;
 }
 
@@ -62,7 +69,7 @@ int Image::getHeight() const {
     return height_;
 }
 int Image::GetChannels() const {
-    return nrChannels_;
+    return nr_channels_;
 }
 
 GLenum Image::getFormat() const {

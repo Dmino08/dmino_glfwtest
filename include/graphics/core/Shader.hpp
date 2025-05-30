@@ -16,9 +16,9 @@
 
 
 class Shader {
-    GLuint ID_ = 0;
+    GLuint id_ = 0;
     
-    std::unordered_map<std::string, unsigned int> uniformLocations_;
+    std::unordered_map<std::string, unsigned int> uniform_locations_;
 
     unsigned int getUniformLocation(const std::string& name);
     

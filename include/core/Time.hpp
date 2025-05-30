@@ -8,8 +8,8 @@ namespace core {
     
     class Time {
         using clock = std::chrono::steady_clock;   
-        float deltaTime;
-        clock::time_point last;
+        float delta_time_;
+        clock::time_point last_;
         
         public:
             Time();
