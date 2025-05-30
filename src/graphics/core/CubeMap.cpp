@@ -47,6 +47,15 @@ void CubeMap::create(std::array<std::string, 6> textures_faces) {
         core::logger.log(core::Logger::INFO, "CubeMap " + std::to_string(generatedCubeMaps) + " is generated");
     #endif
 }
+
+void CubeMap::activeUnit(int index) {
+    glActiveTexture(GL_TEXTURE0 + index);
+    unit_ = index;
+}
+int CubeMap::getUnitId() const {
+    return unit_;
+}
+
 void CubeMap::bind() const {
     glBindTexture(GL_TEXTURE_CUBE_MAP, id_);
 }

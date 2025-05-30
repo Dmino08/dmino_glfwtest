@@ -85,7 +85,7 @@ void Engine::run() {
         }
         frames++;
         elapsed  += time.getDeltaTime();
-        if (elapsed >= 30.0f) {
+        if (elapsed >= 60.0f) {
             core::logger.log(core::Logger::INFO, "Engine Frames: " + std::to_string(frames));
             break;
         }

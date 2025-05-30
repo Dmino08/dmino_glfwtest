@@ -30,7 +30,8 @@ void MainScene::init(Window& wind) {
     screen_shader = Shader::create("res/shaders/framebuffer.vert", "res/shaders/framebuffer.frag");
     mult_shader = Shader::create("res/shaders/light_test.vert","res/shaders/multiple_lights.frag");
     skybox_shader = Shader::create("res/shaders/sky_box.vert", "res/shaders/sky_box.frag");
-    mult_shader->use();
+    reflect_shader = Shader::create("res/shaders/reflect.vert", "res/shaders/reflect.frag");
+    // mult_shader->use();
 
     // IMAGE GENERATION
     image0 = makeS<Image>();
@@ -54,7 +55,7 @@ void MainScene::init(Window& wind) {
 
     // LIGHT GENERATION  DIRECTIONAL
     glsl::DirectionalLight direction_light;
-    direction_light.base.ambient = glm::vec3(0.05f, 0.05f, 0.05f);
+    direction_light.base.ambient = glm::vec3(0.20f, 0.20f, 0.20f);
     direction_light.base.diffuse = glm::vec3(0.4f, 0.4f, 0.4f);
     direction_light.base.specular = glm::vec3(0.5f, 0.5f, 0.5f);
     direction_light.direction = glm::vec3(0.0f, -1.0f, 0.0f);
@@ -82,31 +83,43 @@ void MainScene::init(Window& wind) {
     spot_light.position = glm::vec3(0.0f, 0.0f, 0.0f);
     spot_light.direction = glm::vec3(0.0f, -1.0f, 0.0f);
 
-    // SHADER SET UP
-    mult_shader->setMatrices(camera->getProjectionMatrix(), camera->getViewMatrix());
-    glsl::setMaterial(*mult_shader, "material", glsl::Material{0, 1, 32.0f});
-    // LIGHT SET UP
-    glsl::setDirectionalLight(*mult_shader, "direction_light", direction_light);
-    glsl::setSpotLight(*mult_shader, "spot_light", spot_light);
-
-    mult_shader->uniform1i("on_flash_light", true);
-
-    // TEXTURE BINDING
-    texture0.activeUnit(1);
-    texture0.bind();
-
+    // CUBE MAP STUFF
     std::array<std::string, 6> cube_paths = {
-        "res/images/daylight_skybox/Daylight Box_Right.bmp",
-        "res/images/daylight_skybox/Daylight Box_Left.bmp",
-        "res/images/daylight_skybox/Daylight Box_Top.bmp",
-        "res/images/daylight_skybox/Daylight Box_Bottom.bmp",
-        "res/images/daylight_skybox/Daylight Box_Front.bmp",
-        "res/images/daylight_skybox/Daylight Box_Back.bmp"
+        "res/images/skybox/right.jpg",
+        "res/images/skybox/left.jpg",
+        "res/images/skybox/top.jpg",
+        "res/images/skybox/bottom.jpg",
+        "res/images/skybox/front.jpg",
+        "res/images/skybox/back.jpg"
     };
-
     cube_map = makeU<CubeMap>();
     cube_map->create(cube_paths);
+
+    //TEXTURE BIDNING
+    texture0.activeUnit(1);
+    texture0.bind();    
+    cube_map->activeUnit(2);
+    cube_map->bind();
+
+    // SHADER SET UP
+        // MULTISADER
+    mult_shader->use();
+    glsl::setMaterial(*mult_shader, "material", glsl::Material{0, 1, 32.0f});
+    glsl::setDirectionalLight(*mult_shader, "direction_light", direction_light);
+    glsl::setSpotLight(*mult_shader, "spot_light", spot_light);
+    mult_shader->uniform1i("on_flash_light", true);
+    mult_shader->uniform1i("use_specular_map", false);
+        //SKYBOXSHADER
+    skybox_shader->use();
+    skybox_shader->uniform1i("skybox", cube_map->getUnitId());
+        // REFLECTSHADER
+    reflect_shader->use();
+    reflect_shader->uniform1i("skybox", cube_map->getUnitId());
+
+
+
     skybox = makeU<Voxel>(glm::vec3(0.0f));
+    reflectbox = makeU<Voxel>(glm::vec3(0.0f, 5.0f, 0.0f));
 
     fbo->setUnitSlot();
     screen_shader->use();
@@ -184,18 +197,24 @@ void MainScene::draw() {
     mult_shader->setMatrices(camera->getProjectionMatrix(), camera->getViewMatrix());
     mult_shader->uniform3f("spot_light.position", camera->getPos());
     mult_shader->uniform3f("spot_light.direction", camera->getFront());
-    mult_shader->uniform1i("material.diffuse", 1);
-    mult_shader->uniform1i("use_specular_map", false);    
+//
+    mult_shader->uniform1i("material.diffuse", texture0.getUnitId());  
     mult_shader->uniformMatrix("model", floor->transform.getModel());
     floor->draw();
 
     glDepthFunc(GL_LEQUAL);
-    skybox_shader->use();
     glm::mat4 view = glm::mat4(glm::mat3(camera->getViewMatrix()));
     skybox_shader->setMatrices(camera->getProjectionMatrix(), view);
-    cube_map->bind();
     skybox->draw();
     glDepthFunc(GL_LESS);
 
-    fbo->drawScreen(*screen_shader); 
+
+    reflect_shader->setMatrices(camera->getProjectionMatrix(), camera->getViewMatrix());
+    reflect_shader->uniform3f("camera_pos", camera->getPos());
+//
+    reflect_shader->uniformMatrix("model", reflectbox->transform.getModel());
+    reflectbox->draw();
+
+
+    fbo->drawScreen(*screen_shader, false); 
 }

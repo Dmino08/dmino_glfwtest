@@ -39,12 +39,15 @@ class MainScene : public IScene {
         u_ptr<Shader> mult_shader;
         u_ptr<Shader> screen_shader;
         u_ptr<Shader> skybox_shader;
+        u_ptr<Shader> reflect_shader;
 
         asset<Image> image0;
 
         u_ptr<Sprite> floor;
         u_ptr<CubeMap> cube_map;
+
         u_ptr<Voxel> skybox;
+        u_ptr<Voxel> reflectbox;
 
         Texture texture0;
 
