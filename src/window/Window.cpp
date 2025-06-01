@@ -12,11 +12,11 @@ void Window::keyCallback(GLFWwindow *window, int key, int scancode, int action, 
 
     if (action == GLFW_PRESS) {
         ptr->input_.keys_[key] = true;
-        ptr->input_.frames_[key] = ptr->input_.currentFrame_;
+        ptr->input_.frames_[key] = ptr->input_.current_frame_;
     }
     else if(action == GLFW_RELEASE) {
         ptr->input_.keys_[key] = false;
-        ptr->input_.frames_[key] = ptr->input_.currentFrame_;        
+        ptr->input_.frames_[key] = ptr->input_.current_frame_;        
     }
  
 }
@@ -27,11 +27,11 @@ void Window::mouseButtonCallback(GLFWwindow* window, int button, int action, int
 
     if (action == GLFW_PRESS) {
         ptr->input_.buttons_[button] = true;
-        ptr->input_.frames_[KEYS + button] = ptr->input_.currentFrame_;
+        ptr->input_.frames_[KEYS + button] = ptr->input_.current_frame_;
     }
     else if(action == GLFW_RELEASE) {
         ptr->input_.buttons_[button] = false;
-        ptr->input_.frames_[KEYS + button] = ptr->input_.currentFrame_;        
+        ptr->input_.frames_[KEYS + button] = ptr->input_.current_frame_;        
     }
 
 }
@@ -41,20 +41,20 @@ void Window::cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
     
     Window* ptr = static_cast<Window*>(glfwGetWindowUserPointer(window));
 
-    if(ptr->input_.cursorStarted_) {
-        ptr->input_.xPos_ = xpos;
-        ptr->input_.yPos_ = ypos;
-        ptr->input_.deltaX_ = 0.0;
-        ptr->input_.deltaY_ = 0.0;
-        ptr->input_.cursorStarted_ = false;
+    if(ptr->input_.cursor_started_) {
+        ptr->input_.x_pos_ = xpos;
+        ptr->input_.y_pos_ = ypos;
+        ptr->input_.delta_x_ = 0.0;
+        ptr->input_.delta_y_ = 0.0;
+        ptr->input_.cursor_started_ = false;
         return;    
     }
 
-    ptr->input_.deltaX_ += xpos - ptr->input_.xPos_;
-    ptr->input_.deltaY_ += ypos - ptr->input_.yPos_;
+    ptr->input_.delta_x_ += xpos - ptr->input_.x_pos_;
+    ptr->input_.delta_y_ += ypos - ptr->input_.y_pos_;
 
-    ptr->input_.xPos_ = xpos;
-    ptr->input_.yPos_ = ypos;
+    ptr->input_.x_pos_ = xpos;
+    ptr->input_.y_pos_ = ypos;
 }
 
 void Window::scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
@@ -62,11 +62,11 @@ void Window::scrollCallback(GLFWwindow* window, double xoffset, double yoffset) 
     Window* ptr = static_cast<Window*>(glfwGetWindowUserPointer(window));
 
 
-    ptr->input_.scrollXdelta_ += xoffset - ptr->input_.scrollXoffset_;
-    ptr->input_.scrollYdelta_ += xoffset - ptr->input_.scrollYoffset_;
+    ptr->input_.scroll_x_delta_ += xoffset - ptr->input_.scroll_x_offset_;
+    ptr->input_.scroll_y_delta_ += xoffset - ptr->input_.scroll_y_offset_;
 
-    ptr->input_.scrollXoffset_ = xoffset;
-    ptr->input_.scrollYoffset_ = yoffset;
+    ptr->input_.scroll_x_offset_ = xoffset;
+    ptr->input_.scroll_y_offset_ = yoffset;
 }
 
 void Window::frameBufferSizeCallback(GLFWwindow* window, int width, int height) {
@@ -199,6 +199,10 @@ void Window::setCursorMode(int mode) {
     glfwSetInputMode(handle_, GLFW_CURSOR, mode);
 }
 
+void Window::setCloseCallback(GLFWwindowclosefun callback) {
+    glfwSetWindowCloseCallback(handle_, callback);
+}
+
 int Window::getWidth() const {
     return width_;
 }
@@ -217,8 +221,8 @@ bool Window::isResized() const {
 
 
 void Window::toggleCursor() {
-    input_.cursorLocked_ = !input_.cursorLocked_;
-    glfwSetInputMode(handle_, GLFW_CURSOR, input_.cursorLocked_ ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+    input_.cursor_locked_ = !input_.cursor_locked_;
+    glfwSetInputMode(handle_, GLFW_CURSOR, input_.cursor_locked_ ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
 }
 
 

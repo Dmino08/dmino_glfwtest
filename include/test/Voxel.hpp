@@ -15,6 +15,6 @@ class Voxel {
         util::Transform transform;
         Voxel();
         Voxel(const glm::vec3& position);
-        void draw();
+        void draw(GLenum mode = GL_TRIANGLES) const;
 
 };

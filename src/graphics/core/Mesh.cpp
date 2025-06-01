@@ -3,7 +3,7 @@
 #include <cstddef>
 
 #ifdef DEBUG_MODE
-    int generatedMeshes = 0;
+    int generated_meshes = 0;
 #endif
 
 const std::array<VertexAttribute, 3> SimpleVertex::attrs = {{
@@ -12,22 +12,23 @@ const std::array<VertexAttribute, 3> SimpleVertex::attrs = {{
     {2, 3, GL_FLOAT, GL_FALSE, sizeof(SimpleVertex), offsetof(SimpleVertex, uv_coord)}
 }};
 
+int Mesh::draw_calls_ = 0; 
 
-Mesh::Mesh() : vao_(0), vbo_(0), ebo_(0), verticeCount_(0), indiceCount_(0) {}
+Mesh::Mesh() : vao_(0), vbo_(0), ebo_(0), vertice_count_(0), indice_count_(0) {}
 
 Mesh::Mesh(Mesh&& other) noexcept {
     vao_ = other.vao_;
     vbo_ = other.vbo_;
     ebo_ = other.ebo_;
-    verticeCount_ = other.verticeCount_;
-    indiceCount_ = other.indiceCount_;
+    vertice_count_ = other.vertice_count_;
+    indice_count_ = other.indice_count_;
 
     // Очищаем другой объект
     other.vao_ = 0;
     other.vbo_ = 0;
     other.ebo_ = 0;
-    other.verticeCount_ = 0;
-    other.indiceCount_ = 0;
+    other.vertice_count_ = 0;
+    other.indice_count_ = 0;
 }
 Mesh& Mesh::operator= (Mesh&& other) noexcept {
     if (this != &other) {
@@ -38,15 +39,15 @@ Mesh& Mesh::operator= (Mesh&& other) noexcept {
             vao_ = other.vao_;
             vbo_ = other.vbo_;
             ebo_ = other.ebo_;
-            verticeCount_ = other.verticeCount_;
-            indiceCount_ = other.indiceCount_;
+            vertice_count_ = other.vertice_count_;
+            indice_count_ = other.indice_count_;
 
             // Очищаем другой объект
             other.vao_ = 0;
             other.vbo_ = 0;
             other.ebo_ = 0;
-            other.verticeCount_ = 0;
-            other.indiceCount_ = 0;
+            other.vertice_count_ = 0;
+            other.indice_count_ = 0;
         }
     return *this;
 }
@@ -67,19 +68,27 @@ void Mesh::clear() {
     }       
 }
 
-void Mesh::draw() const {
+void Mesh::draw(GLenum mode) const {
     glBindVertexArray(vao_);
 
-    if (verticeCount_ != 0) {
-        if (indiceCount_ != 0) {
-            glDrawElements(GL_TRIANGLES, indiceCount_, GL_UNSIGNED_INT, 0);
+    if (vertice_count_ != 0) {
+        if (indice_count_ != 0) {
+            glDrawElements(mode, indice_count_, GL_UNSIGNED_INT, 0);
         }
         else {
-            glDrawArrays(GL_TRIANGLES, 0, verticeCount_);
+            glDrawArrays(mode, 0, vertice_count_);
         }
-        
+        draw_calls_++;
     }
 
     glBindVertexArray(0);
     
+}
+
+int Mesh::getDrawCalls() {
+    return draw_calls_;
+}
+
+void Mesh::clearDrawCalls() {
+    draw_calls_ = 0;
 }

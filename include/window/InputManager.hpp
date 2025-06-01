@@ -13,24 +13,21 @@ class InputManager {
     bool buttons_[BUTTONS];
     unsigned long frames_[KEYS + BUTTONS];
 
-    unsigned long currentFrame_;
+    unsigned long current_frame_;
 
+    bool cursor_started_;
+    bool cursor_locked_;
 
-    bool cursorStarted_;
-    bool cursorLocked_;
+    float x_pos_;
+    float y_pos_;
+    float delta_x_;
+    float delta_y_;
 
-    float xPos_;
-    float yPos_;
-    float deltaX_;
-    float deltaY_;
+    float scroll_x_offset_;
+    float scroll_y_offset_;
+    float scroll_x_delta_;
+    float scroll_y_delta_;
 
-    float scrollXoffset_;
-    float scrollYoffset_;
-    float scrollXdelta_;
-    float scrollYdelta_;
-
-
-    
     public:
         InputManager();
 

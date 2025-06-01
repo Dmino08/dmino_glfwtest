@@ -34,16 +34,16 @@ std::optional<std::reference_wrapper<Window>> Engine::getWindow(const std::strin
 }
 
 Assets& Engine::getAssets() {
-    return assets;
+    return assets_;
 }
 
 void Engine::run() {
     int frames = 0;
     float elapsed = 0.0f;
-    while (!shouldEnd)
+    while (!should_end_)
     {
-        time.update();
-        float delta = time.getDeltaTime();
+        time_.update();
+        float delta = time_.getDeltaTime();
 
         glfwPollEvents(); 
 
@@ -81,13 +81,14 @@ void Engine::run() {
 
         if (pairs_.empty())
         {
-            shouldEnd = true;
+            should_end_ = true;
         }
         frames++;
-        elapsed  += time.getDeltaTime();
+        elapsed  += time_.getDeltaTime();
         if (elapsed >= 60.0f) {
             core::logger.log(core::Logger::INFO, "Engine Frames: " + std::to_string(frames));
-            break;
+            elapsed = 0.0f;
+            // break;
         }
     }
 }

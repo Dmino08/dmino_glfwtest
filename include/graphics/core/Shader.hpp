@@ -16,14 +16,14 @@
 
 
 class Shader {
-    GLuint ID_ = 0;
+    GLuint id_ = 0;
     
-    std::unordered_map<std::string, unsigned int> uniformLocations_;
+    std::unordered_map<std::string, unsigned int> uniform_locations_;
 
     unsigned int getUniformLocation(const std::string& name);
+    unsigned int getUniformBlockBinding(const std::string& name);
     
     public:
-        Shader(GLuint id);
         ~Shader();
 
         void use() const;
@@ -40,9 +40,9 @@ class Shader {
         void uniform3f(const std::string& name, float x, float y, float z);
         void uniform3f(const std::string& name, glm::vec3 xyz);
         void uniformMatrix(const std::string& name, glm::mat4 matrix);
+        void uniformBlockBinding(const std::string& name, GLuint index);
 
         void setMatrices(const glm::mat4& projection, const glm::mat4& view);
 
-
-        static std::unique_ptr<Shader> create(const char* vertex_path, const char* fragment_path);
+        bool create(const char* vertex_path, const char* fragment_path);
 };

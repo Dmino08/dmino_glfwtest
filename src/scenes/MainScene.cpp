@@ -3,11 +3,9 @@
 #include "window/Window.hpp"
 #include "window/InputManager.hpp"
 
-
 #include "graphics/core/Image.hpp"
 #include "graphics/core/Texture.hpp"
 #include "graphics/glsl/GLSLStructures.hpp"
-
 
 #include <iostream>
 
@@ -16,7 +14,6 @@ void MainScene::init(Window& wind) {
     fbo = makeU<FrameBuffer>();
     fbo->create(wind.getWidth(), wind.getHeight());
 
-    std::cout << "Main is created\n";
     window = &wind;
     input = &wind.getInput();
     glfwSwapInterval(0);
@@ -27,10 +24,18 @@ void MainScene::init(Window& wind) {
     camera = makeU<Camera>(wind, c_params);
 
     // SHADER GENERATION
-    screen_shader = Shader::create("res/shaders/framebuffer.vert", "res/shaders/framebuffer.frag");
-    mult_shader = Shader::create("res/shaders/light_test.vert","res/shaders/multiple_lights.frag");
-    skybox_shader = Shader::create("res/shaders/sky_box.vert", "res/shaders/sky_box.frag");
-    reflect_shader = Shader::create("res/shaders/reflect.vert", "res/shaders/reflect.frag");
+    screen_shader = makeU<Shader>();
+    screen_shader->create("res/shaders/framebuffer.vert", "res/shaders/framebuffer.frag");
+
+    mult_shader = makeU<Shader>();
+    mult_shader->create("res/shaders/light_test.vert","res/shaders/multiple_lights.frag");
+
+    skybox_shader = makeU<Shader>();
+    skybox_shader->create("res/shaders/sky_box.vert", "res/shaders/sky_box.frag");
+
+    reflect_shader = makeU<Shader>();
+    reflect_shader->create("res/shaders/reflect.vert", "res/shaders/reflect.frag");
+
     // mult_shader->use();
 
     // IMAGE GENERATION
@@ -121,12 +126,16 @@ void MainScene::init(Window& wind) {
     skybox = makeU<Voxel>(glm::vec3(0.0f));
     reflectbox = makeU<Voxel>(glm::vec3(0.0f, 5.0f, 0.0f));
 
+    
+    model = makeU<modload::Model>();
+    model->create("res/models/guitar/source/Survival_BackPack_2.fbx");
+
     fbo->setUnitSlot();
     screen_shader->use();
-    screen_shader->uniform1i("screen_texture", fbo->getSlot());
+    screen_shader->uniform1i("screen_texture", fbo->getUnitSlot());
 }
 
-float fpsTimer = 0.0f;
+
 
 void MainScene::update(float delta) {
 
@@ -186,9 +195,22 @@ void MainScene::update(float delta) {
     else if (input->getScrollDeltaY() < 0.0f){
         camera->toZoom(1.2f, 0.0f, 20.0f);
     }
+
+    if (input->justPressed(GLFW_KEY_I))
+    {
+        core::logger.log(core::Logger::INFO, std::to_string(Mesh::getDrawCalls()));
+    }
+
+    if (input->butJustPressed(GLFW_MOUSE_BUTTON_LEFT))
+    {
+        engine_.attachSceneToWindow("2", "1");
+    }
+    
 }
 
 void MainScene::draw() {
+    Mesh::clearDrawCalls();
+    
     fbo->bind();
 
     glClearColor(0.42, 0.42, 0.6, 1.0);
@@ -203,18 +225,28 @@ void MainScene::draw() {
     floor->draw();
 
     glDepthFunc(GL_LEQUAL);
-    glm::mat4 view = glm::mat4(glm::mat3(camera->getViewMatrix()));
-    skybox_shader->setMatrices(camera->getProjectionMatrix(), view);
-    skybox->draw();
+    glCullFace(GL_FRONT);
+        glm::mat4 view = glm::mat4(glm::mat3(camera->getViewMatrix()));
+        skybox_shader->setMatrices(camera->getProjectionMatrix(), view);
+        skybox->draw();
+    glCullFace(GL_BACK);
     glDepthFunc(GL_LESS);
+
+
 
 
     reflect_shader->setMatrices(camera->getProjectionMatrix(), camera->getViewMatrix());
     reflect_shader->uniform3f("camera_pos", camera->getPos());
 //
     reflect_shader->uniformMatrix("model", reflectbox->transform.getModel());
-    reflectbox->draw();
+    reflectbox->draw(GL_LINE_STRIP);
 
+//
+    glm::mat4 md = glm::translate(glm::mat4(1.0f), glm::vec3(5.0f, 4.0f, 5.0f));
+    md = glm::scale(md, glm::vec3(0.01f));
+    reflect_shader->uniformMatrix("model", md);
+    model->draw(GL_LINE_STRIP);
 
     fbo->drawScreen(*screen_shader, false); 
 }
+

@@ -32,7 +32,10 @@ struct MeshData {
 
 class Mesh {
     GLuint vao_, vbo_, ebo_;
-    uint verticeCount_, indiceCount_;
+    uint vertice_count_, indice_count_;
+
+    static int draw_calls_;
+
     public:
         Mesh();
         Mesh(Mesh&& other) noexcept;
@@ -43,7 +46,10 @@ class Mesh {
         template <typename V>
         void create(const MeshData<V>& data, GLenum usage = GL_STATIC_DRAW);
 
-        void draw() const;
+        void draw(GLenum mode = GL_TRIANGLES) const;
+
+        static int getDrawCalls();
+        static void clearDrawCalls();
 };
 
 #include "graphics/core/Mesh.inl"

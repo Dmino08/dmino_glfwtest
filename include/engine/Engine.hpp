@@ -11,15 +11,15 @@ class Window;
 class IScene;
 
 class Engine {
-    Assets assets;
-    core::Time time;
+    Assets assets_;
+    core::Time time_;
 
     std::unordered_map<std::string, 
                        std::pair<std::unique_ptr<Window>, 
                        std::unique_ptr<IScene>>> pairs_;
     std::unordered_map<std::string, std::function<std::unique_ptr<IScene>()>> factories_;
 
-    bool shouldEnd = false;
+    bool should_end_ = false;
 
     public:
         template<typename T>

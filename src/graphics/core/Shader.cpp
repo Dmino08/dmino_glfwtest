@@ -8,16 +8,16 @@
 
 
 unsigned int Shader::getUniformLocation(const std::string& name) {
-    auto found = uniformLocations_.find(name);
+    auto found = uniform_locations_.find(name);
     
-    if (found == uniformLocations_.end())
+    if (found == uniform_locations_.end())
     {
-        unsigned int location = glGetUniformLocation(ID_, name.c_str());
-        if (location == -1) {
+        unsigned int location = glGetUniformLocation(id_, name.c_str());
+        if (location == GL_INVALID_INDEX) {
             core::logger.log(core::Logger::WARNING, "Shader doesn't have the uniform variable " + name);
         }
         else {
-            uniformLocations_.try_emplace(name, location);
+            uniform_locations_.try_emplace(name, location);
         }
         return location;
     }
@@ -25,35 +25,51 @@ unsigned int Shader::getUniformLocation(const std::string& name) {
     return found->second;
 }
 
+unsigned int Shader::getUniformBlockBinding(const std::string& name) {
+    auto found = uniform_locations_.find(name);
+        
+        if (found == uniform_locations_.end())
+        {
+            unsigned int block_index = glGetUniformBlockIndex(id_, name.c_str());
+            if (block_index == GL_INVALID_INDEX) {
+                core::logger.log(core::Logger::WARNING, "Shader doesn't have the uniform variable " + name);
+            }
+            else {
+                uniform_locations_.try_emplace(name, block_index);
+            }
+            return block_index;
+        }
 
-Shader::Shader(GLuint id) : ID_(id) {}
+        return found->second;    
+}
+
 
 Shader::~Shader() {
-    if (ID_ != 0) {
-        glDeleteProgram(ID_);
-        ID_ = 0;
+    if (id_ != 0) {
+        glDeleteProgram(id_);
+        id_ = 0;
     }
 }
 
 
 
 void Shader::use() const {
-    if (ID_ != 0) {
-        glUseProgram(ID_);
+    if (id_ != 0) {
+        glUseProgram(id_);
     }
 }
 
 
 void Shader::uniform1i(const std::string& name, int x) {
     unsigned int location = getUniformLocation(name);
-    if (location != -1) {
+    if (location != GL_INVALID_INDEX) {
         glUniform1i(location, x);
     }
 }   
 
 void Shader::uniform2i(const std::string& name, int x, int y) {
     unsigned int location = getUniformLocation(name);
-    if (location != -1) {    
+    if (location != GL_INVALID_INDEX) {    
         glUniform2i(location, x, y);
     }
 }  
@@ -67,59 +83,66 @@ void Shader::uniform2i(const std::string& name, glm::ivec2 xy) {
 
 void Shader::uniform3i(const std::string& name, int x, int y, int z) {
     unsigned int location = getUniformLocation(name);
-    if (location != -1) {      
+    if (location != GL_INVALID_INDEX) {      
         glUniform3i(location, x, y, z);
     }
 }  
 
 void Shader::uniform3i(const std::string& name, glm::ivec3 xyz) {
     unsigned int location = getUniformLocation(name);
-    if (location != -1) {     
+    if (location != GL_INVALID_INDEX) {     
         glUniform3i(location, xyz.x, xyz.y, xyz.z);
     }
 }  
 
 void Shader::uniform1f(const std::string& name, float x) {
     unsigned int location = getUniformLocation(name);
-    if (location != -1) {     
+    if (location != GL_INVALID_INDEX) {     
         glUniform1f(location, x);
     }
 }  
 
 void Shader::uniform2f(const std::string& name, float x, float y) {
     unsigned int location = getUniformLocation(name);
-    if (location != -1) {     
+    if (location != GL_INVALID_INDEX) {     
         glUniform2f(location, x, y);
     }
 }  
 
 void Shader::uniform2f(const std::string& name, glm::vec2 xy) {
     unsigned int location = getUniformLocation(name);
-    if (location != -1) {     
+    if (location != GL_INVALID_INDEX) {     
         glUniform2f(location, xy.x, xy.y);
     }
 }  
 
 void Shader::uniform3f(const std::string& name, float x, float y, float z) {
     unsigned int location = getUniformLocation(name);
-    if (location != -1) {     
+    if (location != GL_INVALID_INDEX) {     
         glUniform3f(location, x, y, z);
     }
 }  
 
 void Shader::uniform3f(const std::string& name, glm::vec3 xyz) {
     unsigned int location = getUniformLocation(name);
-    if (location != -1) {     
+    if (location != GL_INVALID_INDEX) {     
         glUniform3f(location, xyz.x, xyz.y, xyz.z);
     }
 }  
 
 void Shader::uniformMatrix(const std::string& name, glm::mat4 matrix) {
     unsigned int location = getUniformLocation(name);
-    if (location != -1) {     
+    if (location != GL_INVALID_INDEX) {     
         glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
     }
 }  
+
+void Shader::uniformBlockBinding(const std::string& name, GLuint index) {
+    unsigned int block = getUniformBlockBinding(name);
+    if (block != GL_INVALID_INDEX) {     
+        glUniformBlockBinding(id_, block, index);
+    }    
+}
 
 void Shader::setMatrices(const glm::mat4& projection, const glm::mat4& view) {
     use();
@@ -128,9 +151,7 @@ void Shader::setMatrices(const glm::mat4& projection, const glm::mat4& view) {
 
 }
 
-
-
-std::unique_ptr<Shader> Shader::create(const char* vertex_path, const char* fragment_path) {
+bool Shader::create(const char* vertex_path, const char* fragment_path) {
     std::string vertexCode;
     std::string fragmentCode;
     std::ifstream vShaderFile;
@@ -178,7 +199,7 @@ std::unique_ptr<Shader> Shader::create(const char* vertex_path, const char* frag
         glGetShaderInfoLog(vertex, 512, nullptr, infoLog);
 
         core::logger.log(core::Logger::ERROR, "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" + std::string(infoLog));
-        return nullptr;
+        return false;
     }
     
     GLuint fragment = glCreateShader(GL_FRAGMENT_SHADER);
@@ -193,7 +214,7 @@ std::unique_ptr<Shader> Shader::create(const char* vertex_path, const char* frag
 
         core::logger.log(core::Logger::ERROR, "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" + std::string(infoLog));
         glDeleteShader(vertex);
-        return nullptr;
+        return false;
     }
 
     GLuint id = glCreateProgram();
@@ -210,13 +231,13 @@ std::unique_ptr<Shader> Shader::create(const char* vertex_path, const char* frag
         core::logger.log(core::Logger::ERROR, "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" + std::string(infoLog));
         glDeleteShader(vertex);
         glDeleteShader(fragment);
+        return false;
         
-        return nullptr;
     }
 
     glDeleteShader(vertex);
     glDeleteShader(fragment);
-    
 
-    return std::make_unique<Shader>(id);
+    id_ = id;
+    return true;
 }

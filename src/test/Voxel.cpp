@@ -77,6 +77,6 @@ Voxel::Voxel(const glm::vec3& position) : transform(position) {
 }
 
 
-void Voxel::draw() {
-    Voxel::mesh_.draw();
+void Voxel::draw(GLenum mode) const {
+    Voxel::mesh_.draw(mode);
 }

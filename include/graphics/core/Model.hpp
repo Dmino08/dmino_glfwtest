@@ -4,28 +4,31 @@
 #include <string>
 #include <memory>
 
-class Mesh;
+#include "graphics/core/Texture.hpp"
+#include "graphics/core/Mesh.hpp"
 
-namespace modload {
-    struct Texture {
-        unsigned int id;
-    };
-    
-    struct Material {
-        modload::Texture diffuse;
-        modload::Texture specular;
-    };
+struct aiNode;
+struct aiScene;
+struct aiMesh;
+struct aiMaterial;
+enum aiTextureType;
 
-    struct Drawable {
-        std::unique_ptr<Mesh> mesh;
-        std::unique_ptr<modload::Material> material;
-    };
+
+namespace modload { 
 
     class Model {
-        std::vector<modload::Drawable> meshes_;
-        
+        std::vector<Mesh> meshes_;
+        std::string directory;
+
+        void loadModel(std::string path);
+        void processNode(aiNode* node, const aiScene* scene);
+        Mesh processMesh(aiMesh* mesh, const aiScene* scene);
+        // std::vector<Texture> loadMaterialTextures(aiMaterial& mat, 
+        //                                           aiTextureType type, 
+        //                                           std::string type_name);
 
         public:
-            // void create(const std::string& path);
+             void create(char* path);
+             void draw(GLenum mode = GL_TRIANGLES);
     };
 }

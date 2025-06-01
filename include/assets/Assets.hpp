@@ -14,20 +14,20 @@ using asset = std::shared_ptr<type>;
 
 class Assets {
 
-    assets_map assets;
+    assets_map assets_;
 
     public:
         template<typename T>
         void addItem(const std::shared_ptr<T>& item, const std::string& name) {
 
-            assets[std::type_index(typeid(T))][name] = item;
+            assets_[std::type_index(typeid(T))][name] = item;
         }
 
         template<typename T>
         void DeleteItem(const std::string& name) {
 
-            auto type_it = assets.find(std::type_index(typeid(T)));
-            if (type_it == assets.end()) return;
+            auto type_it = assets_.find(std::type_index(typeid(T)));
+            if (type_it == assets_.end()) return;
 
             auto& inner_map = type_it->second;
 
@@ -39,8 +39,8 @@ class Assets {
         template<typename T>
         std::shared_ptr<T> getItem(const std::string& name) const {
 
-            auto type_it = assets.find(std::type_index(typeid(T)));
-            if (type_it == assets.end()) return nullptr;  
+            auto type_it = assets_.find(std::type_index(typeid(T)));
+            if (type_it == assets_.end()) return nullptr;  
 
             auto& inner_map = type_it->second;
 
@@ -53,8 +53,8 @@ class Assets {
         template<typename T>
         bool hasItem(const std::string& name) const {
 
-            auto type_it = assets.find(std::type_index(typeid(T)));
-            if (type_it == assets.end()) return false;  
+            auto type_it = assets_.find(std::type_index(typeid(T)));
+            if (type_it == assets_.end()) return false;  
 
             auto& inner_map = type_it->second;
 

@@ -73,4 +73,5 @@ namespace glsl {
 
     void setSpotLight(Shader& shader, const std::string& name, const SpotLight& light);
 
+
 }

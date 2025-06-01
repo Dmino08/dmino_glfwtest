@@ -3,7 +3,7 @@
 #include "graphics/core/Shader.hpp"
 
 namespace glsl {
-
+    
     void setMaterial(Shader& shader, const std::string& name, const Material& material) {
         shader.uniform1i(name + ".diffuse", material.diffuse);
         shader.uniform1i(name + ".specular", material.specular);

@@ -3,15 +3,15 @@
 namespace core {
 
     Time::Time() {
-        last = clock::now();
+        last_ = clock::now();
     }
     void Time::update() {
         auto now = clock::now();
-        deltaTime = std::chrono::duration<float>(now - last).count();
-        last = now;
+        delta_time_ = std::chrono::duration<float>(now - last_).count();
+        last_ = now;
     }
     float Time::getDeltaTime() {
-        return deltaTime;
+        return delta_time_;
     }
 
 }

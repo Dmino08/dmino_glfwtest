@@ -52,6 +52,7 @@ class Window {
 
         void setTitle(const std::string& title);
         void setCursorMode(int mode);
+        void setCloseCallback(GLFWwindowclosefun callback);
     
         int getWidth() const;
         int getHeight() const;

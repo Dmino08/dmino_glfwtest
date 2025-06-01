@@ -10,6 +10,7 @@
 #include "graphics/render/FrameBuffer.hpp"
 #include "test/Voxel.hpp"
 #include "graphics/core/CubeMap.hpp"
+#include "graphics/core/Model.hpp"
 
 
 class Assets;
@@ -51,7 +52,10 @@ class MainScene : public IScene {
 
         Texture texture0;
 
+        u_ptr<modload::Model> model;
+
         float camera_speed = 10.f;
+        float fpsTimer = 0.0f;
         bool vsync = false;
         bool onFlashLight = true;
 
@@ -60,4 +64,5 @@ class MainScene : public IScene {
         void update(float delta) override;
 
         void draw() override;
+
 };
