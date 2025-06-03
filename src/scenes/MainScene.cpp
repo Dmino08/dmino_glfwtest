@@ -128,7 +128,7 @@ void MainScene::init(Window& wind) {
 
     
     model = makeU<modload::Model>();
-    model->create("res/models/guitar/source/Survival_BackPack_2.fbx");
+    model->create("res/models/backpack/backpack.obj");
 
     fbo->setUnitSlot();
     screen_shader->use();
@@ -220,9 +220,37 @@ void MainScene::draw() {
     mult_shader->uniform3f("spot_light.position", camera->getPos());
     mult_shader->uniform3f("spot_light.direction", camera->getFront());
 //
+    mult_shader->uniform1i("use_specular_map", false);
     mult_shader->uniform1i("material.diffuse", texture0.getUnitId());  
     mult_shader->uniformMatrix("model", floor->transform.getModel());
     floor->draw();
+
+
+    glm::mat4 md = glm::translate(glm::mat4(1.0f), glm::vec3(5.0f, 4.0f, 5.0f));
+    mult_shader->uniform1i("use_specular_map", true);
+    mult_shader->uniformMatrix("model", md);
+    const auto& meshes = model->getMeshes();
+    const auto& mats = model->getMaterials();
+    const auto& textures = model->getAllTextures();
+
+    for (size_t i = 0; i < meshes.size(); ++i) {
+        int diffuse_id = mats[meshes[i].material_index].diffuse;
+        int specular_id = mats[meshes[i].material_index].specular;
+        if (diffuse_id >= 0) {
+            glActiveTexture(GL_TEXTURE10);
+            textures[diffuse_id].bind();
+            mult_shader->uniform1i("material.diffuse", 10);
+        }
+        if (specular_id >= 0) {
+            glActiveTexture(GL_TEXTURE11);
+            textures[specular_id].bind();
+            mult_shader->uniform1i("material.specular", 11);
+        }
+
+        meshes[i].mesh.draw();
+    }
+    
+
 
     glDepthFunc(GL_LEQUAL);
     glCullFace(GL_FRONT);
@@ -232,21 +260,16 @@ void MainScene::draw() {
     glCullFace(GL_BACK);
     glDepthFunc(GL_LESS);
 
-
-
-
+    
     reflect_shader->setMatrices(camera->getProjectionMatrix(), camera->getViewMatrix());
     reflect_shader->uniform3f("camera_pos", camera->getPos());
 //
     reflect_shader->uniformMatrix("model", reflectbox->transform.getModel());
-    reflectbox->draw(GL_LINE_STRIP);
+    reflectbox->draw();
+
+
 
 //
-    glm::mat4 md = glm::translate(glm::mat4(1.0f), glm::vec3(5.0f, 4.0f, 5.0f));
-    md = glm::scale(md, glm::vec3(0.01f));
-    reflect_shader->uniformMatrix("model", md);
-    model->draw(GL_LINE_STRIP);
-
     fbo->drawScreen(*screen_shader, false); 
 }
 

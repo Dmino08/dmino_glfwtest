@@ -23,7 +23,6 @@ Mesh::Mesh(Mesh&& other) noexcept {
     vertice_count_ = other.vertice_count_;
     indice_count_ = other.indice_count_;
 
-    // Очищаем другой объект
     other.vao_ = 0;
     other.vbo_ = 0;
     other.ebo_ = 0;
@@ -32,17 +31,14 @@ Mesh::Mesh(Mesh&& other) noexcept {
 }
 Mesh& Mesh::operator= (Mesh&& other) noexcept {
     if (this != &other) {
-            // Удаляем текущие ресурсы
             clear();
 
-            // Забираем ресурсы
             vao_ = other.vao_;
             vbo_ = other.vbo_;
             ebo_ = other.ebo_;
             vertice_count_ = other.vertice_count_;
             indice_count_ = other.indice_count_;
 
-            // Очищаем другой объект
             other.vao_ = 0;
             other.vbo_ = 0;
             other.ebo_ = 0;
@@ -82,7 +78,22 @@ void Mesh::draw(GLenum mode) const {
     }
 
     glBindVertexArray(0);
-    
+}
+
+void Mesh::drawInstances(GLsizei instance_count, GLenum mode) const {
+    glBindVertexArray(vao_);
+
+    if (vertice_count_ != 0) {
+        if (indice_count_ != 0) {
+            glDrawElementsInstanced(mode, indice_count_, GL_UNSIGNED_INT, 0, instance_count);
+        }
+        else {
+            glDrawArraysInstanced(mode, 0, vertice_count_, instance_count);
+        }
+        draw_calls_++;
+    }
+
+    glBindVertexArray(0);
 }
 
 int Mesh::getDrawCalls() {

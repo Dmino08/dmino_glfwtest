@@ -73,6 +73,8 @@ int main(void) {
             glEnable(GL_CULL_FACE);
             glCullFace(GL_BACK);
             glFrontFace(GL_CCW);
+            //
+            glEnable(GL_PROGRAM_POINT_SIZE);
         
         engine.addScene<MainScene>("1");
         engine.addScene<AOPGScene>("2");
@@ -81,7 +83,7 @@ int main(void) {
 
         engine.attachSceneToWindow("1", "1");
 
-        glEnable(GL_PROGRAM_POINT_SIZE);
+        
         engine.run();
 
         glDeleteBuffers(1, &ubo_buffer);

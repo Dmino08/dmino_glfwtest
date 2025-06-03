@@ -33,6 +33,8 @@ class Texture {
     public:
         std::string type;
         Texture();
+        Texture(Texture&& other) noexcept;
+        Texture& operator=(Texture&& other) noexcept;
         ~Texture();
         
         void bind() const;

@@ -3,9 +3,11 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <unordered_map>
 
 #include "graphics/core/Texture.hpp"
 #include "graphics/core/Mesh.hpp"
+#include "graphics/glsl/GLSLStructures.hpp"
 
 struct aiNode;
 struct aiScene;
@@ -14,21 +16,38 @@ struct aiMaterial;
 enum aiTextureType;
 
 
+
 namespace modload { 
 
+    enum TextureType {
+        DIFFUSE,
+        SPECULAR
+    };
+
+    struct ModelMesh {
+        Mesh mesh;
+        int material_index;
+    };
+
     class Model {
-        std::vector<Mesh> meshes_;
+        std::vector<ModelMesh> meshes_;
+        std::vector<glsl::Material> materials_;
+        std::unordered_map<std::string, int> texture_cache_;
+        std::vector<Texture> textures_flat_;
+        
         std::string directory;
 
         void loadModel(std::string path);
         void processNode(aiNode* node, const aiScene* scene);
-        Mesh processMesh(aiMesh* mesh, const aiScene* scene);
-        // std::vector<Texture> loadMaterialTextures(aiMaterial& mat, 
-        //                                           aiTextureType type, 
-        //                                           std::string type_name);
+        ModelMesh processMesh(aiMesh* mesh, const aiScene* scene);
+        int Model::loadMaterialTexture(aiMaterial& mat, aiTextureType type);
 
         public:
-             void create(char* path);
-             void draw(GLenum mode = GL_TRIANGLES);
+            void create(char* path);
+            void draw(GLenum mode = GL_TRIANGLES);
+
+            std::vector<ModelMesh>& getMeshes();
+            std::vector<glsl::Material>& getMaterials();
+            std::vector<Texture>& getAllTextures();
     };
 }

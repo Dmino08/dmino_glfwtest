@@ -16,8 +16,12 @@ namespace util {
 
         public:
             Transform();
+            Transform(glm::mat4 matrix);
             Transform(float x, float y, float z);
             Transform(const glm::vec3& position);
+
+            Transform(Transform&& other) noexcept;
+            Transform& operator=(Transform&& other) noexcept;
 
         // Position changing
             void translate(float x, float y, float z);

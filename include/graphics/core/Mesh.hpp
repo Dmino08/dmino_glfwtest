@@ -47,7 +47,8 @@ class Mesh {
         void create(const MeshData<V>& data, GLenum usage = GL_STATIC_DRAW);
 
         void draw(GLenum mode = GL_TRIANGLES) const;
-
+        void drawInstances(GLsizei instance_count, GLenum mode = GL_TRIANGLES) const;
+        
         static int getDrawCalls();
         static void clearDrawCalls();
 };

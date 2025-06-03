@@ -11,7 +11,38 @@ Texture::Texture() :
     height_(0)
     {}
 
+Texture::Texture(Texture&& other) noexcept
+    : id_(other.id_),
+      target_(other.target_),
+      width_(other.width_),
+      height_(other.height_) 
+{
+    other.id_ = 0;
+    other.target_ = 0;
+    other.width_ = 0;
+    other.height_ = 0;
+}
 
+Texture& Texture::operator=(Texture&& other) noexcept {
+    if (this != &other) {
+        // Удалить текущую текстуру, если есть
+        if (id_ != 0)
+            glDeleteTextures(1, &id_);
+
+        // Перенести данные из other
+        id_ = other.id_;
+        target_ = other.target_;
+        width_ = other.width_;
+        height_ = other.height_;
+
+        // Обнулить other
+        other.id_ = 0;
+        other.target_ = 0;
+        other.width_ = 0;
+        other.height_ = 0;
+    }
+    return *this;
+}
 
 Texture::~Texture() {
     if (id_ != 0) {

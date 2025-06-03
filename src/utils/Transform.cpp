@@ -26,6 +26,15 @@ namespace util {
         updateVectors();
     }
 
+    Transform::Transform(glm::mat4 matrix)
+    : position_(glm::vec3(0.0f, 0.0f, 0.0f)),
+      rotation_(glm::vec3(0.0f, 0.0f, 0.0f)), 
+      scale_(glm::vec3(1.0f, 1.0f, 1.0f)),
+      model_(glm::mat4(1.0f))
+    {
+        model_ = matrix;
+    }
+
     Transform::Transform(float x, float y, float z)
     : position_(glm::vec3(x, y, z)),
       rotation_(glm::vec3(0.0f, 0.0f, 0.0f)),
@@ -42,6 +51,22 @@ namespace util {
       model_(glm::mat4(1.0f))    
     {
         updateVectors();
+    }
+
+    Transform::Transform(Transform&& other) noexcept : 
+          position_(std::move(other.position_)),
+          rotation_(std::move(other.rotation_)),
+          scale_(std::move(other.scale_)),
+          model_(std::move(other.model_))  {}
+    
+    Transform& Transform::operator=(Transform&& other) noexcept{
+        if (this != &other) {
+            position_ = std::move(other.position_);
+            rotation_ = std::move(other.rotation_);
+            scale_    = std::move(other.scale_);
+            model_    = std::move(other.model_);
+        }
+        return *this;
     }
 
 
