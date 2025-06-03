@@ -6,10 +6,13 @@
 #include "graphics/core/Image.hpp"
 #include "graphics/core/Texture.hpp"
 #include "graphics/glsl/GLSLStructures.hpp"
+#include "core/Time.hpp"
 
 #include <iostream>
 
 void MainScene::init(Window& wind) {
+    core::Time time;
+    time.update();
     // CREATING FRAMEBUFFER
     fbo = makeU<FrameBuffer>();
     fbo->create(wind.getWidth(), wind.getHeight());
@@ -60,7 +63,7 @@ void MainScene::init(Window& wind) {
 
     // LIGHT GENERATION  DIRECTIONAL
     glsl::DirectionalLight direction_light;
-    direction_light.base.ambient = glm::vec3(0.20f, 0.20f, 0.20f);
+    direction_light.base.ambient = glm::vec3(0.08f);
     direction_light.base.diffuse = glm::vec3(0.4f, 0.4f, 0.4f);
     direction_light.base.specular = glm::vec3(0.5f, 0.5f, 0.5f);
     direction_light.direction = glm::vec3(0.0f, -1.0f, 0.0f);
@@ -73,7 +76,7 @@ void MainScene::init(Window& wind) {
     point_light.attenuation.constant = 1.0f;
     point_light.attenuation.linear = 0.09f;
     point_light.attenuation.quadratic = 0.032f;
-    point_light.position = glm::vec3(0.0f, 0.0f, 0.0f);
+    point_light.position = glm::vec3(5.0f, 6.0f, 7.0f);
 
     // LIGHT GENERATION  SPOT
     glsl::SpotLight spot_light;
@@ -112,8 +115,10 @@ void MainScene::init(Window& wind) {
     glsl::setMaterial(*mult_shader, "material", glsl::Material{0, 1, 32.0f});
     glsl::setDirectionalLight(*mult_shader, "direction_light", direction_light);
     glsl::setSpotLight(*mult_shader, "spot_light", spot_light);
+    glsl::setPointLight(*mult_shader, "point_lights[0]", point_light);
     mult_shader->uniform1i("on_flash_light", true);
     mult_shader->uniform1i("use_specular_map", false);
+    mult_shader->uniform1i("blinn", true);
         //SKYBOXSHADER
     skybox_shader->use();
     skybox_shader->uniform1i("skybox", cube_map->getUnitId());
@@ -133,6 +138,9 @@ void MainScene::init(Window& wind) {
     fbo->setUnitSlot();
     screen_shader->use();
     screen_shader->uniform1i("screen_texture", fbo->getUnitSlot());
+
+    time.update();
+    core::logger.log(core::Logger::INFO, "Init time: " + std::to_string(time.getDeltaTime()));
 }
 
 
@@ -217,11 +225,13 @@ void MainScene::draw() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     mult_shader->setMatrices(camera->getProjectionMatrix(), camera->getViewMatrix());
+    mult_shader->uniform3f("view_pos", camera->getPos());
     mult_shader->uniform3f("spot_light.position", camera->getPos());
     mult_shader->uniform3f("spot_light.direction", camera->getFront());
 //
     mult_shader->uniform1i("use_specular_map", false);
     mult_shader->uniform1i("material.diffuse", texture0.getUnitId());  
+    mult_shader->uniform1f("material.shininess", 32.0f);
     mult_shader->uniformMatrix("model", floor->transform.getModel());
     floor->draw();
 
@@ -236,6 +246,7 @@ void MainScene::draw() {
     for (size_t i = 0; i < meshes.size(); ++i) {
         int diffuse_id = mats[meshes[i].material_index].diffuse;
         int specular_id = mats[meshes[i].material_index].specular;
+        float shininess = mats[meshes[i].material_index].shininess;
         if (diffuse_id >= 0) {
             glActiveTexture(GL_TEXTURE10);
             textures[diffuse_id].bind();
@@ -246,6 +257,7 @@ void MainScene::draw() {
             textures[specular_id].bind();
             mult_shader->uniform1i("material.specular", 11);
         }
+        mult_shader->uniform1f("material.shininess", shininess);
 
         meshes[i].mesh.draw();
     }

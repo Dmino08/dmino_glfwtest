@@ -49,7 +49,7 @@ in vec3 frag_pos;
 in vec3 normal;
 in vec2 coord;
 
-#define POINT_LIGHT_SIZE 4
+#define POINT_LIGHT_SIZE 1
 
 uniform vec3 view_pos;
 uniform Material material;
@@ -59,6 +59,7 @@ uniform SpotLight spot_light;
 uniform bool on_flash_light;
 
 uniform bool use_specular_map;
+uniform bool blinn = false;
 
 vec3 calculateDirectionalLight(vec3 texture_color) {
 // ambient
@@ -72,9 +73,17 @@ vec3 calculateDirectionalLight(vec3 texture_color) {
 
 // specular
     vec3 view_dir = normalize(view_pos - frag_pos);
-    vec3 reflect_dir = reflect(-light_dir, norm);
-    float spec = pow(max(dot(view_dir, reflect_dir), 0.0), material.shininess);
-    vec3 spec_color = use_specular_map ? vec3(texture(material.specular, coord)) : vec3(0.0f);
+    float spec = 0.0f;
+    if (blinn) {
+        vec3 half_way_dir = normalize(light_dir + view_dir);
+        spec = pow(max(dot(norm, half_way_dir), 0.0), material.shininess);
+    }
+    else {
+        vec3 reflect_dir = reflect(-light_dir, norm);
+        spec = pow(max(dot(view_dir, reflect_dir), 0.0), material.shininess);
+    }
+    
+    vec3 spec_color = use_specular_map ? vec3(texture(material.specular, coord)) : vec3(0.5f);
     vec3 specular = direction_light.base.specular * spec * spec_color;
 
 // result
@@ -96,9 +105,16 @@ vec3 calculatePointLights(vec3 texture_color) {
         vec3 diffuse = point_lights[i].base.diffuse * diff * texture_color;
         // specular
         vec3 view_dir = normalize(view_pos - frag_pos);
-        vec3 reflect_dir = reflect(-light_dir, norm);
-        float spec = pow(max(dot(view_dir, reflect_dir), 0.0), material.shininess);
-        vec3 spec_color = use_specular_map ? vec3(texture(material.specular, coord)) : vec3(0.0f);
+        float spec = 0.0f;
+        if (blinn) {
+            vec3 half_way_dir = normalize(light_dir + view_dir);
+            spec = pow(max(dot(norm, half_way_dir), 0.0), material.shininess);
+        }
+        else {
+            vec3 reflect_dir = reflect(-light_dir, norm);
+            spec = pow(max(dot(view_dir, reflect_dir), 0.0), material.shininess);
+        }
+        vec3 spec_color = use_specular_map ? vec3(texture(material.specular, coord)) : vec3(0.5f);
         vec3 specular = point_lights[i].base.specular * spec * spec_color;
     // attenuation
         float distance = length(point_lights[i].position - frag_pos);
@@ -125,9 +141,16 @@ vec3 calculateSpotLight(vec3 texture_color) {
     vec3 diffuse = spot_light.base.diffuse * diff * texture_color;
     // specular
     vec3 view_dir = normalize(view_pos - frag_pos);
-    vec3 reflect_dir = reflect(-light_dir, norm);
-    float spec = pow(max(dot(view_dir, reflect_dir), 0.0), material.shininess);
-    vec3 spec_color = use_specular_map ? vec3(texture(material.specular, coord)) : vec3(0.0f);
+    float spec = 0.0f;
+    if (blinn) {
+        vec3 half_way_dir = normalize(light_dir + view_dir);
+        spec = pow(max(dot(norm, half_way_dir), 0.0), material.shininess);
+    }
+    else {
+        vec3 reflect_dir = reflect(-light_dir, norm);
+        spec = pow(max(dot(view_dir, reflect_dir), 0.0), material.shininess);
+    }
+    vec3 spec_color = use_specular_map ? vec3(texture(material.specular, coord)) : vec3(0.5f);
     vec3 specular = spot_light.base.specular * spec * spec_color;
 // spot light
     float theta = dot(light_dir, normalize(-spot_light.direction));
@@ -159,13 +182,13 @@ void main() {
     //     discard;
 
     vec3 dir = calculateDirectionalLight(texture_color);
-//    vec3 point = calculatePointLights(texture_color);
+    vec3 point = calculatePointLights(texture_color);
 
     vec3 spot= vec3(0.0);
     if (on_flash_light) {
         spot = calculateSpotLight(texture_color);
     }
 // result
-    vec3 result = dir + spot;
+    vec3 result = dir + point + spot;
     frag_color = vec4(result, alfa);
 }
