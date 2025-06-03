@@ -75,6 +75,7 @@ int main(void) {
             glFrontFace(GL_CCW);
             //
             glEnable(GL_PROGRAM_POINT_SIZE);
+            // glEnable(GL_FRAMEBUFFER_SRGB);
         
         engine.addScene<MainScene>("1");
         engine.addScene<AOPGScene>("2");

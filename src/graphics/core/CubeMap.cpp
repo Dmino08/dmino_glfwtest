@@ -2,7 +2,7 @@
 
 #include "core/Logger.hpp"
 
-#include <glad/glad.h>
+
 #include "graphics/core/Image.hpp"
 
 #ifdef DEBUG_MODE
@@ -11,7 +11,7 @@
 
 CubeMap::CubeMap() : id_(0) {}
 CubeMap::~CubeMap() {glDeleteTextures(1, &id_);}
-void CubeMap::create(std::array<std::string, 6> textures_faces) {
+void CubeMap::create(std::array<std::string, 6> textures_faces, GLint internalformat) {
     if (id_ != 0) {
         glDeleteTextures(1, &id_);
         id_ = 0;
@@ -24,7 +24,7 @@ void CubeMap::create(std::array<std::string, 6> textures_faces) {
     for(unsigned int i = 0; i < textures_faces.size(); i++)
     {
         image.load(textures_faces[i].c_str());
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, image.getWidth(),
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalformat, image.getWidth(),
         image.getHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE, image.getData());
     }
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

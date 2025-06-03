@@ -48,7 +48,7 @@ void MainScene::init(Window& wind) {
     // TEXTURE GENERATION
     TextureParams tParams;
     tParams.min_filter = GL_LINEAR_MIPMAP_LINEAR;
-    tParams.internal_format = GL_RGBA;
+    tParams.internal_format = GL_SRGB_ALPHA;
     texture0.create(*image0, tParams);
 
     // FLOOR GENERATION
@@ -63,9 +63,9 @@ void MainScene::init(Window& wind) {
 
     // LIGHT GENERATION  DIRECTIONAL
     glsl::DirectionalLight direction_light;
-    direction_light.base.ambient = glm::vec3(0.08f);
-    direction_light.base.diffuse = glm::vec3(0.4f, 0.4f, 0.4f);
-    direction_light.base.specular = glm::vec3(0.5f, 0.5f, 0.5f);
+    direction_light.base.ambient = glm::vec3(0.02f);
+    direction_light.base.diffuse = glm::vec3(0.3f);
+    direction_light.base.specular = glm::vec3(0.5f);
     direction_light.direction = glm::vec3(0.0f, -1.0f, 0.0f);
 
     // LIGHT GENERATION  POINT
@@ -76,7 +76,7 @@ void MainScene::init(Window& wind) {
     point_light.attenuation.constant = 1.0f;
     point_light.attenuation.linear = 0.09f;
     point_light.attenuation.quadratic = 0.032f;
-    point_light.position = glm::vec3(5.0f, 6.0f, 7.0f);
+    point_light.position = glm::vec3(5.0f, 4.0f, 7.0f);
 
     // LIGHT GENERATION  SPOT
     glsl::SpotLight spot_light;
@@ -101,7 +101,7 @@ void MainScene::init(Window& wind) {
         "res/images/skybox/back.jpg"
     };
     cube_map = makeU<CubeMap>();
-    cube_map->create(cube_paths);
+    cube_map->create(cube_paths, tParams.internal_format);
 
     //TEXTURE BIDNING
     texture0.activeUnit(1);
@@ -133,7 +133,8 @@ void MainScene::init(Window& wind) {
 
     
     model = makeU<modload::Model>();
-    model->create("res/models/backpack/backpack.obj");
+    model->texture_params.internal_format = tParams.internal_format;
+    model->create("res/models/backpack/backpack.obj"/*"res/models/laptop/Lowpoly_Notebook_2.obj"*/);
 
     fbo->setUnitSlot();
     screen_shader->use();

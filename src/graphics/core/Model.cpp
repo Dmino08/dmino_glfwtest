@@ -14,7 +14,7 @@ namespace modload {
         
         Assimp::Importer importer;
         const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate
-                                                    //  | aiProcess_FlipUVs 
+                                                    //   | aiProcess_FlipUVs 
                                                     );
 
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
@@ -121,10 +121,7 @@ namespace modload {
             image.load(full_path);
 
             Texture texture;
-            TextureParams tParams;
-            tParams.min_filter = GL_LINEAR_MIPMAP_LINEAR;
-            tParams.internal_format = GL_RGBA;
-            texture.create(image, tParams);
+            texture.create(image, texture_params);
 
             int tex_id = textures_flat_.size();
             textures_flat_.push_back(std::move(texture));

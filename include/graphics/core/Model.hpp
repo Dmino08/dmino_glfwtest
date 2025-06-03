@@ -43,6 +43,7 @@ namespace modload {
         int Model::loadMaterialTexture(aiMaterial& mat, aiTextureType type);
 
         public:
+            TextureParams texture_params;
             void create(char* path);
             void draw(GLenum mode = GL_TRIANGLES);
 

@@ -63,4 +63,6 @@ void main() {
     // frag_color = vec4(vec3(average), 1.0);
 
     frag_color = texture(screen_texture, coord);
+    float gamma = 2.2;
+    frag_color.rgb = pow(frag_color.rgb, vec3(1.0 / gamma));
 }
