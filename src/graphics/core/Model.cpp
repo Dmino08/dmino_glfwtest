@@ -6,6 +6,7 @@
 
 #include "core/Logger.hpp"
 #include "graphics/core/Image.hpp"
+#include "graphics/core/VertexStructures.hpp"
 
 
 namespace modload {
@@ -99,8 +100,21 @@ namespace modload {
         
         int material_index = mesh->mMaterialIndex;
         Mesh mesh_;
+        mesh_.create(vertices.size(), indices.size());
+        mesh_.bind();
+        mesh_.setBuffer(GL_ARRAY_BUFFER, vertices.size() * sizeof(SimpleVertex), vertices.data(), GL_STATIC_DRAW);
+        mesh_.setBuffer(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint), indices.data(), GL_STATIC_DRAW);
 
-        mesh_.create<SimpleVertex>(MeshData<SimpleVertex>{vertices, indices});
+        mesh_.setAttrib(0, 3, GL_FLOAT, GL_FALSE, sizeof(SimpleVertex),
+                       reinterpret_cast<void*>(offsetof(SimpleVertex, position)));
+
+        mesh_.setAttrib(1, 3, GL_FLOAT, GL_FALSE, sizeof(SimpleVertex),
+                       reinterpret_cast<void*>(offsetof(SimpleVertex, normal)));
+
+        mesh_.setAttrib(2, 2, GL_FLOAT, GL_FALSE, sizeof(SimpleVertex),
+                       reinterpret_cast<void*>(offsetof(SimpleVertex, uv_coord)));
+        mesh_.unbind();
+
         return ModelMesh{std::move(mesh_), material_index};
     }
 

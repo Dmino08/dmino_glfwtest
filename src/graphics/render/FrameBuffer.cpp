@@ -1,5 +1,6 @@
 #include "graphics/render/FrameBuffer.hpp"
 #include "graphics/core/Shader.hpp"
+#include "core/Logger.hpp"
 
 #include <glad/glad.h>
 
@@ -7,7 +8,7 @@
     int frameBuffersCreated = 0;
 #endif
 
-FrameBuffer::FrameBuffer() : framebuffer_(0), renderbuffer_(0), texture_color_buffer_(0) {}
+FrameBuffer::FrameBuffer() : framebuffer_(0), renderbuffer_(0), texture_color_buffer_(0), mesh_() {}
 
 FrameBuffer::~FrameBuffer() {
     glDeleteFramebuffers(1, &framebuffer_);
@@ -26,7 +27,12 @@ void FrameBuffer::create(int width, int height) {
             {{1.0f,  1.0f},  {1.0f, 1.0f}}
         };
     }    
-    mesh_.create<ScreenVertex>(MeshData<ScreenVertex>{vertices_});
+    mesh_.create(vertices_.size(), 0);
+    mesh_.bind();
+    mesh_.setBuffer(GL_ARRAY_BUFFER, vertices_.size() * sizeof(ScreenVertex), vertices_.data(), GL_STATIC_DRAW);
+    mesh_.setAttrib(0, 2, GL_FLOAT, GL_FALSE, sizeof(ScreenVertex), reinterpret_cast<void*>(offsetof(ScreenVertex, position)));
+    mesh_.setAttrib(1, 2, GL_FLOAT, GL_FALSE, sizeof(ScreenVertex), reinterpret_cast<void*>(offsetof(ScreenVertex, uv_coord)));
+    mesh_.unbind();
     
     if (framebuffer_ != 0)
     {

@@ -7,8 +7,23 @@
 #include "graphics/core/Texture.hpp"
 #include "graphics/glsl/GLSLStructures.hpp"
 #include "core/Time.hpp"
+#include "core/Logger.hpp"
 
 #include <iostream>
+
+std::vector<glm::vec3> createInstancPositions(size_t size_x, size_t size_z) {
+    std::vector<glm::vec3> positions;
+
+    for (size_t x = 0; x < size_x; x++)
+    {
+        for (size_t z = 0; z < size_z; z++)
+        {
+            positions.push_back(glm::vec3(x * 5.0f, 0.0f , z * 5.0f));
+        }
+    }
+    
+    return positions;
+}
 
 void MainScene::init(Window& wind) {
     core::Time time;
@@ -31,7 +46,7 @@ void MainScene::init(Window& wind) {
     screen_shader->create("res/shaders/framebuffer.vert", "res/shaders/framebuffer.frag");
 
     mult_shader = makeU<Shader>();
-    mult_shader->create("res/shaders/light_test.vert","res/shaders/multiple_lights.frag");
+    mult_shader->create("res/shaders/instance.vert","res/shaders/multiple_lights.frag");
 
     skybox_shader = makeU<Shader>();
     skybox_shader->create("res/shaders/sky_box.vert", "res/shaders/sky_box.frag");
@@ -136,6 +151,22 @@ void MainScene::init(Window& wind) {
     model->texture_params.internal_format = tParams.internal_format;
     model->create("res/models/backpack/backpack.obj"/*"res/models/laptop/Lowpoly_Notebook_2.obj"*/);
 
+    instance_side = 8;
+    instance_pos = createInstancPositions(instance_side, instance_side);
+    instance_size = instance_side * instance_side;
+
+    auto& md_meshes = model->getMeshes();
+    for (size_t i = 0; i < md_meshes.size(); i++)
+    {
+        md_meshes[i].mesh.bind();
+        md_meshes[i].mesh.setBuffer(GL_ARRAY_BUFFER, sizeof(glm::vec3) * instance_pos.size(), instance_pos.data(), GL_STATIC_DRAW);
+        md_meshes[i].mesh.setAttrib(3, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+        glVertexAttribDivisor(3, 1);
+        md_meshes[i].mesh.unbind();
+    }
+    
+
+
     fbo->setUnitSlot();
     screen_shader->use();
     screen_shader->uniform1i("screen_texture", fbo->getUnitSlot());
@@ -207,6 +238,7 @@ void MainScene::update(float delta) {
 
     if (input->justPressed(GLFW_KEY_I))
     {
+        is_instance_draw = !is_instance_draw;
         core::logger.log(core::Logger::INFO, std::to_string(Mesh::getDrawCalls()));
     }
 
@@ -229,13 +261,13 @@ void MainScene::draw() {
     mult_shader->uniform3f("view_pos", camera->getPos());
     mult_shader->uniform3f("spot_light.position", camera->getPos());
     mult_shader->uniform3f("spot_light.direction", camera->getFront());
-//
+
+
     mult_shader->uniform1i("use_specular_map", false);
     mult_shader->uniform1i("material.diffuse", texture0.getUnitId());  
     mult_shader->uniform1f("material.shininess", 32.0f);
     mult_shader->uniformMatrix("model", floor->transform.getModel());
     floor->draw();
-
 
     glm::mat4 md = glm::translate(glm::mat4(1.0f), glm::vec3(5.0f, 4.0f, 5.0f));
     mult_shader->uniform1i("use_specular_map", true);
@@ -243,27 +275,56 @@ void MainScene::draw() {
     const auto& meshes = model->getMeshes();
     const auto& mats = model->getMaterials();
     const auto& textures = model->getAllTextures();
+    if (is_instance_draw) {
 
-    for (size_t i = 0; i < meshes.size(); ++i) {
-        int diffuse_id = mats[meshes[i].material_index].diffuse;
-        int specular_id = mats[meshes[i].material_index].specular;
-        float shininess = mats[meshes[i].material_index].shininess;
-        if (diffuse_id >= 0) {
-            glActiveTexture(GL_TEXTURE10);
-            textures[diffuse_id].bind();
-            mult_shader->uniform1i("material.diffuse", 10);
+        for (size_t i = 0; i < meshes.size(); ++i) {
+            int diffuse_id = mats[meshes[i].material_index].diffuse;
+            int specular_id = mats[meshes[i].material_index].specular;
+            float shininess = mats[meshes[i].material_index].shininess;
+            if (diffuse_id >= 0) {
+                glActiveTexture(GL_TEXTURE10);
+                textures[diffuse_id].bind();
+                mult_shader->uniform1i("material.diffuse", 10);
+            }
+            if (specular_id >= 0) {
+                glActiveTexture(GL_TEXTURE11);
+                textures[specular_id].bind();
+                mult_shader->uniform1i("material.specular", 11);
+            }
+            mult_shader->uniform1f("material.shininess", shininess);
+            meshes[i].mesh.drawInstances(instance_size);
         }
-        if (specular_id >= 0) {
-            glActiveTexture(GL_TEXTURE11);
-            textures[specular_id].bind();
-            mult_shader->uniform1i("material.specular", 11);
-        }
-        mult_shader->uniform1f("material.shininess", shininess);
-
-        meshes[i].mesh.draw();
     }
-    
+    else {
+        for (size_t x = 0; x < instance_side; x++)
+        {
+            for (size_t z = 0; z < instance_side; z++)
+            {
+                for (size_t i = 0; i < meshes.size(); ++i) {
+                    int diffuse_id = mats[meshes[i].material_index].diffuse;
+                    int specular_id = mats[meshes[i].material_index].specular;
+                    float shininess = mats[meshes[i].material_index].shininess;
+                    if (diffuse_id >= 0) {
+                        glActiveTexture(GL_TEXTURE10);
+                        textures[diffuse_id].bind();
+                        mult_shader->uniform1i("material.diffuse", 10);
+                    }
+                    if (specular_id >= 0) {
+                        glActiveTexture(GL_TEXTURE11);
+                        textures[specular_id].bind();
+                        mult_shader->uniform1i("material.specular", 11);
+                    }
+                    mult_shader->uniform1f("material.shininess", shininess);
 
+                    glm::mat4 md = glm::translate(glm::mat4(1.0f), glm::vec3(5.0f * x, 4.0f, 5.0f * z));
+                    mult_shader->uniformMatrix("model", md);                
+                    meshes[i].mesh.draw();
+                } 
+            }           
+        }
+        
+
+    }
 
     glDepthFunc(GL_LEQUAL);
     glCullFace(GL_FRONT);
@@ -279,8 +340,6 @@ void MainScene::draw() {
 //
     reflect_shader->uniformMatrix("model", reflectbox->transform.getModel());
     reflectbox->draw();
-
-
 
 //
     fbo->drawScreen(*screen_shader, false); 

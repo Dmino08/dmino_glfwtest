@@ -3,6 +3,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "graphics/core/VertexStructures.hpp"
+
 
 Mesh Voxel::mesh_ = Mesh();
 GLFWwindow* Voxel::current_context_ = nullptr;
@@ -57,7 +59,20 @@ void Voxel::generateMesh() {
         20,21,22, 20,22,23      // верхняя
     };
     
-    Voxel::mesh_.create<SimpleVertex>(MeshData<SimpleVertex>{cubeVertices, cubeIndices});
+    Voxel::mesh_.create(cubeVertices.size(), cubeIndices.size());
+    Voxel::mesh_.bind();
+    Voxel::mesh_.setBuffer(GL_ARRAY_BUFFER, cubeVertices.size() * sizeof(SimpleVertex), cubeVertices.data(), GL_STATIC_DRAW);
+    Voxel::mesh_.setBuffer(GL_ELEMENT_ARRAY_BUFFER, cubeIndices.size() * sizeof(uint), cubeIndices.data(), GL_STATIC_DRAW);
+
+    Voxel::mesh_.setAttrib(0, 3, GL_FLOAT, GL_FALSE, sizeof(SimpleVertex),
+                reinterpret_cast<void*>(offsetof(SimpleVertex, position)));
+
+    Voxel::mesh_.setAttrib(1, 3, GL_FLOAT, GL_FALSE, sizeof(SimpleVertex),
+                reinterpret_cast<void*>(offsetof(SimpleVertex, normal)));
+
+    Voxel::mesh_.setAttrib(2, 2, GL_FLOAT, GL_FALSE, sizeof(SimpleVertex),
+                reinterpret_cast<void*>(offsetof(SimpleVertex, uv_coord)));
+    Voxel::mesh_.unbind();
 }
 
 Voxel::Voxel() : transform(glm::vec3(0.0f)) {

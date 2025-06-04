@@ -53,6 +53,10 @@ class MainScene : public IScene {
         Texture texture0;
 
         u_ptr<modload::Model> model;
+        size_t instance_size = 0;
+        size_t instance_side = 0;
+        std::vector<glm::vec3> instance_pos;
+        bool is_instance_draw = false;
 
         float camera_speed = 10.f;
         float fpsTimer = 0.0f;

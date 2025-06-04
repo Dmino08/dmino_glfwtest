@@ -2,6 +2,7 @@
 layout (location = 0) in vec3 a_pos;
 layout (location = 1) in vec3 a_normal;
 layout (location = 2) in vec2 a_coord;
+layout (location = 3) in vec3 a_offset;
 
 
 out vec3 frag_pos;
@@ -14,7 +15,8 @@ uniform mat4 model;
 
 
 void main() {
-    frag_pos = vec3(model * vec4(a_pos, 1.0f));
+    vec3 pos = a_pos + a_offset;
+    frag_pos = vec3(model * vec4(pos, 1.0f));
     normal = mat3(transpose(inverse(model))) * a_normal;
     coord = a_coord;
 

@@ -1,4 +1,5 @@
 #include "graphics/core/Mesh.hpp"
+#include "core/Logger.hpp"
 
 #include <cstddef>
 
@@ -6,26 +7,19 @@
     int generated_meshes = 0;
 #endif
 
-const std::array<VertexAttribute, 3> SimpleVertex::attrs = {{
-    {0, 3, GL_FLOAT, GL_FALSE, sizeof(SimpleVertex), offsetof(SimpleVertex, position)},
-    {1, 3, GL_FLOAT, GL_FALSE, sizeof(SimpleVertex), offsetof(SimpleVertex, normal)},
-    {2, 3, GL_FLOAT, GL_FALSE, sizeof(SimpleVertex), offsetof(SimpleVertex, uv_coord)}
-}};
-
 int Mesh::draw_calls_ = 0; 
 
-Mesh::Mesh() : vao_(0), vbo_(0), ebo_(0), vertice_count_(0), indice_count_(0) {}
+Mesh::Mesh() : vao_(0), buffers_(), vertice_count_(0), indice_count_(0), buffer_count_(0) {}
 
 Mesh::Mesh(Mesh&& other) noexcept {
     vao_ = other.vao_;
-    vbo_ = other.vbo_;
-    ebo_ = other.ebo_;
+    buffers_ = other.buffers_;
     vertice_count_ = other.vertice_count_;
     indice_count_ = other.indice_count_;
 
+
     other.vao_ = 0;
-    other.vbo_ = 0;
-    other.ebo_ = 0;
+    other.buffers_ = std::vector<GLuint>();
     other.vertice_count_ = 0;
     other.indice_count_ = 0;
 }
@@ -34,16 +28,15 @@ Mesh& Mesh::operator= (Mesh&& other) noexcept {
             clear();
 
             vao_ = other.vao_;
-            vbo_ = other.vbo_;
-            ebo_ = other.ebo_;
+            buffers_ = other.buffers_;
             vertice_count_ = other.vertice_count_;
             indice_count_ = other.indice_count_;
 
             other.vao_ = 0;
-            other.vbo_ = 0;
-            other.ebo_ = 0;
+            other.buffers_ = std::vector<GLuint>();
             other.vertice_count_ = 0;
             other.indice_count_ = 0;
+            
         }
     return *this;
 }
@@ -53,15 +46,51 @@ Mesh::~Mesh() {
 }
 
 void Mesh::clear() {
-    if (vao_ != 0)
-    {
+    if (vao_) {
         glDeleteVertexArrays(1, &vao_);
-        glDeleteBuffers(1, &vbo_);
-        glDeleteBuffers(1, &ebo_);
         vao_ = 0;
-        vbo_ = 0;
-        ebo_ = 0;
-    }       
+    }
+
+    if (!buffers_.empty()) {
+        glDeleteBuffers(static_cast<GLsizei>(buffers_.size()), buffers_.data());
+        buffers_.clear();
+    }
+
+    vertice_count_ = 0;
+    indice_count_ = 0;   
+} 
+
+void Mesh::create(uint vertice_count, uint indice_count) {
+    vertice_count_ = vertice_count;
+    indice_count_ = indice_count;
+    
+    glGenVertexArrays(1, &vao_);
+
+    #ifdef DEBUG_MODE
+        generated_meshes++;
+        core::logger.log(core::Logger::INFO, "Mesh " + std::to_string(generated_meshes) + " is generated");
+    #endif
+}
+void Mesh::bind() {
+    glBindVertexArray(vao_);
+}
+
+void Mesh::setBuffer(GLenum target, GLsizeiptr size, const void *data, GLenum usage) {
+    GLuint buffer = 0;
+    glGenBuffers(1, &buffer);
+    glBindBuffer(target, buffer);
+    glBufferData(target, size, data, usage);
+    buffers_.push_back(buffer);
+    buffer_count_++;
+}
+
+void Mesh::setAttrib(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void *pointer) {
+    glVertexAttribPointer(index, size, type, normalized, stride, pointer);
+    glEnableVertexAttribArray(index);
+}
+
+void Mesh::unbind() {
+    glBindVertexArray(0);
 }
 
 void Mesh::draw(GLenum mode) const {

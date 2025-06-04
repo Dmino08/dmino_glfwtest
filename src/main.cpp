@@ -10,6 +10,7 @@
 
 #include "scenes/MainScene.hpp"
 #include "scenes/AOPGScene.hpp"
+#include "core/Logger.hpp"
 
 void windowLoop() {
     Window window = Window(1280, 720, "Window");
