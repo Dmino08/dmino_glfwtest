@@ -2,13 +2,19 @@
 
 #include <glm/glm.hpp>
 
-#define PROJECTION "u_projection"
-#define VIEW "u_view"
-#define MODEL "u_model"
-#define PROJ_VIEW "u_proj_view"
-#define PROJ_VIEW_MODEL "u_pvm"
-#define PVM "u_pvm"
-#define PROJ_MODEL "u_proj_model"
+// MATRIX VARIABLES
+constexpr const char* PROJECTION = "u_projection";
+constexpr const char* VIEW = "u_view";
+constexpr const char* MODEL = "u_model";
+constexpr const char* PROJ_VIEW = "u_proj_view";
+constexpr const char* PROJ_VIEW_MODEL = "u_pvm";
+constexpr const char* PVM = "u_pvm";
+constexpr const char* PROJ_MODEL = "u_proj_model";
+
+// SOME STUFF
+constexpr const char* VIEW_POS = "u_view_pos";
+constexpr const char* TEXTURE = "u_texture";
+
 
 class Shader;
 

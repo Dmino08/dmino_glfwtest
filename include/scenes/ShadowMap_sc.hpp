@@ -9,7 +9,7 @@ class Shader;
 class Texture;
 class Voxel;
 class Sprite;
-
+class Mesh;
 
 class ShadowMap_sc : public IScene
 {
@@ -21,7 +21,6 @@ public:
     void input(InputManager& input, float delta) override;
     void draw() override;
 private:
-    
     Window* window_;
     core::Time* time_;
 
@@ -31,6 +30,8 @@ private:
 
     // SHADER STUFF
     u_ptr<Shader> sh_main_;
+    u_ptr<Shader> sh_depth_;
+    u_ptr<Shader> sh_simple_;
 
     // BOX STUFF
     u_ptr<Texture> box_texture_;
@@ -40,4 +41,9 @@ private:
     u_ptr<Texture> floor_texture_;
     float floor_size_ = 15'000.0f;
     u_ptr<Sprite> floor_;
+
+    // DEPTH STUFF
+    uint depth_fbo_;
+    uint depth_map_;
+    u_ptr<Mesh> depth_mesh_;
 };
