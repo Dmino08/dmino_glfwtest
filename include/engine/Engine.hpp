@@ -25,7 +25,7 @@ class Engine {
         template<typename T>
         void addScene(const std::string& name) {
             static_assert(std::is_base_of<IScene, T>::value, "T must inherit from IScene");
-            factories_[name] = [this](){return std::make_unique<T>(*this);};
+            factories_[name] = [this](){return std::make_unique<T>();};
         }
 
         void addWindow(const std::string& name, std::unique_ptr<Window>&& window);
@@ -35,6 +35,7 @@ class Engine {
         std::optional<std::reference_wrapper<Window>> getWindow(const std::string& name);
 
         Assets& getAssets();
+        core::Time& getTime();
 
         void run();
 };

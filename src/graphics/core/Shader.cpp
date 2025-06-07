@@ -144,12 +144,6 @@ void Shader::uniformBlockBinding(const std::string& name, GLuint index) {
     }    
 }
 
-void Shader::setMatrices(const glm::mat4& projection, const glm::mat4& view) {
-    use();
-    uniformMatrix("projection", projection);
-    uniformMatrix("view", view);
-
-}
 
 bool Shader::create(const char* vertex_path, const char* fragment_path) {
     std::string vertexCode;

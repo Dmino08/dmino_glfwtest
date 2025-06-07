@@ -18,7 +18,7 @@ void Engine::attachSceneToWindow(const std::string& scene, const std::string& wi
 
         pair.first->makeContextCurrent();
         pair.second = factories_[scene]();
-        pair.second->init(*pair.first);
+        pair.second->init(*this, *pair.first);
     }
 }
 
@@ -35,6 +35,10 @@ std::optional<std::reference_wrapper<Window>> Engine::getWindow(const std::strin
 
 Assets& Engine::getAssets() {
     return assets_;
+}
+
+core::Time& Engine::getTime() {
+    return time_;
 }
 
 void Engine::run() {
@@ -60,6 +64,7 @@ void Engine::run() {
                 pair.second->preUpdate(delta);
 
                 pair.second->update(delta);
+                pair.second->input(pair.first->getInput(), delta);
                 pair.second->draw();
 
                 pair.second->afterUpdate(delta);

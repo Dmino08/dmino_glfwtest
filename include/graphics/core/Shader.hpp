@@ -42,7 +42,6 @@ class Shader {
         void uniformMatrix(const std::string& name, glm::mat4 matrix);
         void uniformBlockBinding(const std::string& name, GLuint index);
 
-        void setMatrices(const glm::mat4& projection, const glm::mat4& view);
 
         bool create(const char* vertex_path, const char* fragment_path);
 };

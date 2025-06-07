@@ -101,12 +101,16 @@ void Camera::setFov(float value) {
     updateProjection();
 }
 
-glm::mat4 Camera::getViewMatrix() const {
+glm::mat4 Camera::getView() const {
     return glm::lookAt(position_, position_ + front_, up_);
 }
 
-const glm::mat4& Camera::getProjectionMatrix() const {
+const glm::mat4& Camera::getProjection() const {
     return projection_;
+}
+
+glm::mat4 Camera::getProjView() const {
+    return projection_ * glm::lookAt(position_, position_ + front_, up_);
 }
 
 const glm::vec3& Camera::getFront() const {

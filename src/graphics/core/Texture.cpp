@@ -174,4 +174,5 @@ void Texture::create(
 void Texture::activeUnit(int index) {
     glActiveTexture(GL_TEXTURE0 + index);
     unit_ = index;
+    bind();
 }

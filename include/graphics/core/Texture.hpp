@@ -1,11 +1,10 @@
 #pragma once
 
+#include "graphics/core/Image.hpp"
 
 #include <glad/glad.h>
-
 #include <iostream>
 
-class Image;
 
 struct TextureParams {
     GLenum target = GL_TEXTURE_2D;

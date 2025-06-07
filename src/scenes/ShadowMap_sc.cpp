@@ -1,108 +1,107 @@
 #include "scenes/ShadowMap_sc.hpp"
 
-#include "window/Window.hpp"
-#include "window/Camera.hpp"
-#include "window/InputManager.hpp"
-
 #include "graphics/core/Shader.hpp"
-#include "graphics/core/Image.hpp"
 #include "graphics/core/Texture.hpp"
 #include "graphics/core/Sprite.hpp"
 
 #include "objects/Voxel.hpp"
 
-constexpr uint SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+#include "graphics/glsl/GLSLHelper.hpp"
 
-void ShadowMap_sc::init(Window& window) {
+
+ShadowMap_sc::ShadowMap_sc() = default;
+ShadowMap_sc::~ShadowMap_sc() = default;
+
+void ShadowMap_sc::init(Engine& engine, Window& window) 
+{
     window_ = &window;
-    input_ = &window.getInput();
+    time_ = &engine.getTime();
 
-    // CAMERA CREATING
-    CameraParams c_params_;
-    c_params_.z_far = 15'000.0f;
-    camera_ = makeU<Camera>(window, c_params_);
+    // FPS TIMER SET UP
+    core::Timer timer;
+    timer.time_out = [this]() { 
+        std::string fps = "FPS: " + std::to_string(int(1.0f / time_->getDeltaTime()));
+        window_->setTitle(fps);
+    };
+    engine.getTime().addTimer(std::move(timer));
 
-    // SHADER CREATING
-    sh_light_ = makeU<Shader>();
-    sh_light_->create("res/shaders/shadows/shadow_map.vert", "res/shaders/shadows/shadow_map.frag");
-    //
-    sh_depth_ = makeU<Shader>();
-    sh_depth_->create("res/shaders/shadows/simple_depth.vert", "res/shaders/shadows/simple_depth.frag");
-    //
-    sh_fbo_ = makeU<Shader>();
-    sh_fbo_->create("res/shaders/framebuffer.vert", "res/shaders/shadows/depth_fbo.frag");
+    // OPENGL SET UP
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_CCW);
+    
+    // GLFW SET UP
+    glfwSwapInterval(0);
 
-    // FLOOR TEXTURE CREATING
+    // CAMERA SET UP
+    CameraParams c_params;
+    c_params.z_far = 15'000.0f;
+    camera_ = makeU<Camera>(window, c_params);
+    camera_->setTransform(glm::vec3(0.0f, 1.0f, 10.0f));
+
+    // SHADER SET UP
+    sh_main_ = makeU<Shader>();
+    sh_main_->create("res/shaders/shadow_map/3d.vert", "res/shaders/shadow_map/3d.frag");
+    
+    // BOX SET UP
     Image image;
     image.load("res/images/Prototype_Grid_Gray_03-512x512.png");
-    floor_texture_ = makeU<Texture>();
-    TextureParams t_params_;
-    t_params_.min_filter = GL_LINEAR_MIPMAP_LINEAR;
-    floor_texture_->create(image, t_params_);
-    floor_texture_->activeUnit(1);
-    floor_texture_->bind();
-
-    // FLOOR CREATING
-    floor_ = makeU<Sprite>();
-    floor_->setTextureSize(floor_texture_->getWidth(), floor_texture_->getHeight());
-    floor_->transform.setPosition(glm::vec3(0.0f, -1.0f, 0.0f));
-    floor_->transform.rotate(glm::vec3(-90.0f, 0.0f, 0.0f));
-    floor_->transform.setScale(glm::vec3(floor_size_));
-    floor_->setRegion(0.0f, 0.0f, floor_texture_->getWidth() * floor_size_, floor_texture_->getHeight() * floor_size_);
-    floor_->generate();
-
-    // BOX CREATING
+    //
+    TextureParams t_params;
+    t_params.min_filter = GL_LINEAR_MIPMAP_LINEAR;
+    box_texture_ = makeU<Texture>();
+    box_texture_->create(image, t_params);
+    box_texture_->activeUnit(0);
+    //
     box_ = makeU<Voxel>(glm::vec3(0.0f, 1.0f, 0.0f));
 
-
-    // SHADER SETTING UP
-    sh_light_->uniform1i("f_texture", floor_texture_->getUnitId());
-
-    // DEPTH MAP TEXTURE
-    
-
-
+    // FLOOR SET UP
+    floor_ = makeU<Sprite>();
+    floor_->transform.rotate(glm::vec3(-90.0f, 0.0f, 0.0f));
+    floor_->transform.setScale(glm::vec3(floor_size_));
+    floor_->setRegion(0, 0, floor_size_, floor_size_);
+    floor_->generate();
 }
-void ShadowMap_sc::update(float delta) {
-    
-    if (input_->justPressed(GLFW_KEY_TAB))
-    {
-        window_->toggleCursor();    
-    }
-    if (input_->isCursorLocked())
-    {
-        camera_->process3DMouseRotation(input_->getDeltaX(), input_->getDeltaY());
 
-        if (input_->pressed(GLFW_KEY_W))
+void ShadowMap_sc::input(InputManager& input, float delta) 
+{
+    if (input.justPressed(GLFW_KEY_TAB))
+    {
+        window_->toggleCursor();
+    }
+
+    if (input.isCursorLocked())
+    {
+        camera_->process3DMouseRotation(input.getDeltaX(), input.getDeltaY());
+        if (input.pressed(GLFW_KEY_W))
         {
             camera_->translate(camera_->getFront() * camera_speed_ * delta);
         }
-        if (input_->pressed(GLFW_KEY_S))
+        if (input.pressed(GLFW_KEY_S))
         {
             camera_->translate(-camera_->getFront() * camera_speed_ * delta);
-        }
-        if (input_->pressed(GLFW_KEY_A))
+        }        
+        if (input.pressed(GLFW_KEY_A))
         {
             camera_->translate(-camera_->getRight() * camera_speed_ * delta);
         }
-        if (input_->pressed(GLFW_KEY_D))
+        if (input.pressed(GLFW_KEY_D))
         {
             camera_->translate(camera_->getRight() * camera_speed_ * delta);
         }
-        
     }
     
 }
 
+void ShadowMap_sc::draw() 
+{
+    glClearColor(0.5f, 0.6f, 0.7f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-void ShadowMap_sc::draw() {
-    
-    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
-    sh_light_->setMatrices(camera_->getProjectionMatrix(), camera_->getViewMatrix());
-    sh_light_->uniformMatrix("model", floor_->transform.getModel());
-    floor_->draw();
-    //
-    sh_light_->uniformMatrix("model", box_->transform.getModel());
+    sh_main_->use();
+    setMatrices(*sh_main_, camera_->getProjection(), camera_->getView(), box_->transform.getModel());
     box_->draw();
+
+    setMatrices(*sh_main_, camera_->getProjection(), camera_->getView(), floor_->transform.getModel());
+    floor_->draw();
 }

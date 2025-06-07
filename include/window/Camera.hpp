@@ -74,8 +74,9 @@ class Camera {
 
         void setFov(float value);
 
-        glm::mat4 getViewMatrix() const;
-        const glm::mat4& getProjectionMatrix() const;
+        glm::mat4 getView() const;
+        const glm::mat4& getProjection() const;
+        glm::mat4 getProjView() const;
 
         const glm::vec3& getFront() const;
         const glm::vec3& getRight() const;
