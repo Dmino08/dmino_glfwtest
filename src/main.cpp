@@ -10,6 +10,8 @@
 
 #include "scenes/MainScene.hpp"
 #include "scenes/AOPGScene.hpp"
+#include "scenes/ShadowMap_sc.hpp"
+
 #include "core/Logger.hpp"
 
 void windowLoop() {
@@ -80,10 +82,11 @@ int main(void) {
         
         engine.addScene<MainScene>("1");
         engine.addScene<AOPGScene>("2");
+        engine.addScene<ShadowMap_sc>("3");
 
         engine.addWindow("1", std::move(wind1));
 
-        engine.attachSceneToWindow("1", "1");
+        engine.attachSceneToWindow("3", "1");
 
         
         engine.run();

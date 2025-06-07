@@ -6,22 +6,22 @@ Sprite::Sprite()
     : region_(),
       mesh_(),
       color_(1.0f),
-      texture_(nullptr)
+      width_(1),
+      height_(1)
 {}
 
-void Sprite::setTexture(Texture* texture) {
-    texture_ = texture;
+void Sprite::setTextureSize(uint width, uint height) {
+    width_ = width;
+    height_ = height;
 }
 
 void Sprite::setRegion(int x_offset, int y_offset, int x_size, int y_size) {
-    if (texture_ != nullptr) {
-    region_.setRegion(texture_->getWidth(), 
-                      texture_->getHeight(), 
+    region_.setRegion(width_, 
+                      height_, 
                       x_offset,
                       y_offset,
                       x_size,
                       y_size);
-    }
 }
 
 const UVRegion& Sprite::getRegion() const {

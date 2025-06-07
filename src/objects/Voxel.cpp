@@ -1,4 +1,4 @@
-#include "test/Voxel.hpp"
+#include "objects/Voxel.hpp"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>

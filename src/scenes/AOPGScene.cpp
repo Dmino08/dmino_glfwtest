@@ -3,7 +3,7 @@
 #include "graphics/core/Shader.hpp"
 #include "window/Window.hpp"
 #include "window/Camera.hpp"
-#include "test/Voxel.hpp"
+#include "objects/Voxel.hpp"
 
 #include <glm/gtc/type_ptr.hpp>
 

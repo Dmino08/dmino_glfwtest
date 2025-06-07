@@ -8,10 +8,11 @@
 #include "graphics/core/Sprite.hpp"
 #include "graphics/core/Shader.hpp"
 #include "graphics/render/FrameBuffer.hpp"
-#include "test/Voxel.hpp"
+#include "objects/Voxel.hpp"
 #include "graphics/core/CubeMap.hpp"
 #include "graphics/core/Model.hpp"
 
+#include "typedefs.hpp"
 
 class Assets;
 class Engine;
@@ -19,11 +20,6 @@ class InputManager;
 class Image;
 class Shader;
 
-template<typename T>
-using u_ptr = std::unique_ptr<T>;
-
-#define makeU std::make_unique
-#define makeS std::make_shared
 
 class MainScene : public IScene {
     public:
@@ -56,7 +52,7 @@ class MainScene : public IScene {
         size_t instance_size = 0;
         size_t instance_side = 0;
         std::vector<glm::vec3> instance_pos;
-        bool is_instance_draw = false;
+        bool is_instance_draw = true;
 
         float camera_speed = 10.f;
         float fpsTimer = 0.0f;

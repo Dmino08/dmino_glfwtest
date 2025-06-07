@@ -69,7 +69,7 @@ void MainScene::init(Window& wind) {
     // FLOOR GENERATION
     const float floor_size = 10000.0f;
     floor = makeU<Sprite>();
-    floor->setTexture(&texture0);
+    floor->setTextureSize(texture0.getWidth(), texture0.getHeight());
     floor->transform.setPosition(glm::vec3(0.0f, -1.0f, 0.0f));
     floor->transform.setScale(glm::vec3(floor_size));
     floor->transform.rotate(glm::vec3(-90.0f, 0.0f, 0.0f));
@@ -149,9 +149,9 @@ void MainScene::init(Window& wind) {
     
     model = makeU<modload::Model>();
     model->texture_params.internal_format = tParams.internal_format;
-    model->create("res/models/backpack/backpack.obj"/*"res/models/laptop/Lowpoly_Notebook_2.obj"*/);
+    model->create("res/models/backpack/backpack.obj" /*"D:/Mine(D)/Programming/C++/Models/laptop/Lowpoly_Notebook_2.obj"*/ /* "D:/Mine(D)/Programming/C++/Models/low_poly_tree/Lowpoly_tree_sample.obj" */);
 
-    instance_side = 8;
+    instance_side = 5;
     instance_pos = createInstancPositions(instance_side, instance_side);
     instance_size = instance_side * instance_side;
 
@@ -296,31 +296,28 @@ void MainScene::draw() {
         }
     }
     else {
-        for (size_t x = 0; x < instance_side; x++)
+        for (size_t j = 0; j < instance_size; j++)
         {
-            for (size_t z = 0; z < instance_side; z++)
-            {
-                for (size_t i = 0; i < meshes.size(); ++i) {
-                    int diffuse_id = mats[meshes[i].material_index].diffuse;
-                    int specular_id = mats[meshes[i].material_index].specular;
-                    float shininess = mats[meshes[i].material_index].shininess;
-                    if (diffuse_id >= 0) {
-                        glActiveTexture(GL_TEXTURE10);
-                        textures[diffuse_id].bind();
-                        mult_shader->uniform1i("material.diffuse", 10);
-                    }
-                    if (specular_id >= 0) {
-                        glActiveTexture(GL_TEXTURE11);
-                        textures[specular_id].bind();
-                        mult_shader->uniform1i("material.specular", 11);
-                    }
-                    mult_shader->uniform1f("material.shininess", shininess);
+            for (size_t i = 0; i < meshes.size(); ++i) {
+                int diffuse_id = mats[meshes[i].material_index].diffuse;
+                int specular_id = mats[meshes[i].material_index].specular;
+                float shininess = mats[meshes[i].material_index].shininess;
+                if (diffuse_id >= 0) {
+                    glActiveTexture(GL_TEXTURE10);
+                    textures[diffuse_id].bind();
+                    mult_shader->uniform1i("material.diffuse", 10);
+                }
+                if (specular_id >= 0) {
+                    glActiveTexture(GL_TEXTURE11);
+                    textures[specular_id].bind();
+                    mult_shader->uniform1i("material.specular", 11);
+                }
+                mult_shader->uniform1f("material.shininess", shininess);
 
-                    glm::mat4 md = glm::translate(glm::mat4(1.0f), glm::vec3(5.0f * x, 4.0f, 5.0f * z));
-                    mult_shader->uniformMatrix("model", md);                
-                    meshes[i].mesh.draw();
-                } 
-            }           
+                glm::mat4 md = glm::translate(glm::mat4(1.0f), instance_pos[j]);
+                mult_shader->uniformMatrix("model", md);                
+                meshes[i].mesh.draw();
+            }       
         }
         
 

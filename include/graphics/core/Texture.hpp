@@ -48,6 +48,12 @@ class Texture {
             const Image& image,
             TextureParams params = TextureParams()
         );
+        void Texture::create(
+            int width,
+            int height,
+            GLenum format, 
+            TextureParams params
+        );
 
         void activeUnit(int index);
 };
