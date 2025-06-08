@@ -12,7 +12,7 @@
 
 #include <memory>
 
-
+#define SHADER_LOGGING
 
 
 class Shader {

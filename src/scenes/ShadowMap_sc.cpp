@@ -13,7 +13,21 @@
 ShadowMap_sc::ShadowMap_sc() = default;
 ShadowMap_sc::~ShadowMap_sc() = default;
 
-constexpr uint SHADOW_WIDTH = 2048, SHADOW_HEIGHT = 2048;
+
+
+std::vector<glm::vec3> getInstanceOffsets(int side_size) {
+    std::vector<glm::vec3> offsets;
+    offsets.reserve(side_size * side_size);
+
+    for (size_t x = 0; x < side_size; x++)
+    {
+        for (size_t z = 0; z < side_size; z++)
+        {
+            offsets.push_back(glm::vec3(x * 15.0f, 0.0f, z * 15.0f));
+        }
+    }
+    return offsets;
+}
 
 void ShadowMap_sc::init(Engine& engine, Window& window) 
 {
@@ -61,7 +75,8 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
     sh_main_->use();
     sh_main_->uniform1i(DIFFUSE, box_texture_->getUnitId());
     sh_main_->uniform1i(SHADOW_MAP, 2);
-    sh_main_->uniform3f(LIGHT_POS, glm::vec3(-2.0f, 4.0f,-1.0f));
+    sh_main_->uniform1i("u_shadow_on", shadow_on_);
+    // sh_main_->uniform3f(LIGHT_POS, glm::vec3(-2.0f, 4.0f,-1.0f)); // Point implementation
     //
     sh_depth_ = makeU<Shader>();
     sh_depth_->create("res/shaders/shadow_map/depth.vert", "res/shaders/shadow_map/depth.frag");
@@ -79,10 +94,18 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
     floor_->setRegion(0, 0, floor_size_, floor_size_);
     floor_->generate();
 
+    // LIGHT SET UP
+    light_target_ = glm::vec3(0.0f, 0.0f, 0.0f);
+    light_pos_ = glm::vec3(10.0f, 4.0f, 0.01f);
+    light_dir_ = light_target_ - light_pos_;
+    light_distance = 50.0f;
+
     // DEPTH FBO SET UP
     glGenFramebuffers(1, &depth_fbo_);
 
     // DEPTH MAP SET UP
+    SHADOW_WIDTH = SHADOW_K_2;
+    SHADOW_HEIGHT = SHADOW_K_2;
     glActiveTexture(GL_TEXTURE2);
     //
     glGenTextures(1, &depth_map_);
@@ -128,7 +151,21 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
     // MODEL SET UP
     model_ = makeU<modload::Model>();
     glActiveTexture(GL_TEXTURE0);
+    //model_->create("D:/Mine(D)/Programming/C++/Models/grass/Low/Low Grass.fbx");
     model_->create("res/models/backpack/backpack.obj");
+    
+    
+    // CREATING INSTANCES
+    std::vector<glm::vec3> temp_offsets = getInstanceOffsets(side_size_);
+    auto& temp_meshes = model_->getMeshes();
+    for (size_t i = 0; i < temp_meshes.size(); i++)
+    {
+        temp_meshes[i].mesh.bind();
+        temp_meshes[i].mesh.setBuffer(GL_ARRAY_BUFFER, sizeof(glm::vec3) * temp_offsets.size(), temp_offsets.data(), GL_STATIC_DRAW);
+        temp_meshes[i].mesh.setAttrib(3, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+        glVertexAttribDivisor(3, 1);
+    }
+
 }
 
 void ShadowMap_sc::input(InputManager& input, float delta) 
@@ -158,6 +195,12 @@ void ShadowMap_sc::input(InputManager& input, float delta)
             camera_->translate(camera_->getRight() * camera_speed_ * delta);
         }
     }
+
+    if (input.justPressed(GLFW_KEY_Q)) {
+        shadow_on_ = !shadow_on_;
+        sh_main_->use();
+        sh_main_->uniform1i("u_shadow_on", shadow_on_);
+    }
     
 }
 
@@ -165,32 +208,37 @@ void ShadowMap_sc::draw()
 {
     glClearColor(0.5f, 0.7f, 0.8f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glm::mat4 lightSpaceMatrix;
+    if (shadow_on_) {
+        float near_plane = 1.0f, far_plane = light_distance;
+        glm::mat4 lightProjection = glm::ortho(-light_distance, light_distance,-light_distance, light_distance, near_plane, far_plane);
+        glm::vec3 camera_offset_ = glm::vec3(camera_->getPos().x, 0.0f, camera_->getPos().z);
+        glm::mat4 lightView = glm::lookAt(light_pos_ + camera_offset_, light_target_ + camera_offset_, glm::vec3( 0.0f, 1.0f, 0.0f));
 
+        lightSpaceMatrix = lightProjection * lightView;
 
-    float near_plane = 1.0f, far_plane = 7.5f;
-    glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f,-10.0f, 10.0f,near_plane, far_plane);
-    glm::mat4 lightView = glm::lookAt(glm::vec3(-2.0f, 4.0f,-1.0f),glm::vec3( 0.0f, 0.0f, 0.0f),glm::vec3( 0.0f, 1.0f, 0.0f));
+        glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+        // glCullFace(GL_FRONT);
+        glBindFramebuffer(GL_FRAMEBUFFER, depth_fbo_);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        
+        sh_simple_->use();
+        sh_simple_->uniformMatrix("u_light_space_matrix", lightSpaceMatrix);
 
-    glm::mat4 lightSpaceMatrix = lightProjection * lightView;
-
-    glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-    glCullFace(GL_FRONT);
-    glBindFramebuffer(GL_FRAMEBUFFER, depth_fbo_);
-    glClear(GL_DEPTH_BUFFER_BIT);
-
-    sh_simple_->use();
-    sh_simple_->uniformMatrix("u_light_space_matrix", lightSpaceMatrix);
-
-    renderScene(*sh_simple_.get());
-
+        renderScene(*sh_simple_.get());
+    }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glCullFace(GL_BACK);
+    // glCullFace(GL_BACK);
     glViewport(0, 0, window_->getWidth(), window_->getHeight());
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     sh_main_->use();
-    sh_main_->uniformMatrix("u_light_space", lightSpaceMatrix);
-    sh_main_->uniform3f(VIEW_POS, camera_->getPos());
+    if (shadow_on_) 
+    {
+        sh_main_->uniformMatrix("u_light_space", lightSpaceMatrix);
+        sh_main_->uniform3f(VIEW_POS, camera_->getPos()); 
+        sh_main_->uniform3f(LIGHT_DIR, light_dir_); 
+    }
     sh_main_->uniformMatrix(PROJECTION, camera_->getProjection());
     sh_main_->uniformMatrix(VIEW, camera_->getView());
 
@@ -216,7 +264,8 @@ void ShadowMap_sc::renderScene(Shader& shader, bool is_depth)
     
     glm::mat4 md = glm::mat4(1.0f);
     md = glm::translate(md, glm::vec3(2.0f, 3.0f, 0.0f));
-    md = glm::rotate(md, glm::radians(270.0f), glm::vec3(0.0f ,1.0f, 0.0f));
+    md = glm::rotate(md, glm::radians(45.0f), glm::vec3(0.0f ,1.0f, 0.0f));
+    md = glm::scale(md, glm::vec3(0.4f));
     shader.uniformMatrix(MODEL, md);
     auto& meshes_ = model_->getMeshes();
     auto& materials_ = model_->getMaterials();
@@ -226,7 +275,8 @@ void ShadowMap_sc::renderScene(Shader& shader, bool is_depth)
         glActiveTexture(GL_TEXTURE0);
         textures_[materials_[meshes_[i].material_index].diffuse].bind();
 
-        meshes_[i].mesh.draw();
+        meshes_[i].mesh.drawInstances(side_size_ * side_size_);
     }
+    
     
 }

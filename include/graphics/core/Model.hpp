@@ -9,6 +9,9 @@
 #include "graphics/core/Mesh.hpp"
 #include "graphics/glsl/GLSLStructures.hpp"
 
+#define MODEL_LOGGING
+
+
 struct aiNode;
 struct aiScene;
 struct aiMesh;
@@ -30,6 +33,11 @@ namespace modload {
     };
 
     class Model {
+        #ifdef MODEL_LOGGING
+            int loaded_vertices_ = 0;
+            int loaded_polygons_ = 0;
+        #endif
+
         std::vector<ModelMesh> meshes_;
         std::vector<glsl::Material> materials_;
         std::unordered_map<std::string, int> texture_cache_;

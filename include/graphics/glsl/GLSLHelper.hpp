@@ -14,11 +14,20 @@ constexpr const char* PROJ_MODEL = "u_proj_model";
 // SOME STUFF
 constexpr const char* VIEW_POS = "u_view_pos";
 constexpr const char* LIGHT_POS = "u_light_pos";
+constexpr const char* LIGHT_DIR = "u_light_dir";
 constexpr const char* TEXTURE = "u_texture";
 constexpr const char* DIFFUSE = "u_diffuse";
 constexpr const char* SHADOW_MAP = "u_shadow_map";
 constexpr const char* NEAR_PLANE = "u_near_plane";
 constexpr const char* FAR_PLANE = "u_far_plane";
+
+// SHADOW CONSTS
+constexpr unsigned int SHADOW_C_5 = 512;
+constexpr unsigned int SHADOW_K_1 = 1024;
+constexpr unsigned int SHADOW_K_2 = 2048;
+constexpr unsigned int SHADOW_K_4 = 4096;
+constexpr unsigned int SHADOW_K_8 = 8192;
+constexpr unsigned int SHADOW_K_16 = 16384;
 
 
 class Shader;

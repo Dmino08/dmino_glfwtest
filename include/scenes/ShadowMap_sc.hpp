@@ -46,7 +46,15 @@ private:
     float floor_size_ = 15'000.0f;
     u_ptr<Sprite> floor_;
 
+    // LIGHT STUFF
+    glm::vec3 light_dir_;
+    glm::vec3 light_target_;
+    glm::vec3 light_pos_;
+    float light_distance = 10.0f;
+    bool shadow_on_ = true;
+
     // DEPTH STUFF
+    uint SHADOW_WIDTH, SHADOW_HEIGHT;
     uint depth_fbo_;
     uint depth_map_;
     u_ptr<Mesh> depth_mesh_;
@@ -54,4 +62,7 @@ private:
     // MODEL STUFF
     u_ptr<Texture> model_texture_;
     u_ptr<modload::Model> model_;
+    uint side_size_ = 2;
+
+
 };

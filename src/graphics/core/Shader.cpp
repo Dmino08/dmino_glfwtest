@@ -14,7 +14,9 @@ unsigned int Shader::getUniformLocation(const std::string& name) {
     {
         unsigned int location = glGetUniformLocation(id_, name.c_str());
         if (location == GL_INVALID_INDEX) {
-            core::logger.log(core::Logger::WARNING, "Shader doesn't have the uniform variable " + name);
+            #ifdef SHADER_LOGGING
+                core::logger.log(core::Logger::WARNING, "Shader doesn't have the uniform variable " + name);
+            #endif
         }
         else {
             uniform_locations_.try_emplace(name, location);
@@ -32,7 +34,9 @@ unsigned int Shader::getUniformBlockBinding(const std::string& name) {
         {
             unsigned int block_index = glGetUniformBlockIndex(id_, name.c_str());
             if (block_index == GL_INVALID_INDEX) {
-                core::logger.log(core::Logger::WARNING, "Shader doesn't have the uniform variable " + name);
+                #ifdef SHADER_LOGGING
+                    core::logger.log(core::Logger::WARNING, "Shader doesn't have the uniform variable " + name);
+                #endif
             }
             else {
                 uniform_locations_.try_emplace(name, block_index);

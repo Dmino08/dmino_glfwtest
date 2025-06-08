@@ -45,6 +45,11 @@ namespace modload {
 
             materials_.push_back(std::move(material));
         }
+
+        #ifdef MODEL_LOGGING
+            core::logger.log(core::Logger::INFO, "Model vertex amount: " + std::to_string(loaded_vertices_));
+        #endif
+
     }
 
     void Model::processNode(aiNode* node, const aiScene* scene) {
@@ -66,6 +71,10 @@ namespace modload {
         
         std::vector<SimpleVertex> vertices;
         std::vector<uint> indices;
+
+        #ifdef MODEL_LOGGING
+            loaded_vertices_ += mesh->mNumVertices;
+        #endif
 
         for (size_t i = 0; i < mesh->mNumVertices; i++)
         {
