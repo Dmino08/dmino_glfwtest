@@ -17,6 +17,8 @@ constexpr const char* LIGHT_POS = "u_light_pos";
 constexpr const char* TEXTURE = "u_texture";
 constexpr const char* DIFFUSE = "u_diffuse";
 constexpr const char* SHADOW_MAP = "u_shadow_map";
+constexpr const char* NEAR_PLANE = "u_near_plane";
+constexpr const char* FAR_PLANE = "u_far_plane";
 
 
 class Shader;

@@ -13,7 +13,7 @@
 ShadowMap_sc::ShadowMap_sc() = default;
 ShadowMap_sc::~ShadowMap_sc() = default;
 
-constexpr uint SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+constexpr uint SHADOW_WIDTH = 2048, SHADOW_HEIGHT = 2048;
 
 void ShadowMap_sc::init(Engine& engine, Window& window) 
 {
@@ -42,23 +42,6 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
     camera_ = makeU<Camera>(window, c_params);
     camera_->setTransform(glm::vec3(0.0f, 1.0f, 10.0f));
 
-    // SHADER SET UP
-    sh_main_ = makeU<Shader>();
-    sh_main_->create("res/shaders/shadow_map/main.vert", "res/shaders/shadow_map/main.frag");
-    sh_main_->use();
-    sh_main_->uniform1i(DIFFUSE, 0);
-    sh_main_->uniform1i(SHADOW_MAP, 1);
-    sh_main_->uniform3f(LIGHT_POS, glm::vec3(-2.0f, 4.0f,-1.0f));
-    //
-    sh_depth_ = makeU<Shader>();
-    sh_depth_->create("res/shaders/shadow_map/depth.vert", "res/shaders/shadow_map/depth.frag");
-    sh_depth_->use();
-    sh_depth_->uniform1i(TEXTURE, 1);    
-    //
-    sh_simple_ = makeU<Shader>();
-    sh_simple_->create("res/shaders/shadow_map/simple.vert", "res/shaders/shadow_map/simple.frag");     
-
-    
     // BOX SET UP
     Image image;
     image.load("res/images/Prototype_Grid_Gray_03-512x512.png");
@@ -67,9 +50,27 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
     t_params.min_filter = GL_LINEAR_MIPMAP_LINEAR;
     box_texture_ = makeU<Texture>();
     box_texture_->create(image, t_params);
-    box_texture_->activeUnit(0);
+    box_texture_->activeUnit(1);
     //
     box_ = makeU<Voxel>(glm::vec3(0.0f, 1.0f, 0.0f));
+
+
+    // SHADER SET UP
+    sh_main_ = makeU<Shader>();
+    sh_main_->create("res/shaders/shadow_map/main.vert", "res/shaders/shadow_map/main.frag");
+    sh_main_->use();
+    sh_main_->uniform1i(DIFFUSE, box_texture_->getUnitId());
+    sh_main_->uniform1i(SHADOW_MAP, 2);
+    sh_main_->uniform3f(LIGHT_POS, glm::vec3(-2.0f, 4.0f,-1.0f));
+    //
+    sh_depth_ = makeU<Shader>();
+    sh_depth_->create("res/shaders/shadow_map/depth.vert", "res/shaders/shadow_map/depth.frag");
+    sh_depth_->use();
+    sh_depth_->uniform1i(TEXTURE, 2);    
+    //
+    sh_simple_ = makeU<Shader>();
+    sh_simple_->create("res/shaders/shadow_map/simple.vert", "res/shaders/shadow_map/simple.frag");     
+
 
     // FLOOR SET UP
     floor_ = makeU<Sprite>();
@@ -82,7 +83,7 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
     glGenFramebuffers(1, &depth_fbo_);
 
     // DEPTH MAP SET UP
-    glActiveTexture(GL_TEXTURE1);
+    glActiveTexture(GL_TEXTURE2);
     //
     glGenTextures(1, &depth_map_);
     glBindTexture(GL_TEXTURE_2D, depth_map_);
@@ -123,6 +124,11 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
     depth_mesh_->setAttrib(0, 2, GL_FLOAT, GL_FALSE, sizeof(ScreenVertex), reinterpret_cast<void*>(offsetof(ScreenVertex, position)));
     depth_mesh_->setAttrib(1, 2, GL_FLOAT, GL_FALSE, sizeof(ScreenVertex), reinterpret_cast<void*>(offsetof(ScreenVertex, uv_coord)));
     depth_mesh_->unbind();
+
+    // MODEL SET UP
+    model_ = makeU<modload::Model>();
+    glActiveTexture(GL_TEXTURE0);
+    model_->create("res/models/backpack/backpack.obj");
 }
 
 void ShadowMap_sc::input(InputManager& input, float delta) 
@@ -175,11 +181,7 @@ void ShadowMap_sc::draw()
     sh_simple_->use();
     sh_simple_->uniformMatrix("u_light_space_matrix", lightSpaceMatrix);
 
-    sh_simple_->uniformMatrix(MODEL, box_->transform.getModel());
-    box_->draw();
-
-    sh_simple_->uniformMatrix(MODEL, floor_->transform.getModel());
-    floor_->draw();
+    renderScene(*sh_simple_.get());
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glCullFace(GL_BACK);
@@ -189,13 +191,42 @@ void ShadowMap_sc::draw()
     sh_main_->use();
     sh_main_->uniformMatrix("u_light_space", lightSpaceMatrix);
     sh_main_->uniform3f(VIEW_POS, camera_->getPos());
-    setMatrices(*sh_main_, camera_->getProjection(), camera_->getView(), box_->transform.getModel());
+    sh_main_->uniformMatrix(PROJECTION, camera_->getProjection());
+    sh_main_->uniformMatrix(VIEW, camera_->getView());
+
+    renderScene(*sh_main_.get(), false);
+
+
+}
+
+
+void ShadowMap_sc::renderScene(Shader& shader, bool is_depth) 
+{
+    if (!is_depth)
+        shader.uniform1i(DIFFUSE, box_texture_->getUnitId());
+
+    shader.uniformMatrix(MODEL, box_->transform.getModel());
     box_->draw();
 
-    sh_main_->uniformMatrix(MODEL, floor_->transform.getModel());
+    shader.uniformMatrix(MODEL, floor_->transform.getModel());
     floor_->draw();
 
-    // sh_depth_->use();
-    // depth_mesh_->draw();
+    if (!is_depth)
+        shader.uniform1i(DIFFUSE, 0);
+    
+    glm::mat4 md = glm::mat4(1.0f);
+    md = glm::translate(md, glm::vec3(2.0f, 3.0f, 0.0f));
+    md = glm::rotate(md, glm::radians(270.0f), glm::vec3(0.0f ,1.0f, 0.0f));
+    shader.uniformMatrix(MODEL, md);
+    auto& meshes_ = model_->getMeshes();
+    auto& materials_ = model_->getMaterials();
+    auto& textures_ = model_->getAllTextures();
+    for (size_t i = 0; i < meshes_.size(); i++)
+    {
+        glActiveTexture(GL_TEXTURE0);
+        textures_[materials_[meshes_[i].material_index].diffuse].bind();
 
+        meshes_[i].mesh.draw();
+    }
+    
 }

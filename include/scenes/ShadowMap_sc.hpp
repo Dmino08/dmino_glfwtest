@@ -4,6 +4,8 @@
 
 #include "typedefs.hpp"
 
+#include "graphics/core/Model.hpp"
+
 class Camera;
 class Shader;
 class Texture;
@@ -20,6 +22,8 @@ public:
     void init(Engine& engine, Window& window) override;
     void input(InputManager& input, float delta) override;
     void draw() override;
+
+    void renderScene(Shader& shader, bool is_depth = true);
 private:
     Window* window_;
     core::Time* time_;
@@ -46,4 +50,8 @@ private:
     uint depth_fbo_;
     uint depth_map_;
     u_ptr<Mesh> depth_mesh_;
+
+    // MODEL STUFF
+    u_ptr<Texture> model_texture_;
+    u_ptr<modload::Model> model_;
 };
