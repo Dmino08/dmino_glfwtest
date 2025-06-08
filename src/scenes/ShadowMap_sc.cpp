@@ -90,8 +90,10 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
         SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    float border_color[4] = {1.0, 1.0, 1.0, 1.0};
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border_color);
 
     // DEPTH ATTACHMENT
     glBindFramebuffer(GL_FRAMEBUFFER, depth_fbo_);
@@ -155,7 +157,7 @@ void ShadowMap_sc::input(InputManager& input, float delta)
 
 void ShadowMap_sc::draw() 
 {
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClearColor(0.5f, 0.7f, 0.8f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
@@ -166,6 +168,7 @@ void ShadowMap_sc::draw()
     glm::mat4 lightSpaceMatrix = lightProjection * lightView;
 
     glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+    glCullFace(GL_FRONT);
     glBindFramebuffer(GL_FRAMEBUFFER, depth_fbo_);
     glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -179,6 +182,7 @@ void ShadowMap_sc::draw()
     floor_->draw();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glCullFace(GL_BACK);
     glViewport(0, 0, window_->getWidth(), window_->getHeight());
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
