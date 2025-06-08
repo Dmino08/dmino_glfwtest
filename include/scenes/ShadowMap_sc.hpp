@@ -21,6 +21,7 @@ public:
 
     void init(Engine& engine, Window& window) override;
     void input(InputManager& input, float delta) override;
+    void update(float delta) override;
     void draw() override;
 
     void renderScene(Shader& shader, bool is_depth = true);
@@ -62,7 +63,8 @@ private:
     // MODEL STUFF
     u_ptr<Texture> model_texture_;
     u_ptr<modload::Model> model_;
-    uint side_size_ = 2;
+    uint side_size_ = 6;
+    float rotation = 0.0f;
 
 
 };

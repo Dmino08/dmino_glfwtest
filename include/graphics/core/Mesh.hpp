@@ -24,7 +24,7 @@ class Mesh {
         void create(uint vertice_count, uint indice_count);
         void bind();
         void setBuffer(GLenum target, GLsizeiptr size, const void *data, GLenum usage);
-        void setAttrib(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void *pointer);
+        void setAttrib(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void *pointer, bool is_divisor = false);
         void unbind();
 
         void draw(GLenum mode = GL_TRIANGLES) const;

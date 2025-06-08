@@ -84,9 +84,11 @@ void Mesh::setBuffer(GLenum target, GLsizeiptr size, const void *data, GLenum us
     buffer_count_++;
 }
 
-void Mesh::setAttrib(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void *pointer) {
+void Mesh::setAttrib(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void *pointer, bool is_divisor) {
     glVertexAttribPointer(index, size, type, normalized, stride, pointer);
     glEnableVertexAttribArray(index);
+    if (is_divisor)
+        glVertexAttribDivisor(index, 1);
 }
 
 void Mesh::unbind() {

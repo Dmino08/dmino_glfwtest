@@ -96,7 +96,7 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
 
     // LIGHT SET UP
     light_target_ = glm::vec3(0.0f, 0.0f, 0.0f);
-    light_pos_ = glm::vec3(10.0f, 4.0f, 0.01f);
+    light_pos_ = glm::vec3(4.0f, 10.0f, 0.01f);
     light_dir_ = light_target_ - light_pos_;
     light_distance = 50.0f;
 
@@ -104,8 +104,8 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
     glGenFramebuffers(1, &depth_fbo_);
 
     // DEPTH MAP SET UP
-    SHADOW_WIDTH = SHADOW_K_2;
-    SHADOW_HEIGHT = SHADOW_K_2;
+    SHADOW_WIDTH = SHADOW_K_4;
+    SHADOW_HEIGHT = SHADOW_K_4;
     glActiveTexture(GL_TEXTURE2);
     //
     glGenTextures(1, &depth_map_);
@@ -162,8 +162,7 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
     {
         temp_meshes[i].mesh.bind();
         temp_meshes[i].mesh.setBuffer(GL_ARRAY_BUFFER, sizeof(glm::vec3) * temp_offsets.size(), temp_offsets.data(), GL_STATIC_DRAW);
-        temp_meshes[i].mesh.setAttrib(3, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
-        glVertexAttribDivisor(3, 1);
+        temp_meshes[i].mesh.setAttrib(3, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0, true);
     }
 
 }
@@ -202,6 +201,11 @@ void ShadowMap_sc::input(InputManager& input, float delta)
         sh_main_->uniform1i("u_shadow_on", shadow_on_);
     }
     
+}
+
+void ShadowMap_sc::update(float delta) 
+{
+    rotation += 15.0f * delta;
 }
 
 void ShadowMap_sc::draw() 
@@ -264,7 +268,7 @@ void ShadowMap_sc::renderScene(Shader& shader, bool is_depth)
     
     glm::mat4 md = glm::mat4(1.0f);
     md = glm::translate(md, glm::vec3(2.0f, 3.0f, 0.0f));
-    md = glm::rotate(md, glm::radians(45.0f), glm::vec3(0.0f ,1.0f, 0.0f));
+    md = glm::rotate(md, glm::radians(rotation), glm::vec3(0.0f ,1.0f, 0.0f));
     md = glm::scale(md, glm::vec3(0.4f));
     shader.uniformMatrix(MODEL, md);
     auto& meshes_ = model_->getMeshes();
