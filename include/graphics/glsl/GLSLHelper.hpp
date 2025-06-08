@@ -13,7 +13,10 @@ constexpr const char* PROJ_MODEL = "u_proj_model";
 
 // SOME STUFF
 constexpr const char* VIEW_POS = "u_view_pos";
+constexpr const char* LIGHT_POS = "u_light_pos";
 constexpr const char* TEXTURE = "u_texture";
+constexpr const char* DIFFUSE = "u_diffuse";
+constexpr const char* SHADOW_MAP = "u_shadow_map";
 
 
 class Shader;

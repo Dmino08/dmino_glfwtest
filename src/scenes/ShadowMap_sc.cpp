@@ -44,9 +44,11 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
 
     // SHADER SET UP
     sh_main_ = makeU<Shader>();
-    sh_main_->create("res/shaders/shadow_map/3d.vert", "res/shaders/shadow_map/3d.frag");
+    sh_main_->create("res/shaders/shadow_map/main.vert", "res/shaders/shadow_map/main.frag");
     sh_main_->use();
-    sh_main_->uniform1i(TEXTURE, 0);
+    sh_main_->uniform1i(DIFFUSE, 0);
+    sh_main_->uniform1i(SHADOW_MAP, 1);
+    sh_main_->uniform3f(LIGHT_POS, glm::vec3(-2.0f, 4.0f,-1.0f));
     //
     sh_depth_ = makeU<Shader>();
     sh_depth_->create("res/shaders/shadow_map/depth.vert", "res/shaders/shadow_map/depth.frag");
@@ -180,7 +182,16 @@ void ShadowMap_sc::draw()
     glViewport(0, 0, window_->getWidth(), window_->getHeight());
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    sh_depth_->use();
-    depth_mesh_->draw();
+    sh_main_->use();
+    sh_main_->uniformMatrix("u_light_space", lightSpaceMatrix);
+    sh_main_->uniform3f(VIEW_POS, camera_->getPos());
+    setMatrices(*sh_main_, camera_->getProjection(), camera_->getView(), box_->transform.getModel());
+    box_->draw();
+
+    sh_main_->uniformMatrix(MODEL, floor_->transform.getModel());
+    floor_->draw();
+
+    // sh_depth_->use();
+    // depth_mesh_->draw();
 
 }
