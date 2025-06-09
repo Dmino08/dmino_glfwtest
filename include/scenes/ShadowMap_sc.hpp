@@ -49,7 +49,6 @@ private:
 
     // LIGHT STUFF
     glm::vec3 light_dir_;
-    glm::vec3 light_target_;
     glm::vec3 light_pos_;
     float light_distance = 10.0f;
     bool shadow_on_ = true;
@@ -63,7 +62,7 @@ private:
     // MODEL STUFF
     u_ptr<Texture> model_texture_;
     u_ptr<modload::Model> model_;
-    uint side_size_ = 6;
+    uint side_size_ = 4;
     float rotation = 0.0f;
 
 

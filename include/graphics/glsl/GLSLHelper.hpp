@@ -10,6 +10,7 @@ constexpr const char* PROJ_VIEW = "u_proj_view";
 constexpr const char* PROJ_VIEW_MODEL = "u_pvm";
 constexpr const char* PVM = "u_pvm";
 constexpr const char* PROJ_MODEL = "u_proj_model";
+constexpr const char* NORMAL = "u_normal";
 
 // SOME STUFF
 constexpr const char* VIEW_POS = "u_view_pos";
@@ -22,12 +23,23 @@ constexpr const char* NEAR_PLANE = "u_near_plane";
 constexpr const char* FAR_PLANE = "u_far_plane";
 
 // SHADOW CONSTS
-constexpr unsigned int SHADOW_C_5 = 512;
-constexpr unsigned int SHADOW_K_1 = 1024;
-constexpr unsigned int SHADOW_K_2 = 2048;
-constexpr unsigned int SHADOW_K_4 = 4096;
-constexpr unsigned int SHADOW_K_8 = 8192;
-constexpr unsigned int SHADOW_K_16 = 16384;
+constexpr unsigned int SHADOW_C_1   = 128;                      // 128
+constexpr unsigned int SHADOW_K_01  = SHADOW_C_1;               // 128
+constexpr unsigned int SHADOW_C_2   = 2 * SHADOW_C_1;           // 256
+constexpr unsigned int SHADOW_K_02  = SHADOW_C_2;               // 256
+constexpr unsigned int SHADOW_C_5   = 2 * SHADOW_C_2;           // 512
+constexpr unsigned int SHADOW_K_05  = SHADOW_C_5;               // 512
+constexpr unsigned int SHADOW_K_1   = 2 * SHADOW_C_5;           // 1024
+constexpr unsigned int SHADOW_K_2   = 2 * SHADOW_K_1;           // 2048
+constexpr unsigned int SHADOW_K_3   = SHADOW_K_1 + SHADOW_K_2;  // 3072
+constexpr unsigned int SHADOW_K_4   = 2 * SHADOW_K_2;           // 4096
+constexpr unsigned int SHADOW_K_5   = SHADOW_K_1 + SHADOW_K_4;  // 5120
+constexpr unsigned int SHADOW_K_6   = 2 * SHADOW_K_3;           // 6144
+constexpr unsigned int SHADOW_K_7   = SHADOW_K_1 + SHADOW_K_6;  // 7168
+constexpr unsigned int SHADOW_K_8   = 2 * SHADOW_K_4;           // 8192
+constexpr unsigned int SHADOW_K_9   = 3 * SHADOW_K_3;           // 9216
+constexpr unsigned int SHADOW_K_10  = 2 * SHADOW_K_5;           // 10240
+constexpr unsigned int SHADOW_K_16  = 2 * SHADOW_K_8;           // 16384
 
 
 class Shader;

@@ -13,8 +13,6 @@
 ShadowMap_sc::ShadowMap_sc() = default;
 ShadowMap_sc::~ShadowMap_sc() = default;
 
-
-
 std::vector<glm::vec3> getInstanceOffsets(int side_size) {
     std::vector<glm::vec3> offsets;
     offsets.reserve(side_size * side_size);
@@ -95,17 +93,16 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
     floor_->generate();
 
     // LIGHT SET UP
-    light_target_ = glm::vec3(0.0f, 0.0f, 0.0f);
-    light_pos_ = glm::vec3(4.0f, 10.0f, 0.01f);
-    light_dir_ = light_target_ - light_pos_;
-    light_distance = 50.0f;
+    light_pos_ = glm::vec3(0.0f, 5.0f, 0.0f);
+    light_dir_ = glm::vec3(0.0f, -1.0f, 0.01f);
+    light_distance = 25.0f;
 
     // DEPTH FBO SET UP
     glGenFramebuffers(1, &depth_fbo_);
 
     // DEPTH MAP SET UP
-    SHADOW_WIDTH = SHADOW_K_4;
-    SHADOW_HEIGHT = SHADOW_K_4;
+    SHADOW_WIDTH = SHADOW_K_3;
+    SHADOW_HEIGHT = SHADOW_WIDTH;
     glActiveTexture(GL_TEXTURE2);
     //
     glGenTextures(1, &depth_map_);
@@ -193,6 +190,23 @@ void ShadowMap_sc::input(InputManager& input, float delta)
         {
             camera_->translate(camera_->getRight() * camera_speed_ * delta);
         }
+
+
+        if (input.justPressed(GLFW_KEY_LEFT_SHIFT))
+        {
+            camera_speed_ *= 2.0f;
+        }
+        if (input.justReleased(GLFW_KEY_LEFT_SHIFT))
+        {
+            camera_speed_ /= 2.0f;
+        }
+    }
+
+    if (input.getScrollDeltaY() > 0.0f){
+        camera_->toZoom(0.8f, 0.0f, 20.0f);
+    }
+    else if (input.getScrollDeltaY() < 0.0f){
+        camera_->toZoom(1.2f, 0.0f, 20.0f);
     }
 
     if (input.justPressed(GLFW_KEY_Q)) {
@@ -205,7 +219,7 @@ void ShadowMap_sc::input(InputManager& input, float delta)
 
 void ShadowMap_sc::update(float delta) 
 {
-    rotation += 15.0f * delta;
+    rotation += 1.0f * delta;
 }
 
 void ShadowMap_sc::draw() 
@@ -217,7 +231,7 @@ void ShadowMap_sc::draw()
         float near_plane = 1.0f, far_plane = light_distance;
         glm::mat4 lightProjection = glm::ortho(-light_distance, light_distance,-light_distance, light_distance, near_plane, far_plane);
         glm::vec3 camera_offset_ = glm::vec3(camera_->getPos().x, 0.0f, camera_->getPos().z);
-        glm::mat4 lightView = glm::lookAt(light_pos_ + camera_offset_, light_target_ + camera_offset_, glm::vec3( 0.0f, 1.0f, 0.0f));
+        glm::mat4 lightView = glm::lookAt(light_pos_ + camera_offset_, light_pos_ + light_dir_ + camera_offset_, glm::vec3( 0.0f, 1.0f, 0.0f));
 
         lightSpaceMatrix = lightProjection * lightView;
 
@@ -280,7 +294,5 @@ void ShadowMap_sc::renderScene(Shader& shader, bool is_depth)
         textures_[materials_[meshes_[i].material_index].diffuse].bind();
 
         meshes_[i].mesh.drawInstances(side_size_ * side_size_);
-    }
-    
-    
+    }  
 }
