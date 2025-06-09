@@ -65,6 +65,7 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
     box_texture_->activeUnit(1);
     //
     box_ = makeU<Voxel>(glm::vec3(0.0f, 1.0f, 0.0f));
+    box_->transform.rotate(glm::vec3(25.0f, 0.0f, 25.0f));
 
 
     // SHADER SET UP
@@ -94,14 +95,14 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
 
     // LIGHT SET UP
     light_pos_ = glm::vec3(0.0f, 5.0f, 0.0f);
-    light_dir_ = glm::vec3(0.0f, -1.0f, 0.01f);
+    light_dir_ = glm::vec3(-0.1f, -1.0f, 0.01f);
     light_distance = 25.0f;
 
     // DEPTH FBO SET UP
     glGenFramebuffers(1, &depth_fbo_);
 
     // DEPTH MAP SET UP
-    SHADOW_WIDTH = SHADOW_K_3;
+    SHADOW_WIDTH = SHADOW_K_4;
     SHADOW_HEIGHT = SHADOW_WIDTH;
     glActiveTexture(GL_TEXTURE2);
     //
@@ -226,6 +227,7 @@ void ShadowMap_sc::draw()
 {
     glClearColor(0.5f, 0.7f, 0.8f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     glm::mat4 lightSpaceMatrix;
     if (shadow_on_) {
         float near_plane = 1.0f, far_plane = light_distance;

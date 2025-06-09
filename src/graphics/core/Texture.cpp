@@ -51,6 +51,11 @@ Texture::~Texture() {
     }
 }
 
+GLuint Texture::getTextureId()
+{
+    return id_;
+}
+
 void Texture::bind() const {
     glBindTexture(target_, id_);
 }
@@ -86,7 +91,7 @@ void Texture::create(
     glTexParameteri(params.target, GL_TEXTURE_WRAP_S, params.wrap_s);
     glTexParameteri(params.target, GL_TEXTURE_WRAP_T, params.wrap_t);
 
-    if (params.target == GL_TEXTURE_3D) {
+    if (params.target == GL_TEXTURE_3D || params.target == GL_TEXTURE_CUBE_MAP) {
         glTexParameteri(params.target, GL_TEXTURE_WRAP_R, params.wrap_r);
     }
     
@@ -138,7 +143,7 @@ void Texture::create(
     glTexParameteri(params.target, GL_TEXTURE_WRAP_S, params.wrap_s);
     glTexParameteri(params.target, GL_TEXTURE_WRAP_T, params.wrap_t);
 
-    if (params.target == GL_TEXTURE_3D) {
+    if (params.target == GL_TEXTURE_3D || params.target == GL_TEXTURE_CUBE_MAP) {
         glTexParameteri(params.target, GL_TEXTURE_WRAP_R, params.wrap_r);
     }
     

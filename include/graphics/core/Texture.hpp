@@ -36,6 +36,8 @@ class Texture {
         Texture& operator=(Texture&& other) noexcept;
         ~Texture();
         
+        GLuint getTextureId(); 
+
         void bind() const;
         void unbind() const;
 

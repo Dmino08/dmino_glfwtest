@@ -2,120 +2,114 @@
 #include "graphics/core/Shader.hpp"
 #include "core/Logger.hpp"
 
+#include <array>
 #include <glad/glad.h>
 
 #ifdef DEBUG_MODE
     int frameBuffersCreated = 0;
 #endif
 
-FrameBuffer::FrameBuffer() : framebuffer_(0), renderbuffer_(0), texture_(0), mesh_() {}
+FrameBuffer::FrameBuffer() : fbo_id_(0), texture_id_(0)
+{}
 
-FrameBuffer::~FrameBuffer() {
-    glDeleteFramebuffers(1, &framebuffer_);
-    glDeleteTextures(1, &texture_);
-    glDeleteRenderbuffers(1, &renderbuffer_);
+FrameBuffer::~FrameBuffer()
+{
+    clear();
 }
-void FrameBuffer::create(int width, int height) {
-    if (vertices_.empty())
+
+bool FrameBuffer::create(GLenum texture_type, 
+                         int width, 
+                         int height, 
+                         GLenum fbo_type, 
+                         GLenum attachment)
+{
+    // FRAMEBUFFER GENERATION
+    glGenFramebuffers(1, &fbo_id_);
+    glBindFramebuffer(fbo_type, fbo_id_);
+
+    // CREATING TEXTURE
+    glGenTextures(1, &texture_id_);
+    glBindTexture(texture_type, texture_id_);
+    if (texture_type == GL_TEXTURE_2D)
     {
-        vertices_ = {
-            {{-1.0f,  1.0f}, {0.0f, 1.0f}},
-            {{-1.0f, -1.0f}, {0.0f, 0.0f}},
-            {{1.0f, -1.0f},  {1.0f, 0.0f}},
-            {{-1.0f,  1.0f}, {0.0f, 1.0f}},
-            {{1.0f, -1.0f},  {1.0f, 0.0f}},
-            {{1.0f,  1.0f},  {1.0f, 1.0f}}
-        };
-    }    
-    mesh_.create(vertices_.size(), 0);
+        glTexImage2D(texture_type, 0, GL_RGB, width, height, 0, GL_RGB,
+            GL_UNSIGNED_BYTE, NULL); 
+    }
+    else if (texture_type == GL_TEXTURE_CUBE_MAP)
+    {
+        for(unsigned int i = 0; i < 6; i++)
+        {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width,
+            height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+        }
+    }
+    glTexParameteri(texture_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(texture_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    //
+    glFramebufferTexture2D(fbo_type, attachment, texture_type,
+        texture_id_, 0);
+
+    // CREATING MESH
+    std::array<ScreenVertex, 4> vertices = {{
+    //     position       uv_coord
+        {{-1.0f, -1.0f}, {0.0f, 0.0f}},
+        {{ 1.0f, -1.0f}, {1.0f, 0.0f}}, 
+        {{ 1.0f,  1.0f}, {1.0f, 1.0f}},
+        {{-1.0f,  1.0f}, {0.0f, 1.0f}}
+    }};
+    std::array<uint, 6> indices = {
+        0, 1, 2,
+        2, 3, 0
+    }; 
+    mesh_.create(vertices.size(), indices.size());
     mesh_.bind();
-    mesh_.setBuffer(GL_ARRAY_BUFFER, vertices_.size() * sizeof(ScreenVertex), vertices_.data(), GL_STATIC_DRAW);
-    mesh_.setAttrib(0, 2, GL_FLOAT, GL_FALSE, sizeof(ScreenVertex), reinterpret_cast<void*>(offsetof(ScreenVertex, position)));
-    mesh_.setAttrib(1, 2, GL_FLOAT, GL_FALSE, sizeof(ScreenVertex), reinterpret_cast<void*>(offsetof(ScreenVertex, uv_coord)));
+    mesh_.setBuffer(GL_ARRAY_BUFFER, vertices.size() * sizeof(ScreenVertex), vertices.data(), GL_DYNAMIC_DRAW);
+    mesh_.setBuffer(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint), indices.data(), GL_DYNAMIC_DRAW);
+
+    mesh_.setAttrib(0, 2, GL_FLOAT, GL_FALSE, sizeof(ScreenVertex),
+                reinterpret_cast<void*>(offsetof(ScreenVertex, position)));
+
+    mesh_.setAttrib(1, 2, GL_FLOAT, GL_FALSE, sizeof(ScreenVertex),
+                reinterpret_cast<void*>(offsetof(ScreenVertex, uv_coord)));
     mesh_.unbind();
-    
-    if (framebuffer_ != 0)
-    {
-        glDeleteFramebuffers(1, &framebuffer_);
-        framebuffer_ = 0;
-    }
-    
-    glGenFramebuffers(1, &framebuffer_);
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_);
 
-    if (texture_ == 0) 
+
+    // CHECKING FRAMEBUFFER STATUS
+    if(glCheckFramebufferStatus(fbo_type) != GL_FRAMEBUFFER_COMPLETE)
     {
-        glGenTextures(1, &texture_);
-        glBindTexture(GL_TEXTURE_2D, texture_);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_, 0);
-    } 
-    else 
-    {
-        glBindTexture(GL_TEXTURE_2D, texture_);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+        core::logger.log(core::Logger::INFO, "FrameBuffer is not created");
+        return false;
     }
 
-    if (renderbuffer_ != 0)
-    {
-        glDeleteRenderbuffers(1, &renderbuffer_);
-        renderbuffer_ = 0;
-    }
-
-    glGenRenderbuffers(1, &renderbuffer_);
-    glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer_);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height); 
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderbuffer_);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     #ifdef DEBUG_MODE
         frameBuffersCreated++;
-        core::logger.log(core::Logger::INFO, "FrameBuffer " + std::to_string(frameBuffersCreated) + " is created");
     #endif
-}
-void FrameBuffer::resize(int width, int height) {
-    glBindTexture(GL_TEXTURE_2D, texture_);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    
-    glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer_);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height); // use a single renderbuffer object for both a depth AND stencil buffer.
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);            
+
+    fbo_type_ = fbo_type;
+    width_ = width;
+    height_ = height;
+
+    return true;
 }
 
-void FrameBuffer::bind() const {
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_);
-    glEnable(GL_DEPTH_TEST);            
-}
-
-void FrameBuffer::setUnitSlot(int slot) {
-    unit_ = slot;
-    glActiveTexture(GL_TEXTURE0 + unit_);
-    glBindTexture(GL_TEXTURE_2D, texture_);
-}
-
-void FrameBuffer::drawScreen(const Shader& shader, bool clear) const {
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glDisable(GL_DEPTH_TEST);
-
-    if (clear) 
+void FrameBuffer::clear()
+{
+    if (fbo_id_ != 0)
     {
-        glClearColor(1.0, 1.0, 1.0, 1.0);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glDeleteFramebuffers(1, &fbo_id_);
+        fbo_id_ = 0;
     }
-
-    shader.use();
-    mesh_.draw();
+    
+    if (texture_id_ != 0)
+    {    
+        glDeleteTextures(1, &texture_id_);
+        texture_id_ = 0;
+    }
+    mesh_.clear();
 }
 
-void FrameBuffer::setVertices(std::vector<ScreenVertex>&& vertices) {
-    vertices_ = std::move(vertices);
+void FrameBuffer::bind()
+{
+    glBindFramebuffer(fbo_type_, fbo_id_);
 }
-
-void FrameBuffer::setMesh(Mesh&& mesh) {
-    mesh_ = std::move(mesh);
-}
-
-int FrameBuffer::getUnitSlot() const {return unit_;}

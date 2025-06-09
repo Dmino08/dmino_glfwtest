@@ -45,7 +45,7 @@ float shadowCalculation(vec4 frag_pos_light_space, vec3 normal, vec3 light_dir)
         for(int y = -1; y <= 1; ++y) 
         {
             float pcf_depth = texture(u_shadow_map, proj_coord.xy + vec2(x, y) * texel_size).r;
-            shadow += current_depth - bias > pcf_depth ? 0.5 : 0.0;
+            shadow += current_depth - bias > pcf_depth ? 0.5 : 0.05;
         }    
     }
     shadow /= 9.0;
@@ -60,7 +60,7 @@ void main()
         vec3 normal = normalize(fs_in.normal);
         vec3 light_color = vec3(1.0);
         // ambient
-        vec3 ambient = 0.15 * color;
+        vec3 ambient = 0.4 * color;
         // diffuse
         // vec3 light_dir = normalize(u_light_pos - fs_in.frag_pos); // Point implementation
         vec3 light_dir = normalize(-u_light_dir);

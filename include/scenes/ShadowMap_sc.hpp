@@ -62,7 +62,7 @@ private:
     // MODEL STUFF
     u_ptr<Texture> model_texture_;
     u_ptr<modload::Model> model_;
-    uint side_size_ = 4;
+    uint side_size_ = 10;
     float rotation = 0.0f;
 
 

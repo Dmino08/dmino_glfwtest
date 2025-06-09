@@ -1,42 +1,30 @@
 #pragma once
 
-#include <vector>
-#include "graphics/core/Mesh.hpp"
 #include "graphics/core/VertexStructures.hpp"
+#include "graphics/core/Mesh.hpp"
 
-class Shader;
-
-// struct FrameBufferParams 
-// {
-
-// };
 
 class FrameBuffer 
 {
 public:
     FrameBuffer();
     ~FrameBuffer();
-    void create(int width, int height);
-    void resize(int width, int height);
 
-    void bind() const;
-
-    void setUnitSlot(int index = 0);
-
-    void drawScreen(const Shader& shader, bool clear = true) const;
-
-    void setVertices(std::vector<ScreenVertex>&& vertices);
-
-    void setMesh(Mesh&& mesh);
-
-    int getUnitSlot() const;
+    bool create(GLenum texture_type, 
+                int width, 
+                int height, 
+                GLenum fbo_type,
+                GLenum attachment);
     
+    void clear();
+
+    void bind();
+
 private:
-    unsigned int framebuffer_, renderbuffer_;
-    unsigned int texture_;
-
+    GLuint fbo_id_;
     Mesh mesh_;
-    std::vector<ScreenVertex> vertices_;
+    GLuint texture_id_;
 
-    int unit_;
+    GLenum fbo_type_;
+    int width_, height_;
 };

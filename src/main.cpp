@@ -11,8 +11,8 @@ int main(void) {
 
     std::cout << PROJECT_VERSION_MAJOR << "." << PROJECT_VERSION_MINOR << std::endl;
     
-    int width = 1280;
-    int height = 720;
+    int width = 1152;
+    int height = 648;
 
     Window::initGLFW();
     {
@@ -25,7 +25,7 @@ int main(void) {
 
         engine.run();
     }
-
     Window::terminateGLFW();
+
     return 0;
 }

@@ -46,7 +46,7 @@ Mesh::~Mesh() {
 }
 
 void Mesh::clear() {
-    if (vao_) {
+    if (vao_ != 0) {
         glDeleteVertexArrays(1, &vao_);
         vao_ = 0;
     }
