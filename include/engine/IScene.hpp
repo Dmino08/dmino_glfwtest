@@ -19,6 +19,7 @@ class IScene {
         virtual void input(InputManager& input, float delta) {}
         virtual void draw() {}
         virtual void afterUpdate(float delta) {}
+        virtual void onClose() {}
 };
 
 inline IScene::IScene() {}

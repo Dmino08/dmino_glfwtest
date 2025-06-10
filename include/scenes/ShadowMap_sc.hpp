@@ -5,6 +5,7 @@
 #include "typedefs.hpp"
 
 #include "graphics/core/Model.hpp"
+#include "graphics/render/FrameBuffer.hpp"
 
 class Camera;
 class Shader;
@@ -23,6 +24,7 @@ public:
     void input(InputManager& input, float delta) override;
     void update(float delta) override;
     void draw() override;
+    void onClose() override;
 
     void renderScene(Shader& shader, bool is_depth = true);
 private:
@@ -55,9 +57,6 @@ private:
 
     // DEPTH STUFF
     uint SHADOW_WIDTH, SHADOW_HEIGHT;
-    uint depth_fbo_;
-    uint depth_map_;
-    u_ptr<Mesh> depth_mesh_;
 
     // MODEL STUFF
     u_ptr<Texture> model_texture_;
@@ -65,5 +64,7 @@ private:
     uint side_size_ = 10;
     float rotation = 0.0f;
 
+    // FRAMEBUFFER TEST
+    FrameBuffer fbo_;
 
 };

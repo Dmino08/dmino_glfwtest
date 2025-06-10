@@ -16,6 +16,8 @@ struct TextureParams {
     GLenum mag_filter = GL_NEAREST;
     GLenum min_filter = GL_LINEAR;
 
+    GLenum type = GL_UNSIGNED_BYTE;
+
     float border_color[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 
     GLuint internal_format = GL_RGB;
@@ -30,13 +32,15 @@ class Texture {
     int unit_;
 
     public:
-        std::string type;
         Texture();
         Texture(Texture&& other) noexcept;
         Texture& operator=(Texture&& other) noexcept;
         ~Texture();
+
+        void clear();
         
         GLuint getTextureId(); 
+        GLenum getTarget();
 
         void bind() const;
         void unbind() const;

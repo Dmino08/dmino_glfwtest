@@ -45,6 +45,11 @@ Texture& Texture::operator=(Texture&& other) noexcept {
 }
 
 Texture::~Texture() {
+    clear();
+}
+
+void Texture::clear() 
+{
     if (id_ != 0) {
         glDeleteTextures(1, &id_);
         id_ = 0;
@@ -54,6 +59,10 @@ Texture::~Texture() {
 GLuint Texture::getTextureId()
 {
     return id_;
+}
+GLenum Texture::getTarget()
+{
+    return target_;
 }
 
 void Texture::bind() const {
@@ -76,8 +85,8 @@ int Texture::getUnitId() const {
 
 void Texture::create(
     const Image& image, 
-    TextureParams params
-) {
+    TextureParams params) 
+{
 
     if (id_ != 0) {
         glDeleteTextures(1, &id_);
@@ -107,7 +116,17 @@ void Texture::create(
 
     switch (params.target) 
     {
-        default: glTexImage2D(params.target, 0, params.internal_format, image.getWidth(), image.getHeight(), 0, image.getFormat(), GL_UNSIGNED_BYTE, image.getData()); break;
+        case GL_TEXTURE_2D:
+            glTexImage2D(params.target, 0, params.internal_format, image.getWidth(), image.getHeight(), 0, image.getFormat(),
+                params.type, image.getData());    
+        break;
+        case GL_TEXTURE_CUBE_MAP:
+            for(unsigned int i = 0; i < 6; i++)
+            {
+                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, params.internal_format, image.getWidth(),
+                image.getHeight(), 0, image.getFormat(), params.type, image.getData());
+            }           
+        break;
     }
 
     if (params.min_filter == GL_LINEAR_MIPMAP_LINEAR  || 
@@ -128,8 +147,8 @@ void Texture::create(
     int width,
     int height,
     GLenum format, 
-    TextureParams params
-) {
+    TextureParams params) 
+{
 
     if (id_ != 0) {
         glDeleteTextures(1, &id_);
@@ -159,7 +178,17 @@ void Texture::create(
 
     switch (params.target) 
     {
-        default: glTexImage2D(params.target, 0, params.internal_format, width, height, 0, format, GL_UNSIGNED_BYTE, NULL); break;
+        case GL_TEXTURE_2D:
+            glTexImage2D(params.target, 0, params.internal_format, width, height, 0, format,
+                params.type, NULL);        
+        break;
+        case GL_TEXTURE_CUBE_MAP:
+            for(unsigned int i = 0; i < 6; i++)
+            {
+                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, params.internal_format, width,
+                height, 0, format, params.type, NULL);
+            }           
+        break;
     }
 
     if (params.min_filter == GL_LINEAR_MIPMAP_LINEAR  || 

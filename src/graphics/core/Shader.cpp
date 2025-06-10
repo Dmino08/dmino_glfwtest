@@ -28,7 +28,7 @@ void Shader::use() const
 void Shader::uniform1i(const std::string& name, int x) 
 {
     unsigned int location = getUniformLocation(name);
-    if (location != GL_INVALID_INDEX) {
+    if (location != -1) {
         glUniform1i(location, x);
     }
 }   
@@ -36,12 +36,12 @@ void Shader::uniform1i(const std::string& name, int x)
 void Shader::uniform2i(const std::string& name, int x, int y) 
 {
     unsigned int location = getUniformLocation(name);
-    if (location != GL_INVALID_INDEX) {    
+    if (location != -1) {    
         glUniform2i(location, x, y);
     }
 }  
 
-void Shader::uniform2i(const std::string& name, glm::ivec2 xy) 
+void Shader::uniform2i(const std::string& name, const glm::ivec2& xy) 
 {
     unsigned int location = getUniformLocation(name);
     if (location != -1) {      
@@ -52,15 +52,15 @@ void Shader::uniform2i(const std::string& name, glm::ivec2 xy)
 void Shader::uniform3i(const std::string& name, int x, int y, int z) 
 {
     unsigned int location = getUniformLocation(name);
-    if (location != GL_INVALID_INDEX) {      
+    if (location != -1) {      
         glUniform3i(location, x, y, z);
     }
 }  
 
-void Shader::uniform3i(const std::string& name, glm::ivec3 xyz) 
+void Shader::uniform3i(const std::string& name, const glm::ivec3& xyz) 
 {
     unsigned int location = getUniformLocation(name);
-    if (location != GL_INVALID_INDEX) {     
+    if (location != -1) {     
         glUniform3i(location, xyz.x, xyz.y, xyz.z);
     }
 }  
@@ -68,7 +68,7 @@ void Shader::uniform3i(const std::string& name, glm::ivec3 xyz)
 void Shader::uniform1f(const std::string& name, float x) 
 {
     unsigned int location = getUniformLocation(name);
-    if (location != GL_INVALID_INDEX) {     
+    if (location != -1) {     
         glUniform1f(location, x);
     }
 }  
@@ -76,15 +76,15 @@ void Shader::uniform1f(const std::string& name, float x)
 void Shader::uniform2f(const std::string& name, float x, float y) 
 {
     unsigned int location = getUniformLocation(name);
-    if (location != GL_INVALID_INDEX) {     
+    if (location != -1) {     
         glUniform2f(location, x, y);
     }
 }  
 
-void Shader::uniform2f(const std::string& name, glm::vec2 xy)
+void Shader::uniform2f(const std::string& name, const glm::vec2& xy)
 {
     unsigned int location = getUniformLocation(name);
-    if (location != GL_INVALID_INDEX) {     
+    if (location != -1) {     
         glUniform2f(location, xy.x, xy.y);
     }
 }  
@@ -92,23 +92,31 @@ void Shader::uniform2f(const std::string& name, glm::vec2 xy)
 void Shader::uniform3f(const std::string& name, float x, float y, float z) 
 {
     unsigned int location = getUniformLocation(name);
-    if (location != GL_INVALID_INDEX) {     
+    if (location != -1) {     
         glUniform3f(location, x, y, z);
     }
 }  
 
-void Shader::uniform3f(const std::string& name, glm::vec3 xyz) 
+void Shader::uniform3f(const std::string& name, const glm::vec3& xyz) 
 {
     unsigned int location = getUniformLocation(name);
-    if (location != GL_INVALID_INDEX) {     
+    if (location != -1) {     
         glUniform3f(location, xyz.x, xyz.y, xyz.z);
     }
 }  
 
-void Shader::uniformMatrix(const std::string& name, glm::mat4 matrix) 
+void Shader::uniformMat3(const std::string& name, const glm::mat3& matrix) 
 {
     unsigned int location = getUniformLocation(name);
-    if (location != GL_INVALID_INDEX) {     
+    if (location != -1) {     
+        glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
+    }
+}
+
+void Shader::uniformMat4(const std::string& name, const glm::mat4& matrix) 
+{
+    unsigned int location = getUniformLocation(name);
+    if (location != -1) {     
         glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
     }
 }  
@@ -116,7 +124,7 @@ void Shader::uniformMatrix(const std::string& name, glm::mat4 matrix)
 void Shader::uniformBlockBinding(const std::string& name, GLuint index) 
 {
     unsigned int block = getUniformBlockBinding(name);
-    if (block != GL_INVALID_INDEX) {     
+    if (block != -1) {     
         glUniformBlockBinding(id_, block, index);
     }    
 }
@@ -242,16 +250,16 @@ bool Shader::create(const char* vertex_path, const char* fragment_path, const ch
     GLchar infoLog[512];
 
     GLuint vertex = createShader(GL_VERTEX_SHADER, vShaderCode, success, infoLog);
-    if (vertex == GL_INVALID_INDEX)
+    if (vertex == -1)
         return false;
     
     
     GLuint fragment = createShader(GL_FRAGMENT_SHADER, fShaderCode, success, infoLog);
-    if (fragment == GL_INVALID_INDEX)
+    if (fragment == -1)
         return false;
 
     GLuint geometry = createShader(GL_GEOMETRY_SHADER, gShaderCode, success, infoLog);
-    if (geometry == GL_INVALID_INDEX)
+    if (geometry == -1)
         return false;
     
 
@@ -307,7 +315,7 @@ GLuint Shader::createShader(GLenum type, const char* code, GLint& success, GLcha
                 core::logger.log(core::Logger::ERROR, "ERROR::SHADER::COMPILATION_FAILED\n" + std::string(info_log));
             break;
         }
-        return GL_INVALID_INDEX;
+        return -1;
     }
     return shader;
 }
@@ -319,7 +327,7 @@ unsigned int Shader::getUniformLocation(const std::string& name)
     if (found == uniform_locations_.end())
     {
         unsigned int location = glGetUniformLocation(id_, name.c_str());
-        if (location == GL_INVALID_INDEX) {
+        if (location == -1) {
             #ifdef SHADER_LOGGING
                 core::logger.log(core::Logger::WARNING, "Shader doesn't have the uniform variable " + name);
             #endif
@@ -340,7 +348,7 @@ unsigned int Shader::getUniformBlockBinding(const std::string& name)
         if (found == uniform_locations_.end())
         {
             unsigned int block_index = glGetUniformBlockIndex(id_, name.c_str());
-            if (block_index == GL_INVALID_INDEX) {
+            if (block_index == -1) {
                 #ifdef SHADER_LOGGING
                     core::logger.log(core::Logger::WARNING, "Shader doesn't have the uniform variable " + name);
                 #endif

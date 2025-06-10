@@ -76,6 +76,7 @@ void Engine::run() {
                 ++it;
             }
             else {
+                pair.second->onClose();
                 it = pairs_.erase(it);  
 
                 if (!pairs_.empty()) {

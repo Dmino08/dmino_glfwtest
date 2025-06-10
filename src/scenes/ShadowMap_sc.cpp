@@ -8,6 +8,8 @@
 
 #include "graphics/glsl/GLSLHelper.hpp"
 #include "graphics/core/VertexStructures.hpp"
+#include "core/Logger.hpp"
+
 
 
 ShadowMap_sc::ShadowMap_sc() = default;
@@ -21,7 +23,7 @@ std::vector<glm::vec3> getInstanceOffsets(int side_size) {
     {
         for (size_t z = 0; z < side_size; z++)
         {
-            offsets.push_back(glm::vec3(x * 15.0f, 0.0f, z * 15.0f));
+            offsets.emplace_back(glm::vec3(x * 15.0f, 0.0f, z * 15.0f));
         }
     }
     return offsets;
@@ -43,7 +45,11 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
     // OPENGL SET UP
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
-    glCullFace(GL_CCW);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+    //
+    glDisable(GL_BLEND);
+    glDisable(GL_STENCIL_TEST);
     
     // GLFW SET UP
     glfwSwapInterval(0);
@@ -99,52 +105,11 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
     light_distance = 25.0f;
 
     // DEPTH FBO SET UP
-    glGenFramebuffers(1, &depth_fbo_);
-
-    // DEPTH MAP SET UP
-    SHADOW_WIDTH = SHADOW_K_4;
+    SHADOW_WIDTH = SHADOW_K_2;
     SHADOW_HEIGHT = SHADOW_WIDTH;
     glActiveTexture(GL_TEXTURE2);
-    //
-    glGenTextures(1, &depth_map_);
-    glBindTexture(GL_TEXTURE_2D, depth_map_);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH,
-        SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    float border_color[4] = {1.0, 1.0, 1.0, 1.0};
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border_color);
+    fbo_.create(DIRECTION_DEPTH_PARAMS, SHADOW_WIDTH, SHADOW_HEIGHT, GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT);
 
-    // DEPTH ATTACHMENT
-    glBindFramebuffer(GL_FRAMEBUFFER, depth_fbo_);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,
-        depth_map_, 0);
-    glDrawBuffer(GL_NONE);
-    glReadBuffer(GL_NONE);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    // DEPTH MESH SET UP
-    depth_mesh_ = makeU<Mesh>();
-    std::vector<ScreenVertex> vertices_;
-    if (vertices_.empty())
-    {
-        vertices_ = {
-            {{-1.0f,  1.0f}, {0.0f, 1.0f}},
-            {{-1.0f, -1.0f}, {0.0f, 0.0f}},
-            {{1.0f, -1.0f},  {1.0f, 0.0f}},
-            {{-1.0f,  1.0f}, {0.0f, 1.0f}},
-            {{1.0f, -1.0f},  {1.0f, 0.0f}},
-            {{1.0f,  1.0f},  {1.0f, 1.0f}}
-        };
-    }    
-    depth_mesh_->create(vertices_.size(), 0);
-    depth_mesh_->bind();
-    depth_mesh_->setBuffer(GL_ARRAY_BUFFER, vertices_.size() * sizeof(ScreenVertex), vertices_.data(), GL_STATIC_DRAW);
-    depth_mesh_->setAttrib(0, 2, GL_FLOAT, GL_FALSE, sizeof(ScreenVertex), reinterpret_cast<void*>(offsetof(ScreenVertex, position)));
-    depth_mesh_->setAttrib(1, 2, GL_FLOAT, GL_FALSE, sizeof(ScreenVertex), reinterpret_cast<void*>(offsetof(ScreenVertex, uv_coord)));
-    depth_mesh_->unbind();
 
     // MODEL SET UP
     model_ = makeU<modload::Model>();
@@ -225,7 +190,7 @@ void ShadowMap_sc::update(float delta)
 
 void ShadowMap_sc::draw() 
 {
-    glClearColor(0.5f, 0.7f, 0.8f, 1.0f);
+    glClearColor(0.52f, 0.81f, 0.92f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glm::mat4 lightSpaceMatrix;
@@ -238,55 +203,66 @@ void ShadowMap_sc::draw()
         lightSpaceMatrix = lightProjection * lightView;
 
         glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-        // glCullFace(GL_FRONT);
-        glBindFramebuffer(GL_FRAMEBUFFER, depth_fbo_);
+        glCullFace(GL_FRONT);
+        fbo_.bind();
         glClear(GL_DEPTH_BUFFER_BIT);
         
         sh_simple_->use();
-        sh_simple_->uniformMatrix("u_light_space_matrix", lightSpaceMatrix);
+        sh_simple_->uniformMat4("u_light_space_matrix", lightSpaceMatrix);
 
         renderScene(*sh_simple_.get());
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    // glCullFace(GL_BACK);
+    glCullFace(GL_BACK);
     glViewport(0, 0, window_->getWidth(), window_->getHeight());
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     sh_main_->use();
     if (shadow_on_) 
     {
-        sh_main_->uniformMatrix("u_light_space", lightSpaceMatrix);
+        sh_main_->uniformMat4("u_light_space", lightSpaceMatrix);
         sh_main_->uniform3f(VIEW_POS, camera_->getPos()); 
         sh_main_->uniform3f(LIGHT_DIR, light_dir_); 
     }
-    sh_main_->uniformMatrix(PROJECTION, camera_->getProjection());
-    sh_main_->uniformMatrix(VIEW, camera_->getView());
+    sh_main_->uniformMat4(PROJ_VIEW, camera_->getProjection() * camera_->getView());
 
     renderScene(*sh_main_.get(), false);
-
 
 }
 
 
 void ShadowMap_sc::renderScene(Shader& shader, bool is_depth) 
 {
+    // BOX DRAWING
     if (!is_depth)
         shader.uniform1i(DIFFUSE, box_texture_->getUnitId());
-
-    shader.uniformMatrix(MODEL, box_->transform.getModel());
+    shader.uniformMat4(MODEL, box_->transform.getModel());
+    if (!is_depth)
+    {
+        shader.uniformMat3(NORMAL, glm::transpose(glm::inverse(glm::mat3(box_->transform.getModel()))));
+    }
     box_->draw();
 
-    shader.uniformMatrix(MODEL, floor_->transform.getModel());
+    // FLOOR DRAWING
+    shader.uniformMat4(MODEL, floor_->transform.getModel());
+    if (!is_depth) 
+    {
+        shader.uniformMat3(NORMAL, glm::transpose(glm::inverse(glm::mat3(floor_->transform.getModel()))));
+    }
     floor_->draw();
 
+    // MODEL DRAWING
     if (!is_depth)
         shader.uniform1i(DIFFUSE, 0);
-    
     glm::mat4 md = glm::mat4(1.0f);
     md = glm::translate(md, glm::vec3(2.0f, 3.0f, 0.0f));
     md = glm::rotate(md, glm::radians(rotation), glm::vec3(0.0f ,1.0f, 0.0f));
     md = glm::scale(md, glm::vec3(0.4f));
-    shader.uniformMatrix(MODEL, md);
+    shader.uniformMat4(MODEL, md);
+    if (!is_depth) 
+    {
+        shader.uniformMat3(NORMAL, glm::transpose(glm::inverse(glm::mat3(md))));
+    }
     auto& meshes_ = model_->getMeshes();
     auto& materials_ = model_->getMaterials();
     auto& textures_ = model_->getAllTextures();
@@ -297,4 +273,13 @@ void ShadowMap_sc::renderScene(Shader& shader, bool is_depth)
 
         meshes_[i].mesh.drawInstances(side_size_ * side_size_);
     }  
+}
+
+void ShadowMap_sc::onClose()
+{
+    #ifdef MEMORY_DEBUG
+        print_Alloc_Memory_Kilobyte();
+        print_Dealloc_Memory_Kilobyte();
+        print_Usage_Memory_Kilobyte();
+    #endif    
 }

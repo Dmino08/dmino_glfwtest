@@ -6,7 +6,7 @@
 constexpr const char* PROJECTION = "u_projection";
 constexpr const char* VIEW = "u_view";
 constexpr const char* MODEL = "u_model";
-constexpr const char* PROJ_VIEW = "u_proj_view";
+constexpr const char* PROJ_VIEW = "u_projview";
 constexpr const char* PROJ_VIEW_MODEL = "u_pvm";
 constexpr const char* PVM = "u_pvm";
 constexpr const char* PROJ_MODEL = "u_proj_model";

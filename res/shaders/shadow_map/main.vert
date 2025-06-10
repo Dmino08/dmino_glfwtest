@@ -13,18 +13,19 @@ out VS_OUT
     vec4 frag_pos_light_space;
 } vs_out;
 
-uniform mat4 u_projection;
-uniform mat4 u_view;
+uniform mat4 u_projview;
 uniform mat4 u_model;
+uniform mat3 u_normal;
+
 uniform mat4 u_light_space;
 
 void main()
 {
-    vec3 pos = a_pos + a_offset;
-    vs_out.frag_pos = vec3(u_model * vec4(pos, 1.0));
-    vs_out.normal = transpose(inverse(mat3(u_model))) * a_normal;
+    vec4 world_pos = u_model * vec4(a_pos + a_offset, 1.0);
+    vs_out.frag_pos = world_pos.xyz;
+    vs_out.normal = u_normal * a_normal; // transpose(inverse(mat3(u_model))) * a_normal;
     vs_out.coord = a_coord;
     vs_out.frag_pos_light_space = u_light_space * vec4(vs_out.frag_pos, 1.0);
 
-    gl_Position = u_projection * u_view * u_model * vec4(pos, 1.0);
+    gl_Position = u_projview * world_pos;
 }

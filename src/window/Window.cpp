@@ -100,7 +100,7 @@ void Window::initGLAD() {
     }
     is_glad_initialized_ = true;
 
-    #ifdef DEBUG_MOD
+    #ifdef DEBUG_MODE
         core::logger.log(core::Logger::INFO, "GLAD is initialized"); 
     #endif
 }
@@ -121,7 +121,9 @@ Window::Window(int width, int height, std::string title, WindowType type) :
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
         glfwWindowHint(GLFW_DEPTH_BITS, 24);
+        glfwWindowHint(GLFW_STENCIL_BITS, 8);
 
         handle_ = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
 
@@ -129,7 +131,7 @@ Window::Window(int width, int height, std::string title, WindowType type) :
             core::logger.log(core::Logger::ERROR, "Window is not created");
             return;
         } 
-        #ifdef DEBUG_MOD
+        #ifdef DEBUG_MODE
             core::logger.log(core::Logger::INFO, "GLFW Window is created"); 
         #endif
 

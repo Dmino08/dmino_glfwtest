@@ -21,17 +21,18 @@ public:
 
     void use() const;
 
-    void uniform1i(const std::string& name, int x);
-    void uniform2i(const std::string& name, int x, int y);
-    void uniform2i(const std::string& name, glm::ivec2 xy);
-    void uniform3i(const std::string& name, int x, int y, int z);
-    void uniform3i(const std::string& name, glm::ivec3 xyz);
-    void uniform1f(const std::string& name, float x);
-    void uniform2f(const std::string& name, float x, float y);
-    void uniform2f(const std::string& name, glm::vec2 xy);
-    void uniform3f(const std::string& name, float x, float y, float z);
-    void uniform3f(const std::string& name, glm::vec3 xyz);
-    void uniformMatrix(const std::string& name, glm::mat4 matrix);
+    void uniform1i  (const std::string& name, int x);
+    void uniform2i  (const std::string& name, int x, int y);
+    void uniform2i  (const std::string& name, const glm::ivec2& xy);
+    void uniform3i  (const std::string& name, int x, int y, int z);
+    void uniform3i  (const std::string& name, const glm::ivec3& xyz);
+    void uniform1f  (const std::string& name, float x);
+    void uniform2f  (const std::string& name, float x, float y);
+    void uniform2f  (const std::string& name, const glm::vec2& xy);
+    void uniform3f  (const std::string& name, float x, float y, float z);
+    void uniform3f  (const std::string& name, const glm::vec3& xyz);
+    void uniformMat3(const std::string& name, const glm::mat3& matrix);
+    void uniformMat4(const std::string& name, const glm::mat4& matrix);
     void uniformBlockBinding(const std::string& name, GLuint index);
 
 

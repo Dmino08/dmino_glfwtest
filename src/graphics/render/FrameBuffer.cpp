@@ -9,7 +9,7 @@
     int frameBuffersCreated = 0;
 #endif
 
-FrameBuffer::FrameBuffer() : fbo_id_(0), texture_id_(0)
+FrameBuffer::FrameBuffer() : fbo_id_(0)
 {}
 
 FrameBuffer::~FrameBuffer()
@@ -17,37 +17,32 @@ FrameBuffer::~FrameBuffer()
     clear();
 }
 
-bool FrameBuffer::create(GLenum texture_type, 
-                         int width, 
-                         int height, 
-                         GLenum fbo_type, 
+bool FrameBuffer::create(TextureParams textureParams, 
+                         int width,
+                         int height,
+                         GLenum fbo_type,
                          GLenum attachment)
 {
+    if (fbo_id_ != 0) {
+        clear();
+    }
+
     // FRAMEBUFFER GENERATION
     glGenFramebuffers(1, &fbo_id_);
     glBindFramebuffer(fbo_type, fbo_id_);
 
     // CREATING TEXTURE
-    glGenTextures(1, &texture_id_);
-    glBindTexture(texture_type, texture_id_);
-    if (texture_type == GL_TEXTURE_2D)
-    {
-        glTexImage2D(texture_type, 0, GL_RGB, width, height, 0, GL_RGB,
-            GL_UNSIGNED_BYTE, NULL); 
-    }
-    else if (texture_type == GL_TEXTURE_CUBE_MAP)
-    {
-        for(unsigned int i = 0; i < 6; i++)
-        {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width,
-            height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-        }
-    }
-    glTexParameteri(texture_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(texture_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    texture_.create(width, height, textureParams.internal_format, textureParams);
     //
-    glFramebufferTexture2D(fbo_type, attachment, texture_type,
-        texture_id_, 0);
+    texture_.bind();
+    glFramebufferTexture2D(fbo_type, attachment, textureParams.target,
+        texture_.getTextureId(), 0);
+
+    if (attachment == GL_DEPTH_ATTACHMENT)
+    {
+        glDrawBuffer(GL_NONE);
+        glReadBuffer(GL_NONE);
+    }
 
     // CREATING MESH
     std::array<ScreenVertex, 4> vertices = {{
@@ -74,6 +69,8 @@ bool FrameBuffer::create(GLenum texture_type,
     mesh_.unbind();
 
 
+    
+
     // CHECKING FRAMEBUFFER STATUS
     if(glCheckFramebufferStatus(fbo_type) != GL_FRAMEBUFFER_COMPLETE)
     {
@@ -90,6 +87,8 @@ bool FrameBuffer::create(GLenum texture_type,
     width_ = width;
     height_ = height;
 
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
     return true;
 }
 
@@ -100,13 +99,6 @@ void FrameBuffer::clear()
         glDeleteFramebuffers(1, &fbo_id_);
         fbo_id_ = 0;
     }
-    
-    if (texture_id_ != 0)
-    {    
-        glDeleteTextures(1, &texture_id_);
-        texture_id_ = 0;
-    }
-    mesh_.clear();
 }
 
 void FrameBuffer::bind()
