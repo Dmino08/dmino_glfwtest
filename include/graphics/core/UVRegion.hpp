@@ -12,6 +12,9 @@ class UVRegion {
 
     public:
         UVRegion();
+        UVRegion(const UVRegion& other);
+        UVRegion& operator=(const UVRegion& other);
+
         void setRegion(int width, int height, int x_offset, int y_offset, int x_size, int y_size);
         
         const glm::vec2 getUVMin() const;

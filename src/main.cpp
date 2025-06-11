@@ -5,6 +5,7 @@
 #include "window/Window.hpp"
 
 #include "scenes/ShadowMap_sc.hpp"
+#include "scenes/PointShadows_sc.hpp"
 
 #include "core/Logger.hpp"
 
@@ -44,14 +45,17 @@ int main(void) {
     Window::initGLFW();
     {
         Engine engine;
+        engine.addScene<ShadowMap_sc>("1");
+        engine.addScene<PointShadows_sc>("2");
+
         auto wind1 = std::make_unique<Window>(width, height, "Test");
 
         engine.addWindow("1", std::move(wind1));
-        engine.addScene<ShadowMap_sc>("1");
 
         engine.attachSceneToWindow("1", "1");
 
-        engine.run();
+        engine.run();    
+
     }
     // windowLoop();
 

@@ -9,6 +9,24 @@ UVRegion::UVRegion()
       v_size_(1.0f) 
   {}
 
+UVRegion::UVRegion(const UVRegion& other) 
+    : u_offset_(other.u_offset_), 
+      v_offset_(other.v_offset_), 
+      u_size_(other.u_size_), 
+      v_size_(other.v_size_) 
+{
+}
+
+UVRegion& UVRegion::operator=(const UVRegion& other) {
+    if (this != &other) {
+        u_offset_ = other.u_offset_;
+        v_offset_ = other.v_offset_;
+        u_size_ = other.u_size_;
+        v_size_ = other.v_size_;
+    }
+    return *this;
+}
+
 void UVRegion::setRegion(int width, 
                          int height, 
                          int x_offset, 

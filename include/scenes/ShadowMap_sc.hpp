@@ -46,7 +46,7 @@ private:
 
     // FLOOR STUFF
     u_ptr<Texture> floor_texture_;
-    float floor_size_ = 15'000.0f;
+    float floor_size_ = 4'000.0f;
     u_ptr<Sprite> floor_;
 
     // LIGHT STUFF
@@ -54,6 +54,7 @@ private:
     glm::vec3 light_pos_;
     float light_distance = 10.0f;
     bool shadow_on_ = true;
+    glm::mat4 light_projection;
 
     // DEPTH STUFF
     uint SHADOW_WIDTH, SHADOW_HEIGHT;

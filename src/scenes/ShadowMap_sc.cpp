@@ -36,9 +36,9 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
 
     // FPS TIMER SET UP
     core::Timer timer;
+    timer.finish_time = 0.5f;
     timer.time_out = [this]() { 
-        std::string fps = "FPS: " + std::to_string(int(1.0f / time_->getDeltaTime()));
-        window_->setTitle(fps);
+        std::cout << "FPS: " + std::to_string(int(1.0f / time_->getDeltaTime())) << std::endl;
     };
     engine.getTime().addTimer(std::move(timer));
 
@@ -48,15 +48,15 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
     //
-    glDisable(GL_BLEND);
-    glDisable(GL_STENCIL_TEST);
+    // glDisable(GL_BLEND);
+    // glDisable(GL_STENCIL_TEST);
     
     // GLFW SET UP
     glfwSwapInterval(0);
 
     // CAMERA SET UP
     CameraParams c_params;
-    c_params.z_far = 15'000.0f;
+    c_params.z_far = 4'000.0f;
     camera_ = makeU<Camera>(window, c_params);
     camera_->setTransform(glm::vec3(0.0f, 1.0f, 10.0f));
 
@@ -66,10 +66,11 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
     //
     TextureParams t_params;
     t_params.min_filter = GL_LINEAR_MIPMAP_LINEAR;
+    t_params.mag_filter = GL_LINEAR_MIPMAP_LINEAR;
     box_texture_ = makeU<Texture>();
+    Texture::activeUnit(1);
     box_texture_->create(image, t_params);
-    box_texture_->activeUnit(1);
-    //
+
     box_ = makeU<Voxel>(glm::vec3(0.0f, 1.0f, 0.0f));
     box_->transform.rotate(glm::vec3(25.0f, 0.0f, 25.0f));
 
@@ -103,17 +104,19 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
     light_pos_ = glm::vec3(0.0f, 5.0f, 0.0f);
     light_dir_ = glm::vec3(-0.1f, -1.0f, 0.01f);
     light_distance = 25.0f;
+    float near_plane = 1.0f, far_plane = light_distance;
+    light_projection = glm::ortho(-light_distance, light_distance,-light_distance, light_distance, near_plane, far_plane);
 
     // DEPTH FBO SET UP
-    SHADOW_WIDTH = SHADOW_K_2;
+    SHADOW_WIDTH = SHADOW_K_4;
     SHADOW_HEIGHT = SHADOW_WIDTH;
-    glActiveTexture(GL_TEXTURE2);
+    Texture::activeUnit(2);
     fbo_.create(DIRECTION_DEPTH_PARAMS, SHADOW_WIDTH, SHADOW_HEIGHT, GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT);
 
 
     // MODEL SET UP
     model_ = makeU<modload::Model>();
-    glActiveTexture(GL_TEXTURE0);
+    Texture::activeUnit(0);
     //model_->create("D:/Mine(D)/Programming/C++/Models/grass/Low/Low Grass.fbx");
     model_->create("res/models/backpack/backpack.obj");
     
@@ -190,17 +193,15 @@ void ShadowMap_sc::update(float delta)
 
 void ShadowMap_sc::draw() 
 {
-    glClearColor(0.52f, 0.81f, 0.92f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // glClearColor(0.52f, 0.81f, 0.92f, 1.0f);
+    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glm::mat4 lightSpaceMatrix;
     if (shadow_on_) {
-        float near_plane = 1.0f, far_plane = light_distance;
-        glm::mat4 lightProjection = glm::ortho(-light_distance, light_distance,-light_distance, light_distance, near_plane, far_plane);
         glm::vec3 camera_offset_ = glm::vec3(camera_->getPos().x, 0.0f, camera_->getPos().z);
         glm::mat4 lightView = glm::lookAt(light_pos_ + camera_offset_, light_pos_ + light_dir_ + camera_offset_, glm::vec3( 0.0f, 1.0f, 0.0f));
 
-        lightSpaceMatrix = lightProjection * lightView;
+        lightSpaceMatrix = light_projection * lightView;
 
         glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
         glCullFace(GL_FRONT);
@@ -212,9 +213,10 @@ void ShadowMap_sc::draw()
 
         renderScene(*sh_simple_.get());
     }
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glCullFace(GL_BACK);
     glViewport(0, 0, window_->getWidth(), window_->getHeight());
+    glCullFace(GL_BACK);
+    fbo_.unbind();
+    glClearColor(0.52f, 0.81f, 0.92f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     sh_main_->use();
@@ -266,10 +268,17 @@ void ShadowMap_sc::renderScene(Shader& shader, bool is_depth)
     auto& meshes_ = model_->getMeshes();
     auto& materials_ = model_->getMaterials();
     auto& textures_ = model_->getAllTextures();
+    int current_material_index = -1;
+    glActiveTexture(GL_TEXTURE0);
     for (size_t i = 0; i < meshes_.size(); i++)
     {
-        glActiveTexture(GL_TEXTURE0);
-        textures_[materials_[meshes_[i].material_index].diffuse].bind();
+        int mat_idx = meshes_[i].material_index;
+        if (current_material_index != mat_idx) 
+        {
+            textures_[materials_[mat_idx].diffuse].bind();
+            current_material_index = mat_idx;
+        }
+
 
         meshes_[i].mesh.drawInstances(side_size_ * side_size_);
     }  

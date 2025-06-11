@@ -53,6 +53,24 @@ namespace util {
         updateVectors();
     }
 
+    Transform::Transform(const Transform& other) 
+        : position_(other.position_),
+        rotation_(other.rotation_),
+        scale_(other.scale_),
+        model_(other.model_)
+    {}
+
+    Transform& Transform::operator=(const Transform& other) 
+    {
+        if (this != &other) {
+            position_ = other.position_;
+            rotation_ = other.rotation_;
+            scale_ = other.scale_;
+            model_ = other.model_;
+        }
+        return *this;
+    }
+
     Transform::Transform(Transform&& other) noexcept : 
           position_(std::move(other.position_)),
           rotation_(std::move(other.rotation_)),

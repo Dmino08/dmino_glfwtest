@@ -16,6 +16,7 @@ class Mesh {
 
     public:
         Mesh();
+        
         Mesh(Mesh&& other) noexcept;
         Mesh& operator=(Mesh&& other) noexcept;
         ~Mesh();

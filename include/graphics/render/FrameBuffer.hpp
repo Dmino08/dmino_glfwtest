@@ -19,6 +19,26 @@ constexpr TextureParams DIRECTION_DEPTH_PARAMS =
 
     {1.0f, 1.0f, 1.0f, 1.0f},
 
+    GL_DEPTH_COMPONENT32F,
+    GL_DEPTH_COMPONENT
+};
+
+constexpr TextureParams POINT_DEPTH_PARAMS = 
+{
+    GL_TEXTURE_CUBE_MAP,
+
+    GL_CLAMP_TO_EDGE,
+    GL_CLAMP_TO_EDGE,
+    GL_CLAMP_TO_EDGE,
+
+    GL_NEAREST,
+    GL_NEAREST,
+
+    GL_FLOAT,
+
+    {1.0f, 1.0f, 1.0f, 1.0f},
+
+    GL_DEPTH_COMPONENT,
     GL_DEPTH_COMPONENT
 };
 
@@ -36,7 +56,8 @@ public:
     
     void clear();
 
-    void bind();
+    void bind(); 
+    void unbind();
 
 private:
     GLuint fbo_id_;

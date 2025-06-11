@@ -6,6 +6,8 @@
 #include <iostream>
 
 
+#define TEXTURE_LOGGING
+
 struct TextureParams {
     GLenum target = GL_TEXTURE_2D;
 
@@ -21,6 +23,7 @@ struct TextureParams {
     float border_color[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 
     GLuint internal_format = GL_RGB;
+    GLuint format = GL_RGB;
 };
 
 
@@ -30,6 +33,13 @@ class Texture {
     int width_, height_;
 
     int unit_;
+
+    static bool* active_units_;
+    static int active_units_size_;
+    
+    static int count_;
+
+    static void initUnits();
 
     public:
         Texture();
@@ -56,9 +66,8 @@ class Texture {
         void Texture::create(
             int width,
             int height,
-            GLenum format, 
             TextureParams params
         );
 
-        void activeUnit(int index);
+        static void activeUnit(int index = 0);
 };

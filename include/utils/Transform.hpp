@@ -20,6 +20,9 @@ namespace util {
             Transform(float x, float y, float z);
             Transform(const glm::vec3& position);
 
+            Transform(const Transform& other);
+            Transform& operator=(const Transform& other);
+
             Transform(Transform&& other) noexcept;
             Transform& operator=(Transform&& other) noexcept;
 

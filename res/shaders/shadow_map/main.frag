@@ -80,6 +80,6 @@ void main()
     }
     else
     {
-    f_color = texture(u_diffuse, fs_in.coord);
+        f_color = texture(u_diffuse, fs_in.coord);
     }
 }

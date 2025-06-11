@@ -9,10 +9,15 @@
 
 #include "typedefs.hpp"
 
+struct GLFWwindow;
+
 class Sprite {
     
     UVRegion region_;
-    Mesh mesh_;
+
+    static Mesh mesh_;
+    static GLFWwindow* current_context_;
+
     glm::vec3 color_;
     uint width_, height_;
 
@@ -20,6 +25,9 @@ class Sprite {
         util::Transform transform;
         
         Sprite();
+        Sprite(const Sprite& other);
+        Sprite& operator=(const Sprite& other);
+        
         void setTextureSize(uint width, uint height);
         void setRegion(int x_offset, int y_offset, int x_size, int y_size);
 

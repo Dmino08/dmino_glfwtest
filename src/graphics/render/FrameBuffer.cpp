@@ -32,12 +32,25 @@ bool FrameBuffer::create(TextureParams textureParams,
     glBindFramebuffer(fbo_type, fbo_id_);
 
     // CREATING TEXTURE
-    texture_.create(width, height, textureParams.internal_format, textureParams);
+    texture_.create(width, height, textureParams);
     //
     texture_.bind();
-    glFramebufferTexture2D(fbo_type, attachment, textureParams.target,
-        texture_.getTextureId(), 0);
-
+    switch (textureParams.target)
+    {
+        case GL_TEXTURE_2D:
+            glFramebufferTexture2D(fbo_type, attachment, textureParams.target,
+                texture_.getTextureId(), 0);
+        break;
+        case GL_TEXTURE_CUBE_MAP:
+            for (size_t i = 0; i < 6; i++)
+            {
+                GLenum face =  GL_TEXTURE_CUBE_MAP_POSITIVE_X + i;
+                glFramebufferTexture2D(fbo_type, attachment, face,
+                    texture_.getTextureId(), 0);
+            }
+             glFramebufferTexture(fbo_type, attachment, texture_.getTextureId(), 0);
+        break;
+    }
     if (attachment == GL_DEPTH_ATTACHMENT)
     {
         glDrawBuffer(GL_NONE);
@@ -67,9 +80,6 @@ bool FrameBuffer::create(TextureParams textureParams,
     mesh_.setAttrib(1, 2, GL_FLOAT, GL_FALSE, sizeof(ScreenVertex),
                 reinterpret_cast<void*>(offsetof(ScreenVertex, uv_coord)));
     mesh_.unbind();
-
-
-    
 
     // CHECKING FRAMEBUFFER STATUS
     if(glCheckFramebufferStatus(fbo_type) != GL_FRAMEBUFFER_COMPLETE)
@@ -104,4 +114,9 @@ void FrameBuffer::clear()
 void FrameBuffer::bind()
 {
     glBindFramebuffer(fbo_type_, fbo_id_);
+}
+
+void FrameBuffer::unbind()
+{
+    glBindFramebuffer(fbo_type_, 0);
 }
