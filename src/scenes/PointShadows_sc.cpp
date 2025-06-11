@@ -119,6 +119,12 @@ void PointShadows_sc::init(Engine& engine, Window& window)
     boxes_[1] = Voxel(glm::vec3(-5.0f, -2.0f, 2.0f));
     boxes_[2] = Voxel(glm::vec3(5.0f, 0.0f, -5.0f));
     boxes_[3] = Voxel(glm::vec3(2.0f, 0.0f, 5.0f));
+    boxes_[4] = Voxel(glm::vec3(2.0f, 0.0f, 5.0f));
+    boxes_[5] = Voxel(glm::vec3(7.0f, -5.0f, 5.0f));
+    boxes_[6] = Voxel(glm::vec3(1.0f, 0.0f, -5.0f));
+    boxes_[7] = Voxel(glm::vec3(0.0f, 7.0f, 5.0f));
+    boxes_[8] = Voxel(glm::vec3(2.0f, -6.0f, 5.0f));
+    boxes_[9] = Voxel(glm::vec3(0.0f, 1.0f, 0.0f));
 
     // FBO SET UP
     SHADOW_W_H = SHADOW_K_1;

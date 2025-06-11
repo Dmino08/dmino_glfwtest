@@ -61,7 +61,7 @@ private:
 
     // BOX STUFF
     u_ptr<Texture> box_texture_;
-    std::array<Voxel, 4> boxes_;
+    std::array<Voxel, 10> boxes_;
 
     // FBO STUFF
     FrameBuffer fbo_;
