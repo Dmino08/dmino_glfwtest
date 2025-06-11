@@ -27,10 +27,29 @@ float shadowCalculation(vec3 frag_pos)
 
     float current_depth = length(frag_to_light);
 
+    float shadow = 0.0;
     float bias = 0.05;
+    float samples = 4.0;
+    float offset = 0.1;
 
-    float shadow = current_depth - bias > closest_depth ? 1.0 : 0.0;
-
+     for(float x =-offset; x < offset; x += offset / (samples * 0.5))
+    {
+        for(float y =-offset; y < offset; y += offset / (samples * 0.5))
+        {
+            for(float z =-offset; z < offset; z += offset / (samples * 0.5))
+            {
+                float closestDepth = texture(u_shadow_map, frag_to_light +
+                vec3(x, y, z)).r;
+                closestDepth *= u_far_plane; // undo mapping [0;1]
+                if(current_depth - bias > closestDepth)
+                {
+                    shadow += 1.0;
+                }
+            }
+        }
+    }
+    shadow /= (samples * samples * samples);
+    
     return shadow;
 }
 
