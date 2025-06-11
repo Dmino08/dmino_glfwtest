@@ -52,10 +52,9 @@ int main(void) {
 
         engine.addWindow("1", std::move(wind1));
 
-        engine.attachSceneToWindow("1", "1");
+        engine.attachSceneToWindow("2", "1");
 
         engine.run();    
-
     }
     // windowLoop();
 

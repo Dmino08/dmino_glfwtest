@@ -13,7 +13,6 @@ in VS_OUT
 uniform sampler2D u_diffuse;
 uniform sampler2D u_shadow_map;
 
-uniform vec3 u_light_pos;
 uniform vec3 u_light_dir;
 uniform vec3 u_view_pos;
 

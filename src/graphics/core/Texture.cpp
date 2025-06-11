@@ -65,14 +65,17 @@ Texture& Texture::operator=(Texture&& other) noexcept {
 
 Texture::~Texture() {
     clear();
-    count_--;
-
-    if (count_ <= 0)
+    if (count_ > 0)
+    {
+        count_--;
+    }
+    else
     {
         delete [] active_units_;
         active_units_ = nullptr;
         active_units_size_ = 0;
     }
+    std::cout << count_ << std::endl;
 }
 
 void Texture::clear() 

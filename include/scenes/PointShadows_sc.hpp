@@ -21,8 +21,10 @@ class Mesh;
 struct DepthPointLight
 {
     glm::vec3 pos;
+    float far_plane;
     glm::mat4 shad_proj;
     std::array<glm::mat4, 6> shad_transforms;
+    void setUpMatrix();
 };
 
 class PointShadows_sc : public IScene
@@ -36,6 +38,9 @@ public:
     void update(float delta) override;
     void draw() override;
     void onClose() override;
+    
+    void renderScene(Shader& shader, bool is_depth = true);
+
 
 private:
     Window* window_;
@@ -47,7 +52,7 @@ private:
 
     // SHADER STUFF
     u_ptr<Shader> sh_main_;
-    u_ptr<Shader> sh_depth_;
+    u_ptr<Shader> sh_shadow_;
 
     // FLOOR AND WALLS STUFF
     u_ptr<Texture> simple_texture_;
@@ -63,5 +68,6 @@ private:
 
     // LIGHT STUFF
     DepthPointLight dpl_;
+    int SHADOW_W_H = 0;
 
 };

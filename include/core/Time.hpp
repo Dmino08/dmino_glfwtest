@@ -22,14 +22,18 @@ namespace core {
         Time();
         void update();
         float getDeltaTime();
+        float getTime();
         
         void addTimer(Timer&& timer);
+        bool each(float interval);
+
         
     private:
         using clock = std::chrono::steady_clock;   
         float delta_time_;
         clock::time_point last_;
         std::vector<Timer> timers_;
+        float time_;
 
     }; 
 

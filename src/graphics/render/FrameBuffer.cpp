@@ -42,13 +42,7 @@ bool FrameBuffer::create(TextureParams textureParams,
                 texture_.getTextureId(), 0);
         break;
         case GL_TEXTURE_CUBE_MAP:
-            for (size_t i = 0; i < 6; i++)
-            {
-                GLenum face =  GL_TEXTURE_CUBE_MAP_POSITIVE_X + i;
-                glFramebufferTexture2D(fbo_type, attachment, face,
-                    texture_.getTextureId(), 0);
-            }
-             glFramebufferTexture(fbo_type, attachment, texture_.getTextureId(), 0);
+            glFramebufferTexture(fbo_type, attachment, texture_.getTextureId(), 0);
         break;
     }
     if (attachment == GL_DEPTH_ATTACHMENT)

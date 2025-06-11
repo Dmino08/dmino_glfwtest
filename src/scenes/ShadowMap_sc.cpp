@@ -36,7 +36,7 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
 
     // FPS TIMER SET UP
     core::Timer timer;
-    timer.finish_time = 0.5f;
+    timer.finish_time = 1.0f;
     timer.time_out = [this]() { 
         std::cout << "FPS: " + std::to_string(int(1.0f / time_->getDeltaTime())) << std::endl;
     };
@@ -52,7 +52,7 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
     // glDisable(GL_STENCIL_TEST);
     
     // GLFW SET UP
-    glfwSwapInterval(0);
+    glfwSwapInterval(vsync);
 
     // CAMERA SET UP
     CameraParams c_params;
@@ -74,7 +74,6 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
     box_ = makeU<Voxel>(glm::vec3(0.0f, 1.0f, 0.0f));
     box_->transform.rotate(glm::vec3(25.0f, 0.0f, 25.0f));
 
-
     // SHADER SET UP
     sh_main_ = makeU<Shader>();
     sh_main_->create("res/shaders/shadow_map/main.vert", "res/shaders/shadow_map/main.frag");
@@ -82,7 +81,6 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
     sh_main_->uniform1i(DIFFUSE, box_texture_->getUnitId());
     sh_main_->uniform1i(SHADOW_MAP, 2);
     sh_main_->uniform1i("u_shadow_on", shadow_on_);
-    // sh_main_->uniform3f(LIGHT_POS, glm::vec3(-2.0f, 4.0f,-1.0f)); // Point implementation
     //
     sh_depth_ = makeU<Shader>();
     sh_depth_->create("res/shaders/shadow_map/depth.vert", "res/shaders/shadow_map/depth.frag");
@@ -91,7 +89,6 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
     //
     sh_simple_ = makeU<Shader>();
     sh_simple_->create("res/shaders/shadow_map/simple.vert", "res/shaders/shadow_map/simple.frag");     
-
 
     // FLOOR SET UP
     floor_ = makeU<Sprite>();
@@ -113,13 +110,11 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
     Texture::activeUnit(2);
     fbo_.create(DIRECTION_DEPTH_PARAMS, SHADOW_WIDTH, SHADOW_HEIGHT, GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT);
 
-
     // MODEL SET UP
     model_ = makeU<modload::Model>();
     Texture::activeUnit(0);
     //model_->create("D:/Mine(D)/Programming/C++/Models/grass/Low/Low Grass.fbx");
     model_->create("res/models/backpack/backpack.obj");
-    
     
     // CREATING INSTANCES
     std::vector<glm::vec3> temp_offsets = getInstanceOffsets(side_size_);
@@ -178,6 +173,11 @@ void ShadowMap_sc::input(InputManager& input, float delta)
         camera_->toZoom(1.2f, 0.0f, 20.0f);
     }
 
+    if (input.justPressed(GLFW_KEY_F)) {
+        vsync = !vsync;
+        glfwSwapInterval(vsync);
+    }    
+
     if (input.justPressed(GLFW_KEY_Q)) {
         shadow_on_ = !shadow_on_;
         sh_main_->use();
@@ -196,33 +196,33 @@ void ShadowMap_sc::draw()
     // glClearColor(0.52f, 0.81f, 0.92f, 1.0f);
     // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glm::mat4 lightSpaceMatrix;
-    if (shadow_on_) {
+    if (shadow_on_)
+    {
         glm::vec3 camera_offset_ = glm::vec3(camera_->getPos().x, 0.0f, camera_->getPos().z);
         glm::mat4 lightView = glm::lookAt(light_pos_ + camera_offset_, light_pos_ + light_dir_ + camera_offset_, glm::vec3( 0.0f, 1.0f, 0.0f));
 
-        lightSpaceMatrix = light_projection * lightView;
+        light_space_matrix = light_projection * lightView;
 
+        fbo_.bind();
         glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
         glCullFace(GL_FRONT);
-        fbo_.bind();
         glClear(GL_DEPTH_BUFFER_BIT);
         
         sh_simple_->use();
-        sh_simple_->uniformMat4("u_light_space_matrix", lightSpaceMatrix);
+        sh_simple_->uniformMat4("u_light_space_matrix", light_space_matrix);
 
         renderScene(*sh_simple_.get());
     }
+    fbo_.unbind();
     glViewport(0, 0, window_->getWidth(), window_->getHeight());
     glCullFace(GL_BACK);
-    fbo_.unbind();
     glClearColor(0.52f, 0.81f, 0.92f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     sh_main_->use();
     if (shadow_on_) 
     {
-        sh_main_->uniformMat4("u_light_space", lightSpaceMatrix);
+        sh_main_->uniformMat4("u_light_space", light_space_matrix);
         sh_main_->uniform3f(VIEW_POS, camera_->getPos()); 
         sh_main_->uniform3f(LIGHT_DIR, light_dir_); 
     }
@@ -278,8 +278,6 @@ void ShadowMap_sc::renderScene(Shader& shader, bool is_depth)
             textures_[materials_[mat_idx].diffuse].bind();
             current_material_index = mat_idx;
         }
-
-
         meshes_[i].mesh.drawInstances(side_size_ * side_size_);
     }  
 }

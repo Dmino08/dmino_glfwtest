@@ -30,6 +30,7 @@ public:
 private:
     Window* window_;
     core::Time* time_;
+    bool vsync = false;
 
     // CAMERA STUFF
     u_ptr<Camera> camera_;
@@ -55,6 +56,7 @@ private:
     float light_distance = 10.0f;
     bool shadow_on_ = true;
     glm::mat4 light_projection;
+    glm::mat4 light_space_matrix;
 
     // DEPTH STUFF
     uint SHADOW_WIDTH, SHADOW_HEIGHT;
