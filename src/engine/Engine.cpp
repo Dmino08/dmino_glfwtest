@@ -13,13 +13,18 @@ void Engine::addWindow(const std::string& name, std::unique_ptr<Window>&& window
     pairs_[name].second = nullptr;
 }
 
-void Engine::attachSceneToWindow(const std::string& scene, const std::string& window) {
+void Engine::attachSceneToWindow(const std::string& scene, const std::string& window) {  
     if (factories_.find(scene) != factories_.end())
     {
         auto& pair = pairs_[window];
 
+        if (!pair.first) {
+            throw std::runtime_error("Window not initialized before attaching scene.");
+        }        
+
         pair.first->makeContextCurrent();
 
+        pair.second.reset();
         pair.second = factories_[scene]();
         pair.second->init(*this, *pair.first);
     }
@@ -50,6 +55,7 @@ void Engine::run() {
     
     while (!should_end_)
     {
+        events.callEvents();
         time_.update();
         float delta = time_.getDeltaTime();
 
@@ -66,11 +72,9 @@ void Engine::run() {
             if (!pair.first->shouldClose()) {
 
                 pair.second->preUpdate(delta);
-
                 pair.second->update(delta);
                 pair.second->input(pair.first->getInput(), delta);
                 pair.second->draw();
-
                 pair.second->afterUpdate(delta);
 
                 pair.first->swapBuffers();

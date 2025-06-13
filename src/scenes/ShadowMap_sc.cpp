@@ -128,7 +128,6 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
         temp_meshes[i].mesh.setBuffer(GL_ARRAY_BUFFER, sizeof(glm::vec3) * temp_offsets.size(), temp_offsets.data(), GL_STATIC_DRAW);
         temp_meshes[i].mesh.setAttrib(3, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0, true);
     }
-
 }
 
 void ShadowMap_sc::input(InputManager& input, float delta) 
@@ -181,7 +180,10 @@ void ShadowMap_sc::input(InputManager& input, float delta)
     }
 
     if (input.justPressed(GLFW_KEY_2)) {
-        engine_->attachSceneToWindow("2", "1");
+        engine_->events.addEvent([engine_ = engine_](){
+            engine_->attachSceneToWindow("2", "1");
+            std::cout << "Attached 2\n"; 
+        });
     }    
     
 }

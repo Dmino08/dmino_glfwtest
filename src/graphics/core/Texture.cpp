@@ -18,9 +18,12 @@ Texture::Texture() :
     id_(0), 
     target_(0),
     width_(0), 
-    height_(0) {
-        if (Texture::active_units_ == nullptr)
+    height_(0),
+    unit_(-1) {
+        if (Texture::active_units_ == nullptr) {
             initUnits();
+            count_ = 0;
+        }
         count_++;
     }
 
@@ -28,14 +31,14 @@ Texture::Texture(Texture&& other) noexcept
     : id_(other.id_),
       target_(other.target_),
       width_(other.width_),
-      height_(other.height_) {
+      height_(other.height_),
+      unit_(other.unit_) {
 
     other.id_ = 0;
     other.target_ = 0;
     other.width_ = 0;
     other.height_ = 0;
-
-    count_++;
+    other.unit_ = -1;
 }
 
 Texture& Texture::operator=(Texture&& other) noexcept {
@@ -49,41 +52,35 @@ Texture& Texture::operator=(Texture&& other) noexcept {
         target_ = other.target_;
         width_ = other.width_;
         height_ = other.height_;
-
+        unit_ = other.unit_;
 
         other.id_ = 0;
         other.target_ = 0;
         other.width_ = 0;
         other.height_ = 0;
-
-        count_++;
+        other.unit_ = -1;
     }
     return *this;
 }
 
 Texture::~Texture() {
     clear();
-    if (Texture::count_ > 0) {
-        Texture::count_--;
-    }
-    else {
-        if (Texture::active_units_) {
+    if (--Texture::count_ == 0) {
+        if (Texture::active_units_ != nullptr) {
             delete [] Texture::active_units_;
             Texture::active_units_ = nullptr;
             Texture::active_units_size_ = 0;
         }
+        
     }
+    
 }
 
 void Texture::clear() {
     if (id_ != 0) {
         glDeleteTextures(1, &id_);
         id_ = 0;
-        if (Texture::active_units_ != nullptr) {
-            if (unit_ >= 0 && unit_ < Texture::active_units_size_) {
-                Texture::active_units_[unit_] = false;
-            }
-        }
+        unit_ = -1;
     }
 }
 
@@ -167,28 +164,29 @@ void Texture::create(
     height_ = image.getHeight(); 
     target_ = params.target;
 
+
     GLint texture_unit;
     glGetIntegerv(GL_ACTIVE_TEXTURE, &texture_unit);
     texture_unit -= GL_TEXTURE0;
-
     if (Texture::active_units_[texture_unit] == true) {
+        unit_ = texture_unit;
         #ifdef TEXTURE_LOGGING
             core::logger.log(core::Logger::INFO, "You've used this texture slot before! Unit: " + std::to_string(texture_unit));
         #endif          
     }
-
     if (texture_unit >= 0 && texture_unit < active_units_size_) {
         Texture::active_units_[texture_unit] = true;
+        unit_ = texture_unit;
         #ifdef TEXTURE_LOGGING
             core::logger.log(core::Logger::INFO, "Used texture unit: " + std::to_string(texture_unit));
         #endif  
     }
     else {
+        unit_ = active_units_size_ - 1;
         #ifdef TEXTURE_LOGGING
             core::logger.log(core::Logger::ERROR, "Incorrect texture unit: " + std::to_string(texture_unit));
         #endif 
     }
-    unit_ = texture_unit;
 }
 
 void Texture::create(
@@ -248,28 +246,30 @@ void Texture::create(
     height_ = height; 
     target_ = params.target;
 
+
     GLint texture_unit;
     glGetIntegerv(GL_ACTIVE_TEXTURE, &texture_unit);
     texture_unit -= GL_TEXTURE0;
-
     if (Texture::active_units_[texture_unit] == true) {
+        unit_ = texture_unit;
         #ifdef TEXTURE_LOGGING
             core::logger.log(core::Logger::INFO, "You've used this texture slot before! Unit: " + std::to_string(texture_unit));
         #endif          
     }
-
     if (texture_unit >= 0 && texture_unit < active_units_size_) {
         Texture::active_units_[texture_unit] = true;
+        unit_ = texture_unit;
         #ifdef TEXTURE_LOGGING
             core::logger.log(core::Logger::INFO, "Used texture unit: " + std::to_string(texture_unit));
         #endif  
     }
     else {
+        unit_ = active_units_size_ - 1;
         #ifdef TEXTURE_LOGGING
             core::logger.log(core::Logger::ERROR, "Incorrect texture unit: " + std::to_string(texture_unit));
         #endif 
     }
-    unit_ = texture_unit;
+    
 }
 
 void Texture::activeUnit(int index) {

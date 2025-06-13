@@ -34,11 +34,11 @@ void PointShadows_sc::init(Engine& engine, Window& window)
     engine_ = &engine;
 
     // FPS TIMER SET UP
-    core::Timer timer;
-    timer.time_out = [this]() { 
-        std::cout << "FPS: " + std::to_string(int(1.0f / time_->getDeltaTime())) << '\n';
-    };
-    engine.getTime().addTimer(std::move(timer));
+    // core::Timer timer;
+    // timer.time_out = [this]() { 
+    //     std::cout << "FPS: " + std::to_string(int(1.0f / time_->getDeltaTime())) << '\n';
+    // };
+    // engine.getTime().addTimer(std::move(timer));
 
     // OPENGL SET UP
     glEnable(GL_DEPTH_TEST);
@@ -197,15 +197,18 @@ void PointShadows_sc::input(InputManager& input, float delta)
     }
 
 
-    if (input.justPressed(GLFW_KEY_1))
-    {
-        engine_->attachSceneToWindow("1", "1");
+    if (input.justPressed(GLFW_KEY_1)) {
+        engine_->events.addEvent([engine_ = engine_](){
+            engine_->attachSceneToWindow("1", "1");
+            std::cout << "Attached 1\n"; 
+        });
     }
 
 }
 
 void PointShadows_sc::update(float delta) {
     rotation_ += 15.0 * delta;
+    
 }
 
 void PointShadows_sc::draw() {   

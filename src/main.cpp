@@ -12,6 +12,17 @@
 #include "core/MemoryTracker.hpp"
 
 
+#include <iostream>
+#include <string>
+#include <functional>
+
+void setFoo(std::string f_a, std::string s_a) {
+    std::cout << f_a << s_a << '\n';
+}
+template <typename... Args>
+void testFoo(std::function<void> func) {
+    func(Args);
+}
 
 void windowLoop() 
 {
@@ -75,8 +86,8 @@ int main(void) {
         print_Dealloc_Memory_Kilobyte();
         print_Usage_Memory_Kilobyte();  
     }
-
     Window::terminateGLFW();
+
 
     print_Alloc_Memory_Megabyte();
     print_Dealloc_Memory_Megabyte();
