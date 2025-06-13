@@ -9,6 +9,7 @@
 #include "graphics/glsl/GLSLHelper.hpp"
 #include "graphics/core/VertexStructures.hpp"
 #include "core/Logger.hpp"
+#include "core/MemoryTracker.hpp"
 
 
 
@@ -32,15 +33,16 @@ std::vector<glm::vec3> getInstanceOffsets(int side_size) {
 void ShadowMap_sc::init(Engine& engine, Window& window) 
 {
     window_ = &window;
+    engine_ = &engine;
     time_ = &engine.getTime();
 
     // FPS TIMER SET UP
-    core::Timer timer;
-    timer.finish_time = 1.0f;
-    timer.time_out = [this]() { 
-        std::cout << "FPS: " + std::to_string(int(1.0f / time_->getDeltaTime())) << std::endl;
-    };
-    engine.getTime().addTimer(std::move(timer));
+    // core::Timer timer;
+    // timer.finish_time = 1.0f;
+    // timer.time_out = [this]() { 
+    //     std::cout << "FPS: " + std::to_string(int(1.0f / time_->getDeltaTime())) << std::endl;
+    // };
+    // engine.getTime().addTimer(std::move(timer));
 
     // OPENGL SET UP
     glEnable(GL_DEPTH_TEST);
@@ -61,6 +63,7 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
     camera_->setTransform(glm::vec3(0.0f, 1.0f, 10.0f));
 
     // BOX SET UP
+    Image::flipLoad(true);
     Image image;
     image.load("res/images/Prototype_Grid_Gray_03-512x512.png");
     //
@@ -130,38 +133,31 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
 
 void ShadowMap_sc::input(InputManager& input, float delta) 
 {
-    if (input.justPressed(GLFW_KEY_TAB))
-    {
+    if (input.justPressed(GLFW_KEY_TAB)) {
         window_->toggleCursor();
     }
 
-    if (input.isCursorLocked())
-    {
+    if (input.isCursorLocked()) {
         camera_->process3DMouseRotation(input.getDeltaX(), input.getDeltaY());
-        if (input.pressed(GLFW_KEY_W))
-        {
+        
+        if (input.pressed(GLFW_KEY_W)) {
             camera_->translate(camera_->getFront() * camera_speed_ * delta);
         }
-        if (input.pressed(GLFW_KEY_S))
-        {
+        if (input.pressed(GLFW_KEY_S)) {
             camera_->translate(-camera_->getFront() * camera_speed_ * delta);
         }        
-        if (input.pressed(GLFW_KEY_A))
-        {
+        if (input.pressed(GLFW_KEY_A)) {
             camera_->translate(-camera_->getRight() * camera_speed_ * delta);
         }
-        if (input.pressed(GLFW_KEY_D))
-        {
+        if (input.pressed(GLFW_KEY_D)) {
             camera_->translate(camera_->getRight() * camera_speed_ * delta);
         }
+        
 
-
-        if (input.justPressed(GLFW_KEY_LEFT_SHIFT))
-        {
+        if (input.justPressed(GLFW_KEY_LEFT_SHIFT)) {
             camera_speed_ *= 2.0f;
         }
-        if (input.justReleased(GLFW_KEY_LEFT_SHIFT))
-        {
+        if (input.justReleased(GLFW_KEY_LEFT_SHIFT)) {
             camera_speed_ /= 2.0f;
         }
     }
@@ -183,19 +179,26 @@ void ShadowMap_sc::input(InputManager& input, float delta)
         sh_main_->use();
         sh_main_->uniform1i("u_shadow_on", shadow_on_);
     }
+
+    if (input.justPressed(GLFW_KEY_2)) {
+        engine_->attachSceneToWindow("2", "1");
+    }    
     
 }
 
 void ShadowMap_sc::update(float delta) 
 {
+    fps_++;
+    if (time_->each(1.0f)) {
+        std::cout << "FPS: " << fps_ << '\n';
+        fps_ = 0;
+    }
+    
     rotation += 1.0f * delta;
 }
 
 void ShadowMap_sc::draw() 
 {
-    // glClearColor(0.52f, 0.81f, 0.92f, 1.0f);
-    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     if (shadow_on_)
     {
         glm::vec3 camera_offset_ = glm::vec3(camera_->getPos().x, 0.0f, camera_->getPos().z);
@@ -229,7 +232,6 @@ void ShadowMap_sc::draw()
     sh_main_->uniformMat4(PROJ_VIEW, camera_->getProjection() * camera_->getView());
 
     renderScene(*sh_main_.get(), false);
-
 }
 
 
@@ -284,9 +286,7 @@ void ShadowMap_sc::renderScene(Shader& shader, bool is_depth)
 
 void ShadowMap_sc::onClose()
 {
-    #ifdef MEMORY_DEBUG
-        print_Alloc_Memory_Kilobyte();
-        print_Dealloc_Memory_Kilobyte();
-        print_Usage_Memory_Kilobyte();
-    #endif    
+    print_Alloc_Memory_Kilobyte();
+    print_Dealloc_Memory_Kilobyte();
+    print_Usage_Memory_Kilobyte();
 }

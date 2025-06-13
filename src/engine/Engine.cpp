@@ -6,6 +6,8 @@
 
 #include <iostream>
 
+Engine::~Engine() {}
+
 void Engine::addWindow(const std::string& name, std::unique_ptr<Window>&& window) {
     pairs_[name].first = std::move(window);
     pairs_[name].second = nullptr;
@@ -17,6 +19,7 @@ void Engine::attachSceneToWindow(const std::string& scene, const std::string& wi
         auto& pair = pairs_[window];
 
         pair.first->makeContextCurrent();
+
         pair.second = factories_[scene]();
         pair.second->init(*this, *pair.first);
     }
@@ -44,6 +47,7 @@ core::Time& Engine::getTime() {
 void Engine::run() {
     int frames = 0;
     float elapsed = 0.0f;
+    
     while (!should_end_)
     {
         time_.update();
@@ -85,8 +89,7 @@ void Engine::run() {
             }
         }
 
-        if (pairs_.empty())
-        {
+        if (pairs_.empty()) {
             should_end_ = true;
         }
         frames++;

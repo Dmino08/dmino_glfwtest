@@ -6,8 +6,10 @@
 
 #include "scenes/ShadowMap_sc.hpp"
 #include "scenes/PointShadows_sc.hpp"
+#include "scenes/VoidScene_sc.hpp"
 
 #include "core/Logger.hpp"
+#include "core/MemoryTracker.hpp"
 
 
 
@@ -17,6 +19,10 @@ void windowLoop()
 
     core::Time time;
 
+    ShadowMap_sc scene;
+    Engine engine;
+    scene.init(engine, window);
+
 
     while (!window.shouldClose())
     {
@@ -24,11 +30,20 @@ void windowLoop()
 
         glfwPollEvents();
 
-        window.swapBuffers();
+        float delta = time.getDeltaTime();
 
+        scene.preUpdate(delta);
+        scene.input(window.getInput(), delta);
+        scene.update(delta);
+        scene.draw();
+        scene.afterUpdate(delta);
+
+
+        window.swapBuffers();
         window.eventsUpdate();
 
     }
+    scene.onClose();
 
     print_Alloc_Memory_Kilobyte();
     print_Dealloc_Memory_Kilobyte();
@@ -52,13 +67,20 @@ int main(void) {
 
         engine.addWindow("1", std::move(wind1));
 
-        engine.attachSceneToWindow("2", "1");
+        engine.attachSceneToWindow("1", "1");
 
-        engine.run();    
+        engine.run(); 
+
+        print_Alloc_Memory_Kilobyte();
+        print_Dealloc_Memory_Kilobyte();
+        print_Usage_Memory_Kilobyte();  
     }
-    // windowLoop();
 
     Window::terminateGLFW();
+
+    print_Alloc_Memory_Megabyte();
+    print_Dealloc_Memory_Megabyte();
+    print_Usage_Memory_Byte(); 
 
     return 0;
 }

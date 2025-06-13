@@ -18,7 +18,7 @@ class ShadowMap_sc : public IScene
 {
 public:
     ShadowMap_sc();
-    ~ShadowMap_sc();
+    ~ShadowMap_sc() ;
 
     void init(Engine& engine, Window& window) override;
     void input(InputManager& input, float delta) override;
@@ -29,6 +29,7 @@ public:
     void renderScene(Shader& shader, bool is_depth = true);
 private:
     Window* window_;
+    Engine* engine_;
     core::Time* time_;
     bool vsync = false;
 
@@ -69,5 +70,8 @@ private:
 
     // FRAMEBUFFER TEST
     FrameBuffer fbo_;
+
+    // FPS STUFF
+    int fps_ = 0;
 
 };

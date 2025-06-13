@@ -2,18 +2,16 @@
 #include "graphics/core/VertexStructures.hpp"
 #include <array>
 
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-
-Mesh Sprite::mesh_ = Mesh();
-GLFWwindow* Sprite::current_context_ = nullptr;
+#include <iostream>
 
 Sprite::Sprite()
     : region_(),
       color_(1.0f),
       width_(1),
-      height_(1)
-{}
+      height_(1) {}
 
 
 Sprite::Sprite(const Sprite& other) 
@@ -21,9 +19,7 @@ Sprite::Sprite(const Sprite& other)
       color_(other.color_),
       width_(other.width_),
       height_(other.height_),
-      transform(other.transform)
-{
-}
+      transform(other.transform) {}
 
 Sprite& Sprite::operator=(const Sprite& other) {
     if (this != &other) {
@@ -31,8 +27,7 @@ Sprite& Sprite::operator=(const Sprite& other) {
         color_ = other.color_;
         width_ = other.width_;
         height_ = other.height_;
-        transform = other.transform;
-        
+        transform = other.transform;    
     }
     return *this;
 }
@@ -60,40 +55,36 @@ void Sprite::generate() {
     glm::vec2 uv_min = region_.getUVMin();
     glm::vec2 uv_max = region_.getUVMax();
 
-    if (current_context_ != glfwGetCurrentContext())
-    {
-        std::array<SimpleVertex, 12> vertices = {{
-        //        position              normal            uv_coord
-            {{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {uv_min.x, uv_min.y}},
-            {{ 0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {uv_max.x, uv_min.y}}, 
-            {{ 0.5f,  0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {uv_max.x, uv_max.y}},
-            {{-0.5f,  0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {uv_min.x, uv_max.y}}
+    std::array<SimpleVertex, 12> vertices = {{
+    //        position              normal            uv_coord
+        {{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {uv_min.x, uv_min.y}},
+        {{ 0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {uv_max.x, uv_min.y}}, 
+        {{ 0.5f,  0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {uv_max.x, uv_max.y}},
+        {{-0.5f,  0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {uv_min.x, uv_max.y}}
 
-        }};
-        std::array<uint, 6> indices = {
-            0, 1, 2,
-            2, 3, 0
-        };    
-        Sprite::mesh_.create(vertices.size(), indices.size());
-        Sprite::mesh_.bind();
-        Sprite::mesh_.setBuffer(GL_ARRAY_BUFFER, vertices.size() * sizeof(SimpleVertex), vertices.data(), GL_STATIC_DRAW);
-        Sprite::mesh_.setBuffer(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint), indices.data(), GL_STATIC_DRAW);
+    }};
+    std::array<uint, 6> indices = {
+        0, 1, 2,
+        2, 3, 0
+    };    
+    mesh_.create(vertices.size(), indices.size());
+    mesh_.bind();
+    mesh_.setBuffer(GL_ARRAY_BUFFER, vertices.size() * sizeof(SimpleVertex), vertices.data(), GL_STATIC_DRAW);
+    mesh_.setBuffer(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint), indices.data(), GL_STATIC_DRAW);
 
-        Sprite::mesh_.setAttrib(0, 3, GL_FLOAT, GL_FALSE, sizeof(SimpleVertex),
-                    reinterpret_cast<void*>(offsetof(SimpleVertex, position)));
+    mesh_.setAttrib(0, 3, GL_FLOAT, GL_FALSE, sizeof(SimpleVertex),
+                reinterpret_cast<void*>(offsetof(SimpleVertex, position)));
 
-        Sprite::mesh_.setAttrib(1, 3, GL_FLOAT, GL_FALSE, sizeof(SimpleVertex),
-                    reinterpret_cast<void*>(offsetof(SimpleVertex, normal)));
+    mesh_.setAttrib(1, 3, GL_FLOAT, GL_FALSE, sizeof(SimpleVertex),
+                reinterpret_cast<void*>(offsetof(SimpleVertex, normal)));
 
-        Sprite::mesh_.setAttrib(2, 2, GL_FLOAT, GL_FALSE, sizeof(SimpleVertex),
-                    reinterpret_cast<void*>(offsetof(SimpleVertex, uv_coord)));
-        Sprite::mesh_.unbind();
+    mesh_.setAttrib(2, 2, GL_FLOAT, GL_FALSE, sizeof(SimpleVertex),
+                reinterpret_cast<void*>(offsetof(SimpleVertex, uv_coord)));
+    mesh_.unbind();
 
-        current_context_ = glfwGetCurrentContext();
-    }
 
 }
 
 void Sprite::draw() const{
-    Sprite::mesh_.draw();
+    mesh_.draw();
 }

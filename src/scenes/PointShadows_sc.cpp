@@ -7,6 +7,7 @@
 #include "graphics/glsl/GLSLHelper.hpp"
 #include "graphics/core/VertexStructures.hpp"
 #include "core/Logger.hpp"
+#include "core/MemoryTracker.hpp"
 
 
 
@@ -30,6 +31,7 @@ void PointShadows_sc::init(Engine& engine, Window& window)
 {
     window_ = &window;
     time_ = &engine.getTime();
+    engine_ = &engine;
 
     // FPS TIMER SET UP
     core::Timer timer;
@@ -84,29 +86,34 @@ void PointShadows_sc::init(Engine& engine, Window& window)
     simple_texture_->bind();
     //
     Sprite side;
-    side.setRegion(0, 0, side_size_, side_size_);
     side.transform.setScale(glm::vec3(side_size_));
-    side.generate();
+    side.setRegion(0, 0, side_size_, side_size_);
     //
     sides_.fill(side);
     // FLOOR
     sides_[0].transform.setRotation(glm::vec3(-90.0f, 0.0f, 0.0f));
     sides_[0].transform.setPosition(glm::vec3(0.0f, -side_size_ / 2, 0.0f));
+    sides_[0].generate();
     // CEILING
     sides_[1].transform.setRotation(glm::vec3(90.0f, 0.0f, 0.0f));
     sides_[1].transform.setPosition(glm::vec3(0.0f, side_size_ / 2, 0.0f));
+    sides_[1].generate();
     // RIGHT
     sides_[2].transform.setRotation(glm::vec3(0.0f, -90.0f, 0.0f));
     sides_[2].transform.setPosition(glm::vec3(side_size_ / 2, 0.0f, 0.0f));
+    sides_[2].generate();
     // LEFT
     sides_[3].transform.setRotation(glm::vec3(0.0f, 90.0f, 0.0f));
     sides_[3].transform.setPosition(glm::vec3(-side_size_ / 2, 0.0f, 0.0f));
+    sides_[3].generate();
     // FAR
     sides_[4].transform.setRotation(glm::vec3(0.0f, 180.0f, 0.0f));
     sides_[4].transform.setPosition(glm::vec3(0.0f, 0.0f, side_size_ / 2));
+    sides_[4].generate();
     // NEAR
     sides_[5].transform.setRotation(glm::vec3(0.0f, 0.0f, 0.0f));
     sides_[5].transform.setPosition(glm::vec3(0.0f, 0.0f, -side_size_ / 2));
+    sides_[5].generate();
 
     // BOXES SET UP
     image.load("res/images/container2.png");
@@ -125,6 +132,11 @@ void PointShadows_sc::init(Engine& engine, Window& window)
     boxes_[7] = Voxel(glm::vec3(0.0f, 7.0f, 5.0f));
     boxes_[8] = Voxel(glm::vec3(2.0f, -6.0f, 5.0f));
     boxes_[9] = Voxel(glm::vec3(0.0f, 1.0f, 0.0f));
+
+    // MODEL SET UP
+    model_ = makeU<modload::Model>();
+    Texture::activeUnit(0);
+    model_->create("res/models/backpack/backpack.obj");
 
     // FBO SET UP
     SHADOW_W_H = SHADOW_K_1;
@@ -185,15 +197,18 @@ void PointShadows_sc::input(InputManager& input, float delta)
     }
 
 
+    if (input.justPressed(GLFW_KEY_1))
+    {
+        engine_->attachSceneToWindow("1", "1");
+    }
+
 }
 
-void PointShadows_sc::update(float delta)
-{
-
+void PointShadows_sc::update(float delta) {
+    rotation_ += 15.0 * delta;
 }
 
-void PointShadows_sc::draw()
-{   
+void PointShadows_sc::draw() {   
     fbo_.bind();
     glCullFace(GL_FRONT);
     glViewport(0, 0, SHADOW_W_H, SHADOW_W_H);
@@ -232,11 +247,9 @@ void PointShadows_sc::draw()
 
 void PointShadows_sc::onClose()
 {
-    #ifdef MEMORY_DEBUG
-        print_Alloc_Memory_Kilobyte();
-        print_Dealloc_Memory_Kilobyte();
-        print_Usage_Memory_Kilobyte();
-    #endif    
+    print_Alloc_Memory_Kilobyte();
+    print_Dealloc_Memory_Kilobyte();
+    print_Usage_Memory_Kilobyte();
 }
 
 void PointShadows_sc::renderScene(Shader& shader, bool is_depth)
@@ -246,7 +259,7 @@ void PointShadows_sc::renderScene(Shader& shader, bool is_depth)
         shader.uniform1i(DIFFUSE, simple_texture_->getUnitId());
     }
     for (auto& side : sides_)
-    {
+    { 
         shader.uniformMat4(MODEL, side.transform.getModel());
         if (!is_depth)
         {
@@ -260,11 +273,39 @@ void PointShadows_sc::renderScene(Shader& shader, bool is_depth)
     }
     for (auto& box : boxes_)
     {
+        box.transform.setRotation(glm::vec3(rotation_));
         shader.uniformMat4(MODEL, box.transform.getModel());
         if (!is_depth) 
         {
             shader.uniformMat3(NORMAL, glm::transpose(glm::inverse(box.transform.getModel())));
         }
         box.draw();  
-    }    
+    }   
+    
+    if (!is_depth)
+        shader.uniform1i(DIFFUSE, 0);
+    glm::mat4 md = glm::mat4(1.0f);
+    md = glm::translate(md, glm::vec3(-4.0f, 2.0f, 1.0f));
+    md = glm::rotate(md, glm::radians(rotation_), glm::vec3(1.0f, 1.0f, 1.0f));
+    md = glm::scale(md, glm::vec3(0.4f));
+    shader.uniformMat4(MODEL, md);
+    if (!is_depth) 
+    {
+        shader.uniformMat3(NORMAL, glm::transpose(glm::inverse(glm::mat3(md))));
+    }
+    auto& meshes_ = model_->getMeshes();
+    auto& materials_ = model_->getMaterials();
+    auto& textures_ = model_->getAllTextures();
+    int current_material_index = -1;
+    glActiveTexture(GL_TEXTURE0);
+    for (size_t i = 0; i < meshes_.size(); i++)
+    {
+        int mat_idx = meshes_[i].material_index;
+        if (current_material_index != mat_idx) 
+        {
+            textures_[materials_[mat_idx].diffuse].bind();
+            current_material_index = mat_idx;
+        }
+        meshes_[i].mesh.draw();
+    } 
 }

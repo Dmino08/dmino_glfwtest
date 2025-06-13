@@ -61,10 +61,14 @@ void Mesh::clear() {
 } 
 
 void Mesh::create(uint vertice_count, uint indice_count) {
+    clear();
+
     vertice_count_ = vertice_count;
     indice_count_ = indice_count;
-    
+
     glGenVertexArrays(1, &vao_);
+
+    bind();
 
     #ifdef DEBUG_MODE
         generated_meshes++;

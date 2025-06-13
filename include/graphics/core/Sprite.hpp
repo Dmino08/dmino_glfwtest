@@ -9,14 +9,12 @@
 
 #include "typedefs.hpp"
 
-struct GLFWwindow;
 
 class Sprite {
     
     UVRegion region_;
 
-    static Mesh mesh_;
-    static GLFWwindow* current_context_;
+    Mesh mesh_;
 
     glm::vec3 color_;
     uint width_, height_;

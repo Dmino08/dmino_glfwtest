@@ -19,9 +19,11 @@ class Engine {
                        std::unique_ptr<IScene>>> pairs_;
     std::unordered_map<std::string, std::function<std::unique_ptr<IScene>()>> factories_;
 
+
     bool should_end_ = false;
 
     public:
+        ~Engine();
         template<typename T>
         void addScene(const std::string& name) {
             static_assert(std::is_base_of<IScene, T>::value, "T must inherit from IScene");

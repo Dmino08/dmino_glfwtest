@@ -3,6 +3,7 @@
 
 #include <algorithm>
 
+
 Camera::Camera(Window& window, CameraParams params) :
     window_(window),
     _type(params.type),

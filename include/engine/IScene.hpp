@@ -10,8 +10,8 @@
 
 class IScene {
     public:
-        IScene();
-        virtual ~IScene() = 0;
+        IScene() = default;
+        virtual ~IScene() = default;
 
         virtual void init(Engine& engine, Window& window) {}
         virtual void preUpdate(float delta) {}
@@ -21,6 +21,3 @@ class IScene {
         virtual void afterUpdate(float delta) {}
         virtual void onClose() {}
 };
-
-inline IScene::IScene() {}
-inline IScene::~IScene() {}

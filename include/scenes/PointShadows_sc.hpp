@@ -5,6 +5,7 @@
 #include "graphics/core/Sprite.hpp"
 #include "objects/Voxel.hpp"
 #include "graphics/render/FrameBuffer.hpp"
+#include "graphics/core/Model.hpp"
 
 #include "typedefs.hpp"
 
@@ -44,6 +45,7 @@ public:
 
 private:
     Window* window_;
+    Engine* engine_;
     core::Time* time_;
 
     // CAMERA STUFF
@@ -62,6 +64,12 @@ private:
     // BOX STUFF
     u_ptr<Texture> box_texture_;
     std::array<Voxel, 10> boxes_;
+
+    // MODEL STUFF
+    u_ptr<modload::Model> model_;
+
+    // ROTATION STUFF
+    float rotation_ = 0.0f;
 
     // FBO STUFF
     FrameBuffer fbo_;

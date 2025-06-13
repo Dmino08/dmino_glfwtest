@@ -39,10 +39,7 @@ void UVRegion::setRegion(int width,
         v_offset_ = float(y_offset) / float(height);
 
         u_size_ = float(x_size) / float(width);
-        v_size_ = float(y_size) / float(height);
-
-        // u_size_ = std::min(u_size_, 1.0f - u_offset_);
-        // v_size_ = std::min(v_size_, 1.0f - v_offset_);   
+        v_size_ = float(y_size) / float(height); 
     }
 }
 
