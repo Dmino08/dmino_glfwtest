@@ -6,7 +6,7 @@ uniform sampler2D u_texture;
 uniform float u_near_plane;
 uniform float u_far_plane;
 
-in vec2 coord;
+in vec2 v_tex_coords;
 
 float LinearizeDepth(float depth)
  {
@@ -17,7 +17,7 @@ float LinearizeDepth(float depth)
 
 void main()
 {
-    float depth_value = texture(u_texture, coord).r;
+    float depth_value = texture(u_texture, v_tex_coords).r;
     // f_color = vec4(vec3(LinearizeDepth(depth_value) / u_far_plane), 1.0);
     f_color = vec4(vec3(depth_value), 1.0);   // Orthographic
 }

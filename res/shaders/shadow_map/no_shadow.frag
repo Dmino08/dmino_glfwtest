@@ -6,7 +6,7 @@ in VS_OUT
 {
     vec3 frag_pos;
     vec3 normal;
-    vec2 coord;
+    vec2 tex_coords;
     vec4 frag_pos_light_space;    
 } fs_in;
 
@@ -19,5 +19,5 @@ uniform vec3 u_view_pos;
 
 void main()
 {
-    f_color = texture(u_diffuse, fs_in.coord);
+    f_color = texture(u_diffuse, fs_in.tex_coords);
 }

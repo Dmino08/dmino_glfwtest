@@ -9,7 +9,7 @@ constexpr const char* MODEL = "u_model";
 constexpr const char* PROJ_VIEW = "u_projview";
 constexpr const char* PROJ_VIEW_MODEL = "u_pvm";
 constexpr const char* PVM = "u_pvm";
-constexpr const char* PROJ_MODEL = "u_proj_model";
+constexpr const char* PROJ_MODEL = "u_projmodel";
 constexpr const char* NORMAL = "u_normal";
 
 // SOME STUFF
@@ -52,6 +52,13 @@ void setMatrices(Shader& shader, const glm::mat4& projection, const glm::mat4& v
 
 // NAMING RULES FOR GLSL SHADERS
 /**
+ * layouts:
+ * 0 = vec3 a_pos
+ * 1 = vec3 a_normal
+ * 2 = vec2 a_tex_coords
+ * 3 = vec3 a_offset
+ * 4 = vec3 a_color
+ * 
  * Attributes: a_variable_name
  * Vertex shader variables: v_variable_name
  * Fragment shader variables: f_variable_name

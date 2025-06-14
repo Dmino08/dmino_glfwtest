@@ -134,12 +134,10 @@ namespace modload {
 
             std::string full_path = directory + "/" + name_str.C_Str();
 
-            // Проверка кеша:
             auto it = texture_cache_.find(full_path);
             if (it != texture_cache_.end())
                 return it->second;
 
-            // Загрузка новой текстуры:
             Image image;
             image.load(full_path);
 

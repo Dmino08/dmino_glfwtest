@@ -14,6 +14,31 @@ void Texture::initUnits() {
     std::fill(&active_units_[0], &active_units_[0] + active_units_size_, false);
 }
 
+void Texture::setUnit() {
+    GLint texture_unit;
+    glGetIntegerv(GL_ACTIVE_TEXTURE, &texture_unit);
+    texture_unit -= GL_TEXTURE0;
+    if (Texture::active_units_[texture_unit] == true) {
+        unit_ = texture_unit;
+        #ifdef TEXTURE_LOGGING
+            core::logger.log(core::Logger::INFO, "You've used this texture slot before! Unit: " + std::to_string(texture_unit));
+        #endif          
+    }
+    if (texture_unit >= 0 && texture_unit < active_units_size_) {
+        Texture::active_units_[texture_unit] = true;
+        unit_ = texture_unit;
+        #ifdef TEXTURE_LOGGING
+            core::logger.log(core::Logger::INFO, "Used texture unit: " + std::to_string(texture_unit));
+        #endif  
+    }
+    else {
+        unit_ = active_units_size_ - 1;
+        #ifdef TEXTURE_LOGGING
+            core::logger.log(core::Logger::ERROR, "Incorrect texture unit: " + std::to_string(texture_unit));
+        #endif 
+    }
+}
+
 Texture::Texture() : 
     id_(0), 
     target_(0),
@@ -25,7 +50,32 @@ Texture::Texture() :
             count_ = 0;
         }
         count_++;
+        #ifdef TEXTURE_LOGGING
+            core::logger.log(core::Logger::INFO, "Texture count: " + std::to_string(count_));
+        #endif        
+}
+
+Texture::Texture(const Texture& other)     
+    : id_(other.id_),
+      target_(other.target_),
+      width_(other.width_),
+      height_(other.height_),
+      unit_(other.unit_) {}
+
+Texture& Texture::operator=(const Texture& other) {
+    if (this != &other) {
+        clear();
+
+        id_ = other.id_;
+        target_ = other.target_;
+        width_ = other.width_;
+        height_ = other.height_;
+        unit_ = other.unit_;
+
+        count_++;
     }
+    return *this;    
+}
 
 Texture::Texture(Texture&& other) noexcept
     : id_(other.id_),
@@ -39,14 +89,13 @@ Texture::Texture(Texture&& other) noexcept
     other.width_ = 0;
     other.height_ = 0;
     other.unit_ = -1;
+
+    count_++;
 }
 
 Texture& Texture::operator=(Texture&& other) noexcept {
     if (this != &other) {
-
-        if (id_ != 0)
-            glDeleteTextures(1, &id_);
-
+        clear();
 
         id_ = other.id_;
         target_ = other.target_;
@@ -59,6 +108,8 @@ Texture& Texture::operator=(Texture&& other) noexcept {
         other.width_ = 0;
         other.height_ = 0;
         other.unit_ = -1;
+
+        count_++;
     }
     return *this;
 }
@@ -66,20 +117,25 @@ Texture& Texture::operator=(Texture&& other) noexcept {
 Texture::~Texture() {
     clear();
     if (--Texture::count_ == 0) {
+            #ifdef TEXTURE_LOGGING
+                core::logger.log(core::Logger::INFO, "Texture units are cleared");
+            #endif
         if (Texture::active_units_ != nullptr) {
             delete [] Texture::active_units_;
             Texture::active_units_ = nullptr;
             Texture::active_units_size_ = 0;
-        }
-        
+        }  
     }
-    
 }
 
 void Texture::clear() {
     if (id_ != 0) {
         glDeleteTextures(1, &id_);
         id_ = 0;
+        active_units_[unit_] = false;
+        #ifdef TEXTURE_LOGGING
+            core::logger.log(core::Logger::INFO, "Unit " + std::to_string(unit_) + " is freed");
+        #endif
         unit_ = -1;
     }
 }
@@ -110,16 +166,10 @@ int Texture::getUnitId() const {
     return unit_;
 }
 
-void Texture::create(
-    const Image& image, 
-    TextureParams params) {
+void Texture::generateTexture(const TextureParams& params) {
+    glGenTextures(1, &id_);
 
-    clear();
-
-    GLuint id;
-    glGenTextures(1, &id);
-
-    glBindTexture(params.target, id);
+    glBindTexture(params.target, id_);
 
     glTexParameteri(params.target, GL_TEXTURE_WRAP_S, params.wrap_s);
     glTexParameteri(params.target, GL_TEXTURE_WRAP_T, params.wrap_t);
@@ -136,17 +186,33 @@ void Texture::create(
 
     glTexParameteri(params.target, GL_TEXTURE_MAG_FILTER, params.mag_filter);
     glTexParameteri(params.target, GL_TEXTURE_MIN_FILTER, params.min_filter);
-    
 
+    setUnit();
+}
+
+void Texture::texImage(GLenum target, int width, int height, const void* pixels, const TextureParams& params) {
+    glTexImage2D(target, 0, params.internal_format, width, height, 0, params.format,
+        params.type, pixels);    
+}
+
+void Texture::create(
+    const Image& image, 
+    TextureParams params) {
+
+    clear();
+    generateTexture(params);
+    width_ = image.getWidth(); 
+    height_ = image.getHeight(); 
+    target_ = params.target;
+    params.format = image.getFormat();
+    
     switch (params.target) {
         case GL_TEXTURE_2D:
-            glTexImage2D(params.target, 0, params.internal_format, image.getWidth(), image.getHeight(), 0, image.getFormat(),
-                params.type, image.getData());    
+            texImage(GL_TEXTURE_2D, width_, height_, image.getData(), params);
         break;
         case GL_TEXTURE_CUBE_MAP:
             for(unsigned int i = 0; i < 6; i++) {
-                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, params.internal_format, image.getWidth(),
-                image.getHeight(), 0, image.getFormat(), params.type, image.getData());
+                texImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, width_, height_, image.getData(), params);
             }           
         break;
     }
@@ -157,37 +223,8 @@ void Texture::create(
         params.min_filter == GL_NEAREST_MIPMAP_NEAREST) {
         glGenerateMipmap(params.target);
     }
-
-
-    id_ = id; 
-    width_ = image.getWidth(); 
-    height_ = image.getHeight(); 
-    target_ = params.target;
-
-
-    GLint texture_unit;
-    glGetIntegerv(GL_ACTIVE_TEXTURE, &texture_unit);
-    texture_unit -= GL_TEXTURE0;
-    if (Texture::active_units_[texture_unit] == true) {
-        unit_ = texture_unit;
-        #ifdef TEXTURE_LOGGING
-            core::logger.log(core::Logger::INFO, "You've used this texture slot before! Unit: " + std::to_string(texture_unit));
-        #endif          
-    }
-    if (texture_unit >= 0 && texture_unit < active_units_size_) {
-        Texture::active_units_[texture_unit] = true;
-        unit_ = texture_unit;
-        #ifdef TEXTURE_LOGGING
-            core::logger.log(core::Logger::INFO, "Used texture unit: " + std::to_string(texture_unit));
-        #endif  
-    }
-    else {
-        unit_ = active_units_size_ - 1;
-        #ifdef TEXTURE_LOGGING
-            core::logger.log(core::Logger::ERROR, "Incorrect texture unit: " + std::to_string(texture_unit));
-        #endif 
-    }
 }
+
 
 void Texture::create(
     int width,
@@ -195,40 +232,18 @@ void Texture::create(
     TextureParams params) {
 
     clear();
+    generateTexture(params);
+    width_ = width; 
+    height_ = height; 
+    target_ = params.target;
 
-    GLuint id;
-    glGenTextures(1, &id);
-
-    glBindTexture(params.target, id);
-
-    glTexParameteri(params.target, GL_TEXTURE_WRAP_S, params.wrap_s);
-    glTexParameteri(params.target, GL_TEXTURE_WRAP_T, params.wrap_t);
-
-    if (params.target == GL_TEXTURE_3D || params.target == GL_TEXTURE_CUBE_MAP) {
-        glTexParameteri(params.target, GL_TEXTURE_WRAP_R, params.wrap_r);
-    }
-    
-    if (params.wrap_s == GL_CLAMP_TO_BORDER || 
-        params.wrap_t == GL_CLAMP_TO_BORDER || 
-        params.wrap_r == GL_CLAMP_TO_BORDER) {
-        glTexParameterfv(params.target, GL_TEXTURE_BORDER_COLOR, params.border_color);
-    }
-
-    glTexParameteri(params.target, GL_TEXTURE_MAG_FILTER, params.mag_filter);
-    glTexParameteri(params.target, GL_TEXTURE_MIN_FILTER, params.min_filter);
-    
-
-    switch (params.target) 
-    {
+    switch (params.target) {
         case GL_TEXTURE_2D:
-            glTexImage2D(params.target, 0, params.internal_format, width, height, 0, params.format,
-                params.type, NULL);        
+            texImage(GL_TEXTURE_2D, width_, height_, NULL, params);
         break;
         case GL_TEXTURE_CUBE_MAP:
-            for(unsigned int i = 0; i < 6; i++)
-            {
-                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, params.internal_format, width,
-                height, 0, params.format, params.type, NULL);
+            for(unsigned int i = 0; i < 6; i++) {
+                texImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, width_, height_, NULL, params);
             }           
         break;
     }
@@ -241,35 +256,7 @@ void Texture::create(
         glGenerateMipmap(params.target);
     }
 
-    id_ = id; 
-    width_ = width; 
-    height_ = height; 
-    target_ = params.target;
 
-
-    GLint texture_unit;
-    glGetIntegerv(GL_ACTIVE_TEXTURE, &texture_unit);
-    texture_unit -= GL_TEXTURE0;
-    if (Texture::active_units_[texture_unit] == true) {
-        unit_ = texture_unit;
-        #ifdef TEXTURE_LOGGING
-            core::logger.log(core::Logger::INFO, "You've used this texture slot before! Unit: " + std::to_string(texture_unit));
-        #endif          
-    }
-    if (texture_unit >= 0 && texture_unit < active_units_size_) {
-        Texture::active_units_[texture_unit] = true;
-        unit_ = texture_unit;
-        #ifdef TEXTURE_LOGGING
-            core::logger.log(core::Logger::INFO, "Used texture unit: " + std::to_string(texture_unit));
-        #endif  
-    }
-    else {
-        unit_ = active_units_size_ - 1;
-        #ifdef TEXTURE_LOGGING
-            core::logger.log(core::Logger::ERROR, "Incorrect texture unit: " + std::to_string(texture_unit));
-        #endif 
-    }
-    
 }
 
 void Texture::activeUnit(int index) {

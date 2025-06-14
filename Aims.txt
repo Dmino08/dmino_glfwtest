@@ -3,8 +3,8 @@
 [] To create sime widgets for GUI
 [] To draw simple GUI with buttons
 [] To create the classes Font and Text
-[]
-[]
+[] find src include res \( -name "*.hpp" -o -name "*.cpp" -o -name "*.vert" -o -name "*.frag" -o -name "*.geom"  \) | xargs wc -l
+[] 
 []
 []
 []

@@ -6,7 +6,7 @@ in VS_OUT
 {
     vec3 frag_pos;
     vec3 normal;
-    vec2 coord; 
+    vec2 tex_coords; 
 } fs_in;
 
 uniform sampler2D u_diffuse;
@@ -17,6 +17,14 @@ uniform vec3 u_view_pos;
 
 uniform float u_far_plane;
 
+vec3 sampleOffsetDirections[20] = vec3[]
+ (
+ vec3( 1, 1, 1), vec3( 1,-1, 1), vec3(-1,-1, 1), vec3(-1, 1, 1),
+ vec3( 1, 1,-1), vec3( 1,-1,-1), vec3(-1,-1,-1), vec3(-1, 1,-1),
+ vec3( 1, 1, 0), vec3( 1,-1, 0), vec3(-1,-1, 0), vec3(-1, 1, 0),
+ vec3( 1, 0, 1), vec3(-1, 0, 1), vec3( 1, 0,-1), vec3(-1, 0,-1),
+ vec3( 0, 1, 1), vec3( 0,-1, 1), vec3( 0,-1,-1), vec3( 0, 1,-1)
+ );
 
 float shadowCalculation(vec3 frag_pos) 
 {
@@ -28,34 +36,25 @@ float shadowCalculation(vec3 frag_pos)
     float current_depth = length(frag_to_light);
 
     float shadow = 0.0;
-    float bias = 0.05;
-    float samples = 4.0;
-    float offset = 0.1;
-
-     for(float x =-offset; x < offset; x += offset / (samples * 0.5))
+    float bias = 0.15;
+    int samples = 20;
+    float view_dis = length(u_view_pos- frag_pos);
+    float disk_rad = (1.0 + (view_dis / u_far_plane)) / 25.0;
+    for(int i = 0; i < samples; ++i)
     {
-        for(float y =-offset; y < offset; y += offset / (samples * 0.5))
-        {
-            for(float z =-offset; z < offset; z += offset / (samples * 0.5))
-            {
-                float closestDepth = texture(u_shadow_map, frag_to_light +
-                vec3(x, y, z)).r;
-                closestDepth *= u_far_plane; // undo mapping [0;1]
-                if(current_depth - bias > closestDepth)
-                {
-                    shadow += 1.0;
-                }
-            }
-        }
+        float closestDepth = texture(u_shadow_map, frag_to_light +
+        sampleOffsetDirections[i] * disk_rad).r;
+        closestDepth *= u_far_plane; // undo mapping [0;1]
+        if(current_depth - bias > closestDepth)
+            shadow += 1.0;
     }
-    shadow /= (samples * samples * samples);
-    
+    shadow /= float(samples);
     return shadow;
 }
 
 void main()
 {
-        vec3 color = texture(u_diffuse, fs_in.coord).rgb;
+        vec3 color = texture(u_diffuse, fs_in.tex_coords).rgb;
         vec3 normal = normalize(fs_in.normal);
         vec3 light_color = vec3(1.0);
         // ambient

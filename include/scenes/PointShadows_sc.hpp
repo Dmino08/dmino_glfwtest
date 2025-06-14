@@ -78,4 +78,7 @@ private:
     DepthPointLight dpl_;
     int SHADOW_W_H = 0;
 
+    // FPS STUFF
+    int fps_ = 0;
+
 };

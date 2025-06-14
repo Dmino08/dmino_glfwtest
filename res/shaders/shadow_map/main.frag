@@ -6,7 +6,7 @@ in VS_OUT
 {
     vec3 frag_pos;
     vec3 normal;
-    vec2 coord;
+    vec2 tex_coords;
     vec4 frag_pos_light_space;    
 } fs_in;
 
@@ -55,7 +55,7 @@ void main()
 {
     if (u_shadow_on) 
     {
-        vec3 color = texture(u_diffuse, fs_in.coord).rgb;
+        vec3 color = texture(u_diffuse, fs_in.tex_coords).rgb;
         vec3 normal = normalize(fs_in.normal);
         vec3 light_color = vec3(1.0);
         // ambient
@@ -79,6 +79,6 @@ void main()
     }
     else
     {
-        f_color = texture(u_diffuse, fs_in.coord);
+        f_color = texture(u_diffuse, fs_in.tex_coords);
     }
 }

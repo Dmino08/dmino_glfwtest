@@ -115,7 +115,7 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
 
     // MODEL SET UP
     model_ = makeU<modload::Model>();
-    Texture::activeUnit(0);
+    glActiveTexture(GL_TEXTURE0);
     //model_->create("D:/Mine(D)/Programming/C++/Models/grass/Low/Low Grass.fbx");
     model_->create("res/models/backpack/backpack.obj");
     

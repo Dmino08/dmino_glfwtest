@@ -40,9 +40,12 @@ class Texture {
     static int count_;
 
     static void initUnits();
+    void setUnit();
 
     public:
         Texture();
+        Texture(const Texture& other);
+        Texture& operator=(const Texture& other);
         Texture(Texture&& other) noexcept;
         Texture& operator=(Texture&& other) noexcept;
         ~Texture();
@@ -59,11 +62,16 @@ class Texture {
         int getHeight() const;
         int getUnitId() const;
 
+        void generateTexture(const TextureParams& params);
+        void texImage(GLenum target, int width, int height, const void *pixels, const TextureParams& params);
+
+
         void create(
             const Image& image,
             TextureParams params = TextureParams()
         );
-        void Texture::create(
+
+        void create(
             int width,
             int height,
             TextureParams params

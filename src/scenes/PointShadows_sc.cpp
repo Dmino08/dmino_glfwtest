@@ -50,7 +50,7 @@ void PointShadows_sc::init(Engine& engine, Window& window)
     glDisable(GL_STENCIL_TEST);
     
     // GLFW SET UP
-    glfwSwapInterval(0);
+    glfwSwapInterval(1);
 
         // CAMERA SET UP
     CameraParams c_params;
@@ -207,6 +207,12 @@ void PointShadows_sc::input(InputManager& input, float delta)
 }
 
 void PointShadows_sc::update(float delta) {
+    fps_++;
+    if (time_->each(1.0f)) {
+        std::cout << "FPS: " << fps_ << '\n';
+        fps_ = 0;
+    }
+    
     rotation_ += 15.0 * delta;
     
 }
