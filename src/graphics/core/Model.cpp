@@ -142,7 +142,9 @@ namespace modload {
             image.load(full_path);
 
             Texture texture;
+            Texture::activeUnit(Texture::getFreeUnit());
             texture.create(image, texture_params);
+            texture.bind();
 
             int tex_id = textures_flat_.size();
             textures_flat_.push_back(std::move(texture));

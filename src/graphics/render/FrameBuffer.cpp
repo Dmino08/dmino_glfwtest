@@ -32,17 +32,18 @@ bool FrameBuffer::create(TextureParams textureParams,
     glBindFramebuffer(fbo_type, fbo_id_);
 
     // CREATING TEXTURE
-    texture_.create(width, height, textureParams);
+    Texture::activeUnit(Texture::getFreeUnit());
+    texture.create(width, height, textureParams);
     //
-    texture_.bind();
+    texture.bind();
     switch (textureParams.target)
     {
         case GL_TEXTURE_2D:
             glFramebufferTexture2D(fbo_type, attachment, textureParams.target,
-                texture_.getTextureId(), 0);
+                texture.getTextureUnit(), 0);
         break;
         case GL_TEXTURE_CUBE_MAP:
-            glFramebufferTexture(fbo_type, attachment, texture_.getTextureId(), 0);
+            glFramebufferTexture(fbo_type, attachment, texture.getTextureUnit(), 0);
         break;
     }
     if (attachment == GL_DEPTH_ATTACHMENT)

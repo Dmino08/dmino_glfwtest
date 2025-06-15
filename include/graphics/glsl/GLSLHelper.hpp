@@ -21,6 +21,7 @@ constexpr const char* DIFFUSE = "u_diffuse";
 constexpr const char* SHADOW_MAP = "u_shadow_map";
 constexpr const char* NEAR_PLANE = "u_near_plane";
 constexpr const char* FAR_PLANE = "u_far_plane";
+constexpr const char* SKYBOX = "u_skybox";
 
 // SHADOW CONSTS
 constexpr unsigned int SHADOW_C_1   = 128;                      // 128

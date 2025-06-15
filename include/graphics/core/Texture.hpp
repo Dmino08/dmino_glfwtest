@@ -28,6 +28,45 @@ struct TextureParams {
 
 
 class Texture {
+public:
+    Texture();
+    ~Texture();
+    Texture(const Texture& other);
+    Texture& operator=(const Texture& other);
+    Texture(Texture&& other) noexcept;
+    Texture& operator=(Texture&& other) noexcept;
+    
+    void clear();
+    
+    GLuint getTextureUnit(); 
+    GLenum getTarget();
+
+    void bind();
+    void unbind();
+
+    int getWidth() const;
+    int getHeight() const;
+    int getUnitId() const;
+
+    void generateTexture(const TextureParams& params);
+    void texImage(GLenum target, int width, int height, const void *pixels, const TextureParams& params);
+
+    void create(
+        const Image& image,
+        TextureParams params = TextureParams()
+    );
+
+    void create(
+        int width,
+        int height,
+        TextureParams params
+    );
+
+    static void activeUnit(int unit);
+    static int getFreeUnit();
+    static int getCurrentBindedTexture(GLenum target);
+
+private:
     GLuint id_;
     GLenum target_;
     int width_, height_;
@@ -36,46 +75,7 @@ class Texture {
 
     static bool* active_units_;
     static int active_units_size_;
-    
     static int count_;
 
     static void initUnits();
-    void setUnit();
-
-    public:
-        Texture();
-        Texture(const Texture& other);
-        Texture& operator=(const Texture& other);
-        Texture(Texture&& other) noexcept;
-        Texture& operator=(Texture&& other) noexcept;
-        ~Texture();
-
-        void clear();
-        
-        GLuint getTextureId(); 
-        GLenum getTarget();
-
-        void bind() const;
-        void unbind() const;
-
-        int getWidth() const;
-        int getHeight() const;
-        int getUnitId() const;
-
-        void generateTexture(const TextureParams& params);
-        void texImage(GLenum target, int width, int height, const void *pixels, const TextureParams& params);
-
-
-        void create(
-            const Image& image,
-            TextureParams params = TextureParams()
-        );
-
-        void create(
-            int width,
-            int height,
-            TextureParams params
-        );
-
-        static void activeUnit(int index = 0);
 };

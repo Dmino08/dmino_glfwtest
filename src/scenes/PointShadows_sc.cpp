@@ -81,7 +81,7 @@ void PointShadows_sc::init(Engine& engine, Window& window)
     image.load("res/images/Prototype_Grid_Gray_03-512x512.png");
     //
     simple_texture_ = makeU<Texture>();
-    Texture::activeUnit(1);
+    Texture::activeUnit(Texture::getFreeUnit());
     simple_texture_->create(image, t_params);
     simple_texture_->bind();
     //
@@ -118,7 +118,7 @@ void PointShadows_sc::init(Engine& engine, Window& window)
     // BOXES SET UP
     image.load("res/images/container2.png");
     box_texture_ = makeU<Texture>();
-    Texture::activeUnit(2);
+    Texture::activeUnit(Texture::getFreeUnit());
     box_texture_->create(image, t_params);
     box_texture_->bind();
     //
@@ -135,12 +135,10 @@ void PointShadows_sc::init(Engine& engine, Window& window)
 
     // MODEL SET UP
     model_ = makeU<modload::Model>();
-    Texture::activeUnit(0);
     model_->create("res/models/backpack/backpack.obj");
 
     // FBO SET UP
     SHADOW_W_H = SHADOW_K_1;
-    Texture::activeUnit(3);
     fbo_.create(POINT_DEPTH_PARAMS, SHADOW_W_H, SHADOW_W_H, GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT);
 
     // LIGHT SET UP
@@ -247,7 +245,7 @@ void PointShadows_sc::draw() {
     sh_main_->uniform3f(LIGHT_POS, dpl_.pos);
     sh_main_->uniform3f(VIEW_POS, camera_->getPos());
     sh_main_->uniform1f("u_far_plane", dpl_.far_plane);
-    sh_main_->uniform1i(SHADOW_MAP, 3);
+    sh_main_->uniform1i(SHADOW_MAP, fbo_.texture.getUnitId());
 
 
     renderScene(*sh_main_, false);
@@ -291,8 +289,6 @@ void PointShadows_sc::renderScene(Shader& shader, bool is_depth)
         box.draw();  
     }   
     
-    if (!is_depth)
-        shader.uniform1i(DIFFUSE, 0);
     glm::mat4 md = glm::mat4(1.0f);
     md = glm::translate(md, glm::vec3(-4.0f, 2.0f, 1.0f));
     md = glm::rotate(md, glm::radians(rotation_), glm::vec3(1.0f, 1.0f, 1.0f));
@@ -310,10 +306,11 @@ void PointShadows_sc::renderScene(Shader& shader, bool is_depth)
     for (size_t i = 0; i < meshes_.size(); i++)
     {
         int mat_idx = meshes_[i].material_index;
-        if (current_material_index != mat_idx) 
-        {
-            textures_[materials_[mat_idx].diffuse].bind();
-            current_material_index = mat_idx;
+        if (current_material_index != mat_idx) {
+            if (!is_depth)
+                shader.uniform1i(DIFFUSE, textures_[materials_[mat_idx].diffuse].getUnitId());
+            else
+                shader.uniform1i(TEXTURE, textures_[materials_[mat_idx].diffuse].getUnitId());
         }
         meshes_[i].mesh.draw();
     } 

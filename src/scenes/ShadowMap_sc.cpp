@@ -71,27 +71,12 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
     t_params.min_filter = GL_LINEAR_MIPMAP_LINEAR;
     t_params.mag_filter = GL_LINEAR_MIPMAP_LINEAR;
     box_texture_ = makeU<Texture>();
-    Texture::activeUnit(1);
+    Texture::activeUnit(Texture::getFreeUnit());
     box_texture_->create(image, t_params);
+    box_texture_->bind();
 
     box_ = makeU<Voxel>(glm::vec3(0.0f, 1.0f, 0.0f));
     box_->transform.rotate(glm::vec3(25.0f, 0.0f, 25.0f));
-
-    // SHADER SET UP
-    sh_main_ = makeU<Shader>();
-    sh_main_->create("res/shaders/shadow_map/main.vert", "res/shaders/shadow_map/main.frag");
-    sh_main_->use();
-    sh_main_->uniform1i(DIFFUSE, box_texture_->getUnitId());
-    sh_main_->uniform1i(SHADOW_MAP, 2);
-    sh_main_->uniform1i("u_shadow_on", shadow_on_);
-    //
-    sh_depth_ = makeU<Shader>();
-    sh_depth_->create("res/shaders/shadow_map/depth.vert", "res/shaders/shadow_map/depth.frag");
-    sh_depth_->use();
-    sh_depth_->uniform1i(TEXTURE, 2);    
-    //
-    sh_simple_ = makeU<Shader>();
-    sh_simple_->create("res/shaders/shadow_map/simple.vert", "res/shaders/shadow_map/simple.frag");     
 
     // FLOOR SET UP
     floor_ = makeU<Sprite>();
@@ -110,15 +95,30 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
     // DEPTH FBO SET UP
     SHADOW_WIDTH = SHADOW_K_4;
     SHADOW_HEIGHT = SHADOW_WIDTH;
-    Texture::activeUnit(2);
     fbo_.create(DIRECTION_DEPTH_PARAMS, SHADOW_WIDTH, SHADOW_HEIGHT, GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT);
 
     // MODEL SET UP
     model_ = makeU<modload::Model>();
-    glActiveTexture(GL_TEXTURE0);
+    Texture::activeUnit(Texture::getFreeUnit());
     //model_->create("D:/Mine(D)/Programming/C++/Models/grass/Low/Low Grass.fbx");
     model_->create("res/models/backpack/backpack.obj");
     
+    // SHADER SET UP
+    sh_main_ = makeU<Shader>();
+    sh_main_->create("res/shaders/shadow_map/main.vert", "res/shaders/shadow_map/main.frag");
+    sh_main_->use();
+    sh_main_->uniform1i(DIFFUSE, box_texture_->getUnitId());
+    sh_main_->uniform1i(SHADOW_MAP, fbo_.texture.getUnitId());
+    sh_main_->uniform1i("u_shadow_on", shadow_on_);
+    //
+    sh_depth_ = makeU<Shader>();
+    sh_depth_->create("res/shaders/shadow_map/depth.vert", "res/shaders/shadow_map/depth.frag");
+    sh_depth_->use();
+    sh_depth_->uniform1i(TEXTURE, fbo_.texture.getUnitId());    
+    //
+    sh_simple_ = makeU<Shader>();
+    sh_simple_->create("res/shaders/shadow_map/simple.vert", "res/shaders/shadow_map/simple.frag");  
+
     // CREATING INSTANCES
     std::vector<glm::vec3> temp_offsets = getInstanceOffsets(side_size_);
     auto& temp_meshes = model_->getMeshes();
@@ -258,8 +258,6 @@ void ShadowMap_sc::renderScene(Shader& shader, bool is_depth)
     floor_->draw();
 
     // MODEL DRAWING
-    if (!is_depth)
-        shader.uniform1i(DIFFUSE, 0);
     glm::mat4 md = glm::mat4(1.0f);
     md = glm::translate(md, glm::vec3(2.0f, 3.0f, 0.0f));
     md = glm::rotate(md, glm::radians(rotation), glm::vec3(0.0f ,1.0f, 0.0f));
@@ -273,14 +271,13 @@ void ShadowMap_sc::renderScene(Shader& shader, bool is_depth)
     auto& materials_ = model_->getMaterials();
     auto& textures_ = model_->getAllTextures();
     int current_material_index = -1;
-    glActiveTexture(GL_TEXTURE0);
     for (size_t i = 0; i < meshes_.size(); i++)
     {
         int mat_idx = meshes_[i].material_index;
         if (current_material_index != mat_idx) 
         {
-            textures_[materials_[mat_idx].diffuse].bind();
-            current_material_index = mat_idx;
+            if (!is_depth)
+                shader.uniform1i(DIFFUSE, textures_[materials_[mat_idx].diffuse].getUnitId());
         }
         meshes_[i].mesh.drawInstances(side_size_ * side_size_);
     }  

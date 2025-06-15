@@ -8,37 +8,6 @@ bool* Texture::active_units_ = nullptr;
 int Texture::active_units_size_ = 0;
 int Texture::count_ = 0;
 
-void Texture::initUnits() {
-    glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &active_units_size_);
-    active_units_ = new bool[active_units_size_];
-    std::fill(&active_units_[0], &active_units_[0] + active_units_size_, false);
-}
-
-void Texture::setUnit() {
-    GLint texture_unit;
-    glGetIntegerv(GL_ACTIVE_TEXTURE, &texture_unit);
-    texture_unit -= GL_TEXTURE0;
-    if (Texture::active_units_[texture_unit] == true) {
-        unit_ = texture_unit;
-        #ifdef TEXTURE_LOGGING
-            core::logger.log(core::Logger::INFO, "You've used this texture slot before! Unit: " + std::to_string(texture_unit));
-        #endif          
-    }
-    if (texture_unit >= 0 && texture_unit < active_units_size_) {
-        Texture::active_units_[texture_unit] = true;
-        unit_ = texture_unit;
-        #ifdef TEXTURE_LOGGING
-            core::logger.log(core::Logger::INFO, "Used texture unit: " + std::to_string(texture_unit));
-        #endif  
-    }
-    else {
-        unit_ = active_units_size_ - 1;
-        #ifdef TEXTURE_LOGGING
-            core::logger.log(core::Logger::ERROR, "Incorrect texture unit: " + std::to_string(texture_unit));
-        #endif 
-    }
-}
-
 Texture::Texture() : 
     id_(0), 
     target_(0),
@@ -140,18 +109,21 @@ void Texture::clear() {
     }
 }
 
-GLuint Texture::getTextureId() {
+GLuint Texture::getTextureUnit() {
     return id_;
 }
 GLenum Texture::getTarget() {
     return target_;
 }
 
-void Texture::bind() const {
-
+void Texture::bind() {
+    glGetIntegerv(GL_ACTIVE_TEXTURE, &unit_);
+    unit_ -= GL_TEXTURE0;
+    Texture::active_units_[unit_] = true;
     glBindTexture(target_, id_);
 }
-void Texture::unbind() const {
+void Texture::unbind() {
+    unit_ = -1;
     glBindTexture(target_, 0);
 }
 
@@ -186,8 +158,6 @@ void Texture::generateTexture(const TextureParams& params) {
 
     glTexParameteri(params.target, GL_TEXTURE_MAG_FILTER, params.mag_filter);
     glTexParameteri(params.target, GL_TEXTURE_MIN_FILTER, params.min_filter);
-
-    setUnit();
 }
 
 void Texture::texImage(GLenum target, int width, int height, const void* pixels, const TextureParams& params) {
@@ -198,6 +168,9 @@ void Texture::texImage(GLenum target, int width, int height, const void* pixels,
 void Texture::create(
     const Image& image, 
     TextureParams params) {
+
+    GLint prev_texture;    
+    prev_texture = Texture::getCurrentBindedTexture(params.target);
 
     clear();
     generateTexture(params);
@@ -223,6 +196,9 @@ void Texture::create(
         params.min_filter == GL_NEAREST_MIPMAP_NEAREST) {
         glGenerateMipmap(params.target);
     }
+
+
+    glBindTexture(params.target, prev_texture);
 }
 
 
@@ -230,6 +206,10 @@ void Texture::create(
     int width,
     int height,
     TextureParams params) {
+
+    GLint prev_texture;    
+    prev_texture = Texture::getCurrentBindedTexture(params.target);
+
 
     clear();
     generateTexture(params);
@@ -256,22 +236,49 @@ void Texture::create(
         glGenerateMipmap(params.target);
     }
 
-
+    glBindTexture(params.target, prev_texture);
 }
 
-void Texture::activeUnit(int index) {
-    if (index >= active_units_size_ || index < 0) {
-        #ifdef TEXTURE_LOGGING
-            core::logger.log(core::Logger::ERROR, "Incorrect texture unit: " + std::to_string(index));
-        #endif 
-        return;
-    }
-    
-    if (active_units_[index] == true) {
-        #ifdef TEXTURE_LOGGING
-            core::logger.log(core::Logger::WARNING, "You've used this texture slot before! Unit: " + std::to_string(index));
-        #endif
-    }
-    
-    glActiveTexture(GL_TEXTURE0 + index);
+
+
+void Texture::activeUnit(int unit) {
+    glActiveTexture(GL_TEXTURE0 + unit);
 }
+
+int Texture::getFreeUnit() {
+    int free_unit = -1;
+    if (active_units_) {
+        for (size_t i = 0; i < active_units_size_; i++) {
+            if (active_units_[i] == false) {
+                free_unit = i;
+                break;
+            }
+        }
+    }
+    return free_unit;
+}
+
+int Texture::getCurrentBindedTexture(GLenum target) {
+    GLint unit = -1;
+    switch (target)
+    {
+        case GL_TEXTURE_2D:
+            glGetIntegerv(GL_TEXTURE_BINDING_2D, &unit);
+        break;
+        case GL_TEXTURE_3D:
+            glGetIntegerv(GL_TEXTURE_BINDING_3D, &unit);
+        break;
+        case GL_TEXTURE_CUBE_MAP:
+            glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &unit);
+        break;
+    }
+    return unit;
+}
+
+void Texture::initUnits() {
+    glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &active_units_size_);
+    active_units_ = new bool[active_units_size_];
+    std::fill(&active_units_[0], &active_units_[0] + active_units_size_, false);
+}
+
+

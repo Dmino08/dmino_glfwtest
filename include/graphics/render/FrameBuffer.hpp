@@ -59,10 +59,11 @@ public:
     void bind(); 
     void unbind();
 
+    Texture texture;
+
 private:
     GLuint fbo_id_;
     Mesh mesh_;
-    Texture texture_;
 
     GLenum fbo_type_;
     int width_, height_;

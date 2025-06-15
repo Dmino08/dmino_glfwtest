@@ -11,10 +11,10 @@
 #include "core/Logger.hpp"
 #include "core/MemoryTracker.hpp"
 
-
 #include <iostream>
 #include <string>
 #include <functional>
+
 
 void setFoo(std::string f_a, std::string s_a) {
     std::cout << f_a << s_a << '\n';
@@ -56,6 +56,7 @@ void windowLoop()
     }
     scene.onClose();
 
+
     print_Alloc_Memory_Kilobyte();
     print_Dealloc_Memory_Kilobyte();
     print_Usage_Memory_Kilobyte();
@@ -81,6 +82,7 @@ int main(void) {
         engine.attachSceneToWindow("1", "1");
 
         engine.run(); 
+
 
         print_Alloc_Memory_Kilobyte();
         print_Dealloc_Memory_Kilobyte();
