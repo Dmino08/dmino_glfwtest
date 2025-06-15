@@ -8,5 +8,6 @@ uniform mat4 u_projview;
 void main()
 {
     v_tex_coords = a_pos;
-    gl_Position = u_projview * vec4(a_pos);
+    vec4 pos = u_projview * vec4(a_pos, 1.0);
+    gl_Position = vec4(pos.xy, pos.w, pos.w);
 }

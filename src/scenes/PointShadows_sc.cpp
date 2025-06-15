@@ -61,7 +61,6 @@ void PointShadows_sc::init(Engine& engine, Window& window)
     // SHADER SET UP
     sh_main_ = makeU<Shader>();
     sh_main_->create("res/shaders/point_shadows/main.vert", "res/shaders/point_shadows/main.frag");
-    sh_main_->use();
     //
     sh_shadow_ = makeU<Shader>();
     sh_shadow_->create( "res/shaders/point_shadows/shadow.vert",
@@ -175,6 +174,24 @@ void PointShadows_sc::input(InputManager& input, float delta)
         {
             camera_->translate(camera_->getRight() * camera_speed_ * delta);
         }
+
+        if (input.pressed(KEY_UP))
+        {
+            dpl_.pos.z += 1.0 * delta;
+        }
+        if (input.pressed(KEY_DOWN))
+        {
+            dpl_.pos.z -= 1.0 * delta;
+        }
+        if (input.pressed(KEY_LEFT))
+        {
+            dpl_.pos.x -= 1.0 * delta;
+        }
+        if (input.pressed(KEY_RIGHT))
+        {
+            dpl_.pos.x += 1.0 * delta;
+        }
+        
 
 
         if (input.justPressed(GLFW_KEY_LEFT_SHIFT))

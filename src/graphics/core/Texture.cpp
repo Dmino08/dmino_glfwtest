@@ -24,27 +24,6 @@ Texture::Texture() :
         #endif        
 }
 
-Texture::Texture(const Texture& other)     
-    : id_(other.id_),
-      target_(other.target_),
-      width_(other.width_),
-      height_(other.height_),
-      unit_(other.unit_) {}
-
-Texture& Texture::operator=(const Texture& other) {
-    if (this != &other) {
-        clear();
-
-        id_ = other.id_;
-        target_ = other.target_;
-        width_ = other.width_;
-        height_ = other.height_;
-        unit_ = other.unit_;
-
-        count_++;
-    }
-    return *this;    
-}
 
 Texture::Texture(Texture&& other) noexcept
     : id_(other.id_),
@@ -117,8 +96,13 @@ GLenum Texture::getTarget() {
 }
 
 void Texture::bind() {
+    if (unit_ != -1) {
+        active_units_[unit_] = false;
+    }   
+    
     glGetIntegerv(GL_ACTIVE_TEXTURE, &unit_);
     unit_ -= GL_TEXTURE0;
+
     Texture::active_units_[unit_] = true;
     glBindTexture(target_, id_);
 }
@@ -158,6 +142,8 @@ void Texture::generateTexture(const TextureParams& params) {
 
     glTexParameteri(params.target, GL_TEXTURE_MAG_FILTER, params.mag_filter);
     glTexParameteri(params.target, GL_TEXTURE_MIN_FILTER, params.min_filter);
+
+    target_ = params.target;
 }
 
 void Texture::texImage(GLenum target, int width, int height, const void* pixels, const TextureParams& params) {
@@ -173,11 +159,10 @@ void Texture::create(
     prev_texture = Texture::getCurrentBindedTexture(params.target);
 
     clear();
+    params.format = image.getFormat();
     generateTexture(params);
     width_ = image.getWidth(); 
     height_ = image.getHeight(); 
-    target_ = params.target;
-    params.format = image.getFormat();
     
     switch (params.target) {
         case GL_TEXTURE_2D:
@@ -215,7 +200,6 @@ void Texture::create(
     generateTexture(params);
     width_ = width; 
     height_ = height; 
-    target_ = params.target;
 
     switch (params.target) {
         case GL_TEXTURE_2D:

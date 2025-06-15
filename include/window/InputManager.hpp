@@ -2,6 +2,7 @@
 
 
 #include <GLFW/glfw3.h>
+#include "window/InputKeys.hpp"
 
 #define KEYS 1032
 #define BUTTONS 8

@@ -3,25 +3,13 @@
 SkyBox::SkyBox() {}
 SkyBox::~SkyBox() {}
 
-SkyBox::SkyBox(const SkyBox& other) {
-    texture = other.texture;
-}
-SkyBox& SkyBox::operator=(const SkyBox& other) {
-    if (this != &other) {
-        texture = other.texture;
-    }    
-    texture = other.texture;
-    return *this;
-}
-
 SkyBox::SkyBox(SkyBox&& other) noexcept {
     texture = std::move(other.texture);
 }
 SkyBox& SkyBox::operator=(SkyBox&& other) noexcept {
     if (this != &other) {
-        texture = other.texture;
+        texture = std::move(other.texture);
     }        
-    texture = std::move(other.texture);
     return *this;
 }
 
@@ -30,11 +18,25 @@ void SkyBox::clear() {
     texture.clear();
 }
 
-void SkyBox::create(Image images[6], TextureParams params) {
+void SkyBox::create(Image images[6], const TextureParams& params) {
     clear();
+    Texture::activeUnit(Texture::getFreeUnit());
+    texture.bind();
     texture.generateTexture(params);
-    for (size_t i = 0; i < 6; i++)
-    {
-        texture.texImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, images[i].getWidth(), images[i].getHeight(), images[i].getData(), params);
+    for (size_t i = 0; i < 6; i++) {
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, params.internal_format, images[i].getWidth(), images[i].getHeight(), 0, images[i].getFormat(),
+            params.type, images[i].getData()); 
     }
+}
+
+void SkyBox::create(std::string paths[6], const TextureParams& params) {
+    Image images[6];
+    images[0].load(paths[0]);
+    images[1].load(paths[1]);
+    images[2].load(paths[2]);
+    images[3].load(paths[3]);
+    images[4].load(paths[4]);
+    images[5].load(paths[5]);
+
+    create(images, params);
 }

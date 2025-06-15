@@ -10,6 +10,7 @@
 #include "graphics/core/VertexStructures.hpp"
 #include "core/Logger.hpp"
 #include "core/MemoryTracker.hpp"
+#include "graphics/core/SkyBox.hpp"
 
 
 
@@ -92,6 +93,23 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
     float near_plane = 1.0f, far_plane = light_distance;
     light_projection = glm::ortho(-light_distance, light_distance,-light_distance, light_distance, near_plane, far_plane);
 
+    // SKYBOX SETUP
+    skybox_ = makeU<SkyBox>();
+    std::string paths[6] = {
+        "res/images/skybox/right.jpg",
+        "res/images/skybox/left.jpg",
+        "res/images/skybox/top.jpg",
+        "res/images/skybox/bottom.jpg",
+        "res/images/skybox/front.jpg",
+        "res/images/skybox/back.jpg"
+    };
+    Image::flipLoad(false);
+    skybox_->create(paths, SKYBOX_PARAMS);
+    //
+    skybox_voxel_ = makeU<Voxel>();
+    Image::flipLoad(true);
+
+
     // DEPTH FBO SET UP
     SHADOW_WIDTH = SHADOW_K_4;
     SHADOW_HEIGHT = SHADOW_WIDTH;
@@ -99,10 +117,11 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
 
     // MODEL SET UP
     model_ = makeU<modload::Model>();
-    Texture::activeUnit(Texture::getFreeUnit());
     //model_->create("D:/Mine(D)/Programming/C++/Models/grass/Low/Low Grass.fbx");
     model_->create("res/models/backpack/backpack.obj");
     
+
+
     // SHADER SET UP
     sh_main_ = makeU<Shader>();
     sh_main_->create("res/shaders/shadow_map/main.vert", "res/shaders/shadow_map/main.frag");
@@ -118,6 +137,11 @@ void ShadowMap_sc::init(Engine& engine, Window& window)
     //
     sh_simple_ = makeU<Shader>();
     sh_simple_->create("res/shaders/shadow_map/simple.vert", "res/shaders/shadow_map/simple.frag");  
+    //
+    sh_skybox_ = makeU<Shader>();
+    sh_skybox_->create("res/shaders/basic/skybox.vert", "res/shaders/basic/skybox.frag");
+    sh_skybox_->use();
+    sh_skybox_->uniform1i(SKYBOX, skybox_->texture.getUnitId());
 
     // CREATING INSTANCES
     std::vector<glm::vec3> temp_offsets = getInstanceOffsets(side_size_);
@@ -220,9 +244,20 @@ void ShadowMap_sc::draw()
     }
     fbo_.unbind();
     glViewport(0, 0, window_->getWidth(), window_->getHeight());
-    glCullFace(GL_BACK);
+    
     glClearColor(0.52f, 0.81f, 0.92f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glDepthFunc(GL_LEQUAL);
+        sh_skybox_->use();
+        glm::mat4 view = glm::mat4(glm::mat3(camera_->getView()));
+        glm::mat4 projview = camera_->getProjection() * view;
+        sh_skybox_->uniformMat4(PROJ_VIEW, projview);
+        skybox_voxel_->draw();
+    glDepthFunc(GL_LESS);
+
+
+    glCullFace(GL_BACK);
 
     sh_main_->use();
     if (shadow_on_) 
@@ -234,6 +269,9 @@ void ShadowMap_sc::draw()
     sh_main_->uniformMat4(PROJ_VIEW, camera_->getProjection() * camera_->getView());
 
     renderScene(*sh_main_.get(), false);
+
+
+
 }
 
 

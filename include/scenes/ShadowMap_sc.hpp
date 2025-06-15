@@ -7,6 +7,7 @@
 #include "graphics/core/Model.hpp"
 #include "graphics/render/FrameBuffer.hpp"
 
+class SkyBox;
 class Camera;
 class Shader;
 class Texture;
@@ -41,6 +42,7 @@ private:
     u_ptr<Shader> sh_main_;
     u_ptr<Shader> sh_depth_;
     u_ptr<Shader> sh_simple_;
+    u_ptr<Shader> sh_skybox_;
 
     // BOX STUFF
     u_ptr<Texture> box_texture_;
@@ -70,6 +72,10 @@ private:
 
     // FRAMEBUFFER TEST
     FrameBuffer fbo_;
+
+    // SKYBOX STUFF
+    u_ptr<SkyBox> skybox_;
+    u_ptr<Voxel> skybox_voxel_;
 
     // FPS STUFF
     int fps_ = 0;
